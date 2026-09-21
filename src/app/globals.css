@@ -1,26 +1,230 @@
 @import "tailwindcss";
 
+/* ============================================================
+   NXL Design System — tokens
+   Brand: ink + gold, editorial luxury.
+   Everything the UI uses is declared here. No ad-hoc values.
+   ============================================================ */
+
+@theme {
+  /* ---------- Color: ground & elevation ---------- */
+  --color-ink: #070b14;
+  --color-surface-1: #0b1120;
+  --color-surface-2: #111a2d;
+  --color-surface-3: #16223a;
+  --color-surface-4: #1d2c48;
+
+  /* ---------- Color: brand gold ramp ---------- */
+  --color-gold-100: #f7ecd6;
+  --color-gold-200: #e7c98f;
+  --color-gold-300: #d9b473;
+  --color-gold: #c8a15e;
+  --color-gold-600: #a88347;
+  --color-gold-700: #7d6034;
+  --color-gold-800: #4a3a20;
+
+  /* ---------- Color: text ---------- */
+  --color-cream: #f4f1ea;
+  --color-muted: #9aa2b4;
+  --color-muted-dim: #6f7789;
+
+  /* ---------- Color: lines ---------- */
+  --color-line: rgba(255, 255, 255, 0.09);
+  --color-line-strong: rgba(255, 255, 255, 0.16);
+
+  /* ---------- Color: semantic status (single unified set) ---------- */
+  --color-success: #37d67a;
+  --color-success-dim: #16391f;
+  --color-warning: #e5b45a;
+  --color-warning-dim: #3d2f14;
+  --color-danger: #ef5a6f;
+  --color-danger-dim: #3d161d;
+  --color-info: #6aa8ff;
+  --color-info-dim: #152540;
+
+  /* ---------- Color: loyalty tiers ---------- */
+  --color-tier-bronze: #cd7f32;
+  --color-tier-silver: #a8a9ad;
+  --color-tier-gold: #c8a15e;
+  --color-tier-platinum: #e5e4e2;
+
+  /* ---------- Typography ---------- */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Editorial display scale — tuned line-height + tracking per step */
+  --text-display-1: 5.25rem;
+  --text-display-1--line-height: 0.92;
+  --text-display-1--letter-spacing: -0.035em;
+  --text-display-1--font-weight: 600;
+
+  --text-display-2: 3.75rem;
+  --text-display-2--line-height: 0.96;
+  --text-display-2--letter-spacing: -0.03em;
+  --text-display-2--font-weight: 600;
+
+  --text-display-3: 2.75rem;
+  --text-display-3--line-height: 1.04;
+  --text-display-3--letter-spacing: -0.022em;
+  --text-display-3--font-weight: 600;
+
+  --text-display-4: 2rem;
+  --text-display-4--line-height: 1.14;
+  --text-display-4--letter-spacing: -0.016em;
+  --text-display-4--font-weight: 600;
+
+  /* Label / eyebrow step */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1.45;
+  --text-2xs--letter-spacing: 0.28em;
+
+  /* ---------- Radii ---------- */
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+  --radius-2xl: 2.25rem;
+
+  /* ---------- Shadows ---------- */
+  --shadow-elev-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px -6px rgba(0, 0, 0, 0.5);
+  --shadow-elev-2: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+  --shadow-elev-3: 0 24px 60px -30px rgba(0, 0, 0, 0.85);
+  --shadow-glow-gold: 0 10px 30px -12px rgba(200, 161, 94, 0.7);
+  --shadow-glow-gold-lg: 0 30px 80px -40px rgba(200, 161, 94, 0.55);
+
+  /* ---------- Motion ---------- */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-rise: rise 0.7s var(--ease-editorial) both;
+  --animate-live: live-pulse 1.6s ease-in-out infinite;
+  --animate-halo: halo 2.4s var(--ease-editorial) infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+}
+
+/* ---------- Z-index scale (referenced as z-[var(--z-*)]) ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --z-base: 1;
+  --z-sticky: 20;
+  --z-header: 50;
+  --z-float: 60;
+  --z-overlay: 80;
+  --z-modal: 90;
+  --z-toast: 100;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+@keyframes halo {
+  0%   { transform: scale(1);   opacity: 0.65; }
+  70%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   Base
+   ============================================================ */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ink);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink);
+}
+
+/* Focus: always visible, always gold. */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Scrollbars stay out of the way until you scroll. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(200, 161, 94, 0.35) transparent;
+}
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: transparent; border-radius: 999px; }
+*:hover::-webkit-scrollbar-thumb { background: rgba(200, 161, 94, 0.3); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   Signature brand utilities
+   ============================================================ */
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+/* Fine film grain over hero imagery. */
+@utility grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+  pointer-events: none;
+}
+
+/* Gold underline that draws in on hover — used across nav and inline links. */
+@utility gold-underline {
+  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1.5px;
+  transition: background-size 0.4s var(--ease-editorial);
+
+  &:hover {
+    background-size: 100% 1.5px;
+  }
+}
+
+/* 1px-gutter grid — the stat strip motif. */
+@utility hairline-grid {
+  gap: 1px;
+  background-color: var(--color-line);
+}
+
+@utility skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-surface-2) 0%,
+    var(--color-surface-3) 50%,
+    var(--color-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
 }
