@@ -1,0 +1,180 @@
+/* ============================================================
+   NXL — candidate UI directions
+   ============================================================
+   Each block re-declares the design tokens under a [data-theme]
+   scope. Because every utility in the app resolves through these
+   custom properties, swapping the attribute re-skins the entire
+   product without touching a single component.
+
+   Whichever direction is chosen becomes the values in globals.css
+   and this file is deleted.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   A · MIDNIGHT ATELIER
+   Warm near-black, antique gold, high-contrast serif.
+   The current brand, properly executed: quiet, expensive, and
+   closest to the navy-and-gold logo. Reads like a marque.
+   ------------------------------------------------------------ */
+[data-theme="atelier"] {
+  --color-ink: #08060a;
+  --color-surface-1: #0f0c11;
+  --color-surface-2: #17131a;
+  --color-surface-3: #201a24;
+  --color-surface-4: #2b232f;
+
+  --color-gold-100: #f8efd9;
+  --color-gold-200: #e9d3a0;
+  --color-gold-300: #d8b878;
+  --color-gold: #c19a5b;
+  --color-gold-600: #9d7a43;
+  --color-gold-700: #6f5530;
+  --color-gold-800: #40321d;
+
+  --color-cream: #f5f1e8;
+  --color-muted: #a29aa8;
+  --color-muted-dim: #746c7a;
+
+  --color-line: rgba(245, 241, 232, 0.1);
+  --color-line-strong: rgba(245, 241, 232, 0.2);
+
+  --color-success: #4fc98a;
+  --color-success-dim: #10301f;
+  --color-warning: #e0b366;
+  --color-warning-dim: #362a14;
+  --color-danger: #e8657a;
+  --color-danger-dim: #38151d;
+  --color-info: #8fa7d6;
+  --color-info-dim: #171f31;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  --shadow-glow-gold: 0 10px 34px -14px rgba(193, 154, 91, 0.75);
+  --shadow-glow-gold-lg: 0 34px 90px -44px rgba(193, 154, 91, 0.6);
+}
+
+/* ------------------------------------------------------------
+   B · MONACO DAYLIGHT
+   Warm bone paper, deep navy ink, gold reserved for hairlines.
+   Light, editorial, print-led. Keeps the navy-and-gold logo but
+   inverts the ground — the accent goes DARK so buttons still
+   carry light type on them.
+   ------------------------------------------------------------ */
+[data-theme="daylight"] {
+  --color-ink: #f4f1ea;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #ebe6dc;
+  --color-surface-3: #ded8cb;
+  --color-surface-4: #cfc7b7;
+
+  /* The "accent" ramp runs dark-to-light here so bg-gold/text-ink
+     keeps its contrast without touching a single component. */
+  --color-gold-100: #55688a;
+  --color-gold-200: #1c3050;
+  --color-gold-300: #16273f;
+  --color-gold: #101d31;
+  --color-gold-600: #0b1524;
+  --color-gold-700: #8a6d3a;
+  --color-gold-800: #c9b183;
+
+  --color-cream: #14161c;
+  --color-muted: #55585f;
+  --color-muted-dim: #85888f;
+
+  --color-line: rgba(20, 22, 28, 0.14);
+  --color-line-strong: rgba(20, 22, 28, 0.26);
+
+  --color-success: #1d7a4c;
+  --color-success-dim: #d5ead9;
+  --color-warning: #8a6416;
+  --color-warning-dim: #f4e8cd;
+  --color-danger: #a62a3c;
+  --color-danger-dim: #f6dcdf;
+  --color-info: #23557f;
+  --color-info-dim: #d9e6f1;
+
+  --font-display: var(--font-bodoni), Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  --shadow-elev-1: 0 1px 2px rgba(20, 22, 28, 0.06), 0 6px 16px -10px rgba(20, 22, 28, 0.14);
+  --shadow-elev-2: 0 10px 30px -18px rgba(20, 22, 28, 0.28);
+  --shadow-elev-3: 0 30px 70px -40px rgba(20, 22, 28, 0.38);
+  --shadow-glow-gold: 0 10px 26px -14px rgba(16, 29, 49, 0.5);
+  --shadow-glow-gold-lg: 0 30px 70px -44px rgba(16, 29, 49, 0.45);
+}
+
+/* ------------------------------------------------------------
+   C · CARBON & CHROME
+   Graphite, chrome, and a geometric sans. Near-monochrome and
+   technical — a configurator rather than a boutique. Numbers do
+   the talking; the only warmth is the live-status amber.
+   ------------------------------------------------------------ */
+[data-theme="carbon"] {
+  --color-ink: #0a0b0c;
+  --color-surface-1: #121416;
+  --color-surface-2: #191c1f;
+  --color-surface-3: #23272b;
+  --color-surface-4: #2f3438;
+
+  /* Chrome ramp replaces gold. Light accent, dark type on top. */
+  --color-gold-100: #ffffff;
+  --color-gold-200: #eef1f4;
+  --color-gold-300: #dfe4e9;
+  --color-gold: #c9d1d9;
+  --color-gold-600: #9aa4ad;
+  --color-gold-700: #6b747c;
+  --color-gold-800: #3d4349;
+
+  --color-cream: #eef1f4;
+  --color-muted: #949ca4;
+  --color-muted-dim: #676e75;
+
+  --color-line: rgba(238, 241, 244, 0.1);
+  --color-line-strong: rgba(238, 241, 244, 0.22);
+
+  --color-success: #3ddc97;
+  --color-success-dim: #0d2c20;
+  --color-warning: #f5a524;
+  --color-warning-dim: #3a2708;
+  --color-danger: #ff5c5c;
+  --color-danger-dim: #3a1414;
+  --color-info: #6fc3ff;
+  --color-info-dim: #0e2433;
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.1875rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.3125rem;
+  --radius-xl: 0.375rem;
+
+  --shadow-glow-gold: 0 8px 26px -14px rgba(201, 209, 217, 0.4);
+  --shadow-glow-gold-lg: 0 28px 70px -44px rgba(201, 209, 217, 0.3);
+}
+
+/* Theme C squares off the pill-shaped controls that define A and B.
+   Scoped to the preview so it cannot leak into the live site. */
+[data-theme="carbon"] .rounded-full:not([class*="h-1"]):not([class*="w-1"]):not([class*="w-2"]) {
+  border-radius: var(--radius-sm);
+}
+
+/* Display type in C is tracked tight and set in caps for headings. */
+[data-theme="carbon"] .font-display {
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+}
