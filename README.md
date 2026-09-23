@@ -116,6 +116,21 @@ The prototype's README over-claimed in several places. Verified against its sour
   per-page metadata. Real routes, per-page metadata, sitemap and JSON-LD now.
 - Points redemption, promo codes and campaigns had no data model at all. They are
   M4 scope.
+- **The notification bell had a hard-coded "1" badge** with no feed behind it. The
+  bell ships, the fake count does not.
+
+### The header's account controls
+
+The bell and "Join / Sign in" are in the header from M1 so it is complete, but
+sign-in, the member dashboard and the notification feed are all M2 scope. Each
+control opens a short note saying so rather than linking somewhere that 404s.
+**M2 swaps the click handler for the real route** — the markup, placement and
+styling stay as they are.
+
+The full desktop row needs `xl`. Eight nav links plus the bell, the account entry
+and Reserve overflow at 1024px; measured across 13 widths from 360 to 1920, with
+the drawer covering everything below 1280 so no width is left without navigation.
+The phone number appears at `2xl`, where there is finally room for it.
 
 ---
 
