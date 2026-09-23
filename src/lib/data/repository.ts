@@ -3,6 +3,8 @@ import type {
   HomeListing,
   Listing,
   ListingKind,
+  MemberAccount,
+  NewMemberInput,
   Plan,
   Review,
 } from "@/lib/domain/types";
@@ -30,6 +32,22 @@ export interface Repository {
   listReviews(listingId: string): Promise<Review[]>;
   listPlans(): Promise<Plan[]>;
   getStats(): Promise<SiteStats>;
+
+  /* ------------------------------- members ------------------------------- */
+
+  /**
+   * Look up an account by email. `null` means no such member.
+   *
+   * There is no password parameter and that is deliberate: real credentials,
+   * OTP and 2FA are M3. M2 proves the screens and the navigation, so the
+   * lookup is by email alone and the session lives in the browser. When M3
+   * lands, this signature grows a credential argument and the session moves
+   * to an httpOnly cookie — the components above it do not change.
+   */
+  getMemberByEmail(email: string): Promise<MemberAccount | null>;
+
+  /** Create an account. Rejects an email that already has one. */
+  createMember(input: NewMemberInput): Promise<MemberAccount>;
 }
 
 /** Headline figures shown on the home, about and partner pages. */

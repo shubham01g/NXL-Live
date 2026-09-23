@@ -37,6 +37,16 @@
   --color-line: rgba(233, 191, 69, 0.16);
   --color-line-strong: rgba(233, 191, 69, 0.34);
 
+  /* ---------- Loyalty tiers ----------
+     loyalty.ts hands these out as `tier.color` for inline styles. They were
+     referenced before they existed, so every tier name rendered at the
+     inherited colour. Silver and Platinum are deliberately cool, so a tier
+     chip never reads as the brand gold unless it IS Gold. */
+  --color-tier-bronze: #c88a4a;
+  --color-tier-silver: #c9d2dc;
+  --color-tier-gold: #e9bf45;
+  --color-tier-platinum: #e6e8f0;
+
   /* ---------- Semantic status ---------- */
   --color-success: #46d98a;
   --color-success-dim: #0c2e1d;

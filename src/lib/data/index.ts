@@ -1,7 +1,8 @@
 import type { Repository, SiteStats } from "./repository";
-import type { ListingKind } from "@/lib/domain/types";
+import type { ListingKind, MemberAccount, NewMemberInput } from "@/lib/domain/types";
 import { CARS, HOMES, LISTINGS } from "./fixtures/listings";
 import { PLANS, REVIEWS } from "./fixtures/catalog";
+import { blankMember, DEMO_MEMBER } from "./fixtures/member";
 
 /**
  * In-memory implementation of Repository, used for M1 and M2.
@@ -42,6 +43,19 @@ const fixtureRepository: Repository = {
 
   async listPlans() {
     return PLANS;
+  },
+
+  async getMemberByEmail(email: string): Promise<MemberAccount | null> {
+    const normalized = email.trim().toLowerCase();
+    return normalized === DEMO_MEMBER.email ? structuredClone(DEMO_MEMBER) : null;
+  },
+
+  async createMember(input: NewMemberInput): Promise<MemberAccount> {
+    const normalized = input.email.trim().toLowerCase();
+    if (normalized === DEMO_MEMBER.email) {
+      throw new Error("An account already exists for that email.");
+    }
+    return blankMember({ ...input, email: normalized });
   },
 
   async getStats(): Promise<SiteStats> {

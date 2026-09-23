@@ -14,7 +14,7 @@ Deployed on Vercel. Supabase (Postgres / Auth / Storage / Realtime) arrives at M
 | | Scope | Status |
 |---|---|---|
 | **M1** | Customer Experience UI — design system + 10 public pages | **Complete** |
-| M2 | Member, Partner & Admin portal UI, booking + checkout flow | Next |
+| M2 | Member, Partner & Admin portal UI, booking + checkout flow | Member account done; partner, employee, admin and checkout outstanding |
 | M3 | Backend foundation — Supabase schema, auth, 5 roles, availability engine | |
 | M4 | Booking engine, credit wallet, loyalty accrual, partner commissions | |
 | M5 | Payments, SendGrid + Twilio, SEO, PWA, launch | |
@@ -88,6 +88,39 @@ runs continuously across the whole headline.
 
 Adding a new custom `text-*` utility means registering it in
 `lib/utils/cn.ts` — see the note there.
+
+### The member account
+
+`/membership` signs in or creates an account; `/account` and its six sections
+are the member dashboard. Both are UI against the same repository the public
+pages use — **there is no server, no password and no token.**
+
+"Signed in" means a `MemberAccount` in `localStorage`, and
+`lib/auth/session-store.ts` is the only file where that is true. It is an
+external store read through `useSyncExternalStore` rather than React state,
+so the server snapshot matches what React hydrates and reading storage does
+not cascade a second render. It is **not a security boundary** — anyone can
+edit localStorage and call themselves Alex Rivera. That is fine for screens
+built to be reviewed, and is exactly what M3's auth work replaces.
+
+Sign in with `alex@example.com` for the seeded account (6,250 points, 14
+rentals, a spent-down Weekender wallet). Any other address is rejected rather
+than silently accepted; creating an account gives a real empty one.
+
+What is genuinely live: the card, insurance, address, photo, contact and MFA
+panels all save and survive a reload. What is deliberately not: loading credit
+and checkout, because those are payments (M5).
+
+Everything the dashboard shows is **derived, never stored** —
+`lib/domain/account.ts` owns it. The tier comes from the points balance, the
+"action required" banner from which fields are still null, and the header's
+bell badge counts exactly the list its panel renders. There is no stored
+counter anywhere that could drift from the thing it counts, which is how the
+prototype ended up with a hard-coded "1" over an empty feed.
+
+M3 swaps the storage read for a session cookie and the email lookup for a real
+credential check. `useSession()`, the guard and every panel above it keep
+their shape.
 
 ### Single source of truth
 

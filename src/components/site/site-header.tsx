@@ -6,8 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { SITE } from "@/lib/domain/site";
+import { tierFor } from "@/lib/domain/loyalty";
+import { notificationsFor } from "@/lib/domain/account";
+import { useSession } from "@/lib/auth/use-session";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/layout";
+import { TierChip } from "@/components/account/tier-chip";
 import { Wordmark } from "./wordmark";
 
 /**
@@ -34,38 +38,23 @@ const NAV = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
-/**
- * Account entry and notifications.
- *
- * Both controls ship with M1 so the header is complete, but everything they
- * point at — sign-in, the member dashboard, the notification feed — is M2.
- * Rather than ship a dead link or a 404, each opens a short note saying so.
- * M2 replaces the click handler with the real route and leaves the markup,
- * the placement and the styling exactly as they are.
- *
- * The bell carries no unread count. The prototype hard-coded a "1" badge with
- * nothing behind it, and a fabricated count would contradict the panel, which
- * says there is nothing to show yet.
- */
-const HEADER_NOTES = {
-  account: {
-    title: "Member accounts",
-    body: "Sign-in, your bookings, Level Rewards points and the drive credit wallet arrive with the member portal. Until then the concierge sets everything up for you.",
-  },
-  notifications: {
-    title: "Notifications",
-    body: "Nothing here yet. Booking confirmations, delivery updates and low-balance alerts land here once member accounts go live.",
-  },
-} as const;
-
-type HeaderNote = keyof typeof HEADER_NOTES;
-
 export function SiteHeader() {
   const pathname = usePathname();
+  const session = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [note, setNote] = useState<HeaderNote | null>(null);
-  const noteRef = useRef<HTMLDivElement>(null);
+  const [bellOpen, setBellOpen] = useState(false);
+  const bellRef = useRef<HTMLDivElement>(null);
+
+  const member = session.status === "signed-in" ? session.member : null;
+
+  /**
+   * The badge counts the same list the panel renders, both derived from the
+   * account. There is no stored counter that could drift, and a signed-out
+   * visitor has nothing to be notified about — so no badge, rather than the
+   * prototype's hard-coded "1".
+   */
+  const notifications = member ? notificationsFor(member) : [];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -82,39 +71,32 @@ export function SiteHeader() {
     };
   }, [open]);
 
-  // Nothing closes these on navigation explicitly: every nav link already
-  // calls setOpen(false), and clicking one lands in the click-away handler
-  // below, which dismisses the note.
-
   // Escape dismisses the topmost layer.
   useEffect(() => {
-    if (!open && !note) return;
+    if (!open && !bellOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (note) setNote(null);
+      if (bellOpen) setBellOpen(false);
       else setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, note]);
+  }, [open, bellOpen]);
 
-  // Click-away closes the note. Triggers are skipped so their own handler
+  // Click-away closes the bell. The trigger is skipped so its own handler
   // still toggles it shut, rather than closing and reopening in one click.
   useEffect(() => {
-    if (!note) return;
+    if (!bellOpen) return;
     const onDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      if (noteRef.current?.contains(target)) return;
-      if (target.closest("[data-note-trigger]")) return;
-      setNote(null);
+      if (bellRef.current?.contains(target)) return;
+      if (target.closest("[data-bell-trigger]")) return;
+      setBellOpen(false);
     };
     window.addEventListener("pointerdown", onDown);
     return () => window.removeEventListener("pointerdown", onDown);
-  }, [note]);
-
-  const toggleNote = (next: HeaderNote) =>
-    setNote((current) => (current === next ? null : next));
+  }, [bellOpen]);
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -123,7 +105,7 @@ export function SiteHeader() {
     <header
       className={cn(
         "sticky top-0 z-[var(--z-header)] transition-all duration-500 ease-editorial",
-        scrolled || open || note
+        scrolled || open || bellOpen
           ? "border-b border-line bg-ink/85 backdrop-blur-xl"
           : "border-b border-transparent bg-transparent",
       )}
@@ -163,26 +145,28 @@ export function SiteHeader() {
             <span className="font-mono tabular-nums">{SITE.contact.phone}</span>
           </a>
 
-          <button
-            type="button"
-            data-note-trigger
-            onClick={() => toggleNote("notifications")}
-            aria-expanded={note === "notifications"}
-            aria-label="Notifications"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line text-cream/80 transition-colors hover:border-gold/50 hover:text-gold"
-          >
-            <Bell width={16} height={16} />
-          </button>
+          <BellButton
+            count={notifications.length}
+            open={bellOpen}
+            onToggle={() => setBellOpen((v) => !v)}
+          />
 
-          <button
-            type="button"
-            data-note-trigger
-            onClick={() => toggleNote("account")}
-            aria-expanded={note === "account"}
-            className="whitespace-nowrap text-[0.8125rem] font-medium text-cream/80 transition-colors hover:text-gold"
-          >
-            Join / Sign in
-          </button>
+          {member ? (
+            <Link
+              href="/account"
+              aria-label={`Your account — ${member.name}`}
+              className="transition-opacity hover:opacity-80"
+            >
+              <TierChip tier={tierFor(member.points)} points={member.points} />
+            </Link>
+          ) : (
+            <Link
+              href="/membership"
+              className="whitespace-nowrap text-[0.8125rem] font-medium text-cream/80 transition-colors hover:text-gold"
+            >
+              Join / Sign in
+            </Link>
+          )}
 
           <ButtonLink href="/cars" size="sm" className="px-5 py-2.5">
             Reserve
@@ -229,26 +213,48 @@ export function SiteHeader() {
 
             <div className="flex flex-col gap-3 py-5">
               <div className="flex gap-3">
+                {member ? (
+                  <ButtonLink
+                    href="/account"
+                    variant="subtle"
+                    onClick={() => setOpen(false)}
+                    className="flex-1"
+                  >
+                    Your account
+                  </ButtonLink>
+                ) : (
+                  <ButtonLink
+                    href="/membership"
+                    variant="subtle"
+                    onClick={() => setOpen(false)}
+                    className="flex-1"
+                  >
+                    Join / Sign in
+                  </ButtonLink>
+                )}
+
                 <Button
                   variant="subtle"
-                  className="flex-1"
+                  aria-label={
+                    notifications.length > 0
+                      ? `Notifications, ${notifications.length} waiting`
+                      : "Notifications"
+                  }
+                  className="relative shrink-0 px-4"
                   onClick={() => {
                     setOpen(false);
-                    setNote("account");
-                  }}
-                >
-                  Join / Sign in
-                </Button>
-                <Button
-                  variant="subtle"
-                  aria-label="Notifications"
-                  className="shrink-0 px-4"
-                  onClick={() => {
-                    setOpen(false);
-                    setNote("notifications");
+                    setBellOpen(true);
                   }}
                 >
                   <Bell aria-hidden width={16} height={16} />
+                  {notifications.length > 0 ? (
+                    <span
+                      aria-hidden
+                      className="metal-plate absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full px-1 font-mono text-[0.5625rem] tabular-nums"
+                    >
+                      {notifications.length}
+                    </span>
+                  ) : null}
                 </Button>
               </div>
 
@@ -268,21 +274,21 @@ export function SiteHeader() {
         </div>
       ) : null}
 
-      {note ? (
+      {bellOpen ? (
         <div
-          ref={noteRef}
+          ref={bellRef}
           role="dialog"
-          aria-label={HEADER_NOTES[note].title}
-          className="absolute right-4 top-full z-[var(--z-float)] mt-2 w-[min(92vw,21rem)] animate-rise sm:right-6 lg:right-8"
+          aria-label="Notifications"
+          className="absolute right-4 top-full z-[var(--z-float)] mt-2 w-[min(92vw,22rem)] animate-rise sm:right-6 lg:right-8"
         >
           <div className="edge-gold rounded-lg p-5 shadow-elev-3">
             <div className="flex items-start justify-between gap-4">
               <p className="font-display text-base font-semibold text-cream">
-                {HEADER_NOTES[note].title}
+                Notifications
               </p>
               <button
                 type="button"
-                onClick={() => setNote(null)}
+                onClick={() => setBellOpen(false)}
                 aria-label="Close"
                 className="-mr-1 -mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-gold"
               >
@@ -290,22 +296,89 @@ export function SiteHeader() {
               </button>
             </div>
 
-            <p className="mt-2 text-sm leading-relaxed text-muted">
-              {HEADER_NOTES[note].body}
-            </p>
-
-            <ButtonLink
-              href="/contact"
-              variant="outline"
-              size="sm"
-              className="mt-4 w-full"
-              onClick={() => setNote(null)}
-            >
-              Talk to the concierge
-            </ButtonLink>
+            {!member ? (
+              <>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  Booking confirmations, delivery updates and low-balance alerts appear
+                  here once you have an account.
+                </p>
+                <ButtonLink
+                  href="/membership"
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full"
+                  onClick={() => setBellOpen(false)}
+                >
+                  Join / Sign in
+                </ButtonLink>
+              </>
+            ) : notifications.length === 0 ? (
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                You are all set — nothing needs your attention.
+              </p>
+            ) : (
+              <ul className="mt-3 divide-y divide-line">
+                {notifications.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setBellOpen(false)}
+                      className="flex gap-3 py-3 transition-opacity hover:opacity-80"
+                    >
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                          item.tone === "warning" ? "bg-warning" : "bg-info",
+                        )}
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-cream">
+                          {item.title}
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+                          {item.body}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       ) : null}
     </header>
+  );
+}
+
+function BellButton({
+  count,
+  open,
+  onToggle,
+}: {
+  count: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      data-bell-trigger
+      onClick={onToggle}
+      aria-expanded={open}
+      aria-label={count > 0 ? `Notifications, ${count} waiting` : "Notifications"}
+      className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line text-cream/80 transition-colors hover:border-gold/50 hover:text-gold"
+    >
+      <Bell width={16} height={16} />
+      {count > 0 ? (
+        <span
+          aria-hidden
+          className="metal-plate absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full px-1 font-mono text-[0.5625rem] font-semibold tabular-nums"
+        >
+          {count}
+        </span>
+      ) : null}
+    </button>
   );
 }

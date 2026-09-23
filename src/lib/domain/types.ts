@@ -167,16 +167,119 @@ export interface Quote {
 
 /* --------------------------------- people -------------------------------- */
 
-export interface Member {
+export type CardBrand = "visa" | "mastercard" | "amex" | "discover";
+
+export interface PaymentCard {
+  id: string;
+  brand: CardBrand;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  holder: string;
+  /** Charged for the rental. The deposit is held at pickup, never here. */
+  isDefault: boolean;
+}
+
+export interface InsurancePolicy {
+  kind: InsuranceChoice;
+  /** Carrier for an own policy; null for the NXL daily package. */
+  carrier: string | null;
+  policyNumber: string | null;
+  /** ms epoch. null for the NXL package, which never lapses. */
+  expiresAt: number | null;
+  /** Own policies are checked by the team before delivery. */
+  verified: boolean;
+}
+
+export interface BillingAddress {
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+export interface SecuritySettings {
+  mfaEnabled: boolean;
+  /** Last 4 of the number OTP codes go to. */
+  otpPhoneLast4: string | null;
+  passwordUpdatedAt: number | null;
+  recoveryCodesRemaining: number;
+}
+
+export type WalletEntryKind = "load" | "bonus" | "spend" | "refund";
+
+export interface WalletEntry {
+  id: string;
+  kind: WalletEntryKind;
+  label: string;
+  /** Signed: loads and refunds positive, spends negative. */
+  amount: Money;
+  balanceAfter: Money;
+  createdAt: number;
+}
+
+/** A member's view of their own booking. */
+export interface MemberRental {
+  id: string;
+  reference: string;
+  listingId: string;
+  listingSlug: string;
+  listingName: string;
+  listingKind: ListingKind;
+  unit: RateUnit;
+  qty: number;
+  window: DateRange;
+  total: Money;
+  pointsEarned: number;
+  status: BookingStatus;
+}
+
+/**
+ * A member account.
+ *
+ * The prototype's member record was five loose fields on a localStorage blob;
+ * the dashboard needs the payment, insurance, address and security state to
+ * be modelled, because the whole "action required" flow keys off whether they
+ * are null. M3 implements this as the `members` table plus its relations.
+ */
+export interface MemberAccount {
   id: string;
   name: string;
   email: string;
-  phone?: string;
-  points: number;
-  enrolled: boolean;
+  phone: string | null;
+  /** null renders initials on a metal plate — most members never upload one. */
+  photo: string | null;
   joinedAt: number;
-  rentals: number;
+  /** Level Rewards opt-in. Points only accrue when true. */
+  enrolled: boolean;
+  points: number;
+  /** Drive credit wallet balance. */
+  credits: Money;
+  /** Lifetime credits loaded, so "X of Y remaining" can be shown. */
+  creditsLoaded: Money;
   activePlanId: string | null;
+  /**
+   * Lifetime completed rentals. Deliberately separate from `rentals.length`:
+   * that array holds only the most recent page, and M3 takes this figure from
+   * a count query rather than shipping every booking to the client.
+   */
+  lifetimeRentals: number;
+  card: PaymentCard | null;
+  insurance: InsurancePolicy | null;
+  address: BillingAddress | null;
+  security: SecuritySettings;
+  rentals: MemberRental[];
+  wallet: WalletEntry[];
+}
+
+/** What sign-up collects. Everything else starts empty. */
+export interface NewMemberInput {
+  name: string;
+  email: string;
+  phone: string | null;
+  enrolled: boolean;
 }
 
 export type PartnerStatus = "pending" | "active" | "paused";
