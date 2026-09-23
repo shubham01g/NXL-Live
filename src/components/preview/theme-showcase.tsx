@@ -25,54 +25,54 @@ export interface ThemeOption {
 
 export const THEMES: ThemeOption[] = [
   {
-    id: "atelier",
-    label: "A · Midnight Atelier",
-    tagline: "Warm near-black, antique gold, high-contrast serif.",
+    id: "southbeach",
+    label: "1 · South Beach",
+    tagline: "Indigo black, hot magenta, electric cyan.",
     notes: [
-      "Closest to the existing navy-and-gold logo, so brand recognition carries over.",
-      "Serif display against a humanist sans — the pairing does the heavy lifting.",
-      "Gold is rationed: accents, hairlines and one CTA per view, never a wash.",
-      "Best for: positioning NXL as a marque. Feels like a watch brand, not software.",
+      "Magenta leads, cyan answers it — the dual accent is what makes it read vivid.",
+      "Place-specific: this is South Beach after dark, and the business is literally there.",
+      "Geometric display sans, generous weight, high-chroma glow under the CTAs.",
+      "Loudest personality. Skews younger and more nightlife than the current brand.",
     ],
     swatches: [
-      { name: "Ink", value: "#08060a" },
-      { name: "Surface", value: "#17131a" },
-      { name: "Gold", value: "#c19a5b" },
-      { name: "Cream", value: "#f5f1e8" },
+      { name: "Indigo", value: "#09061a" },
+      { name: "Surface", value: "#1a1139" },
+      { name: "Magenta", value: "#ff2d86" },
+      { name: "Cyan", value: "#2ee6ff" },
     ],
   },
   {
-    id: "daylight",
-    label: "B · Monaco Daylight",
-    tagline: "Bone paper, deep navy ink, gold reserved for hairlines.",
+    id: "papaya",
+    label: "2 · Papaya Track",
+    tagline: "Warm carbon, papaya orange, acid lime.",
     notes: [
-      "Inverts the ground. Reads like a print magazine or a Loro Piana lookbook.",
-      "Didone serif set large, with tight rules and generous margins.",
-      "Far better daylight legibility on a phone — which is where most bookings happen.",
-      "Best for: widening appeal beyond the nightlife read. Feels editorial and expensive.",
+      "Motorsport energy — papaya is McLaren's colour and nobody else in rental uses it.",
+      "The warmest of the three; orange on carbon glows without feeling neon-cheap.",
+      "Acid lime carries availability and live status, so the UI signals hard.",
+      "Highest contrast accent of the three, so CTAs hit hardest on mobile.",
     ],
     swatches: [
-      { name: "Bone", value: "#f4f1ea" },
-      { name: "Paper", value: "#ffffff" },
-      { name: "Navy", value: "#101d31" },
-      { name: "Gold rule", value: "#c9b183" },
+      { name: "Carbon", value: "#0a0907" },
+      { name: "Surface", value: "#1d1913" },
+      { name: "Papaya", value: "#ff7a1a" },
+      { name: "Lime", value: "#c6ff2e" },
     ],
   },
   {
-    id: "carbon",
-    label: "C · Carbon & Chrome",
-    tagline: "Graphite, chrome, geometric sans. Near-monochrome.",
+    id: "rosso",
+    label: "3 · Rosso Corsa",
+    tagline: "Black with red undertone, racing red, gold support.",
     notes: [
-      "A configurator, not a boutique. Squared corners, tight grid, numbers up front.",
-      "One geometric sans throughout — no serif anywhere.",
-      "Chrome replaces gold entirely; the only warmth is the live-status amber.",
-      "Best for: the spec-driven buyer. Feels like a McLaren build page.",
+      "Keeps the logo's gold, demoted to the second accent — most on-brand of the three.",
+      "Serif display against hot red: luxury and aggression at the same time.",
+      "Most classically supercar. Reads expensive rather than playful.",
+      "Caveat: red is both the primary and the usual 'booked' colour — status red is shifted to rose so the two stay readable apart.",
     ],
     swatches: [
-      { name: "Carbon", value: "#0a0b0c" },
-      { name: "Graphite", value: "#23272b" },
-      { name: "Chrome", value: "#c9d1d9" },
-      { name: "Bright", value: "#eef1f4" },
+      { name: "Black", value: "#0b0607" },
+      { name: "Surface", value: "#1e1216" },
+      { name: "Rosso", value: "#ff2e43" },
+      { name: "Gold", value: "#f0c04a" },
     ],
   },
 ];
@@ -161,12 +161,22 @@ export function ThemeShowcase({ cars }: { cars: CarListing[] }) {
 
         {/* hero */}
         <section className="relative isolate overflow-hidden py-20 sm:py-28">
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 bg-[radial-gradient(110%_80%_at_50%_100%,var(--color-gold-800),transparent_62%)] opacity-60"
-          />
+          {/* Dual-accent backdrop: the primary glows up from the road line,
+              the secondary answers it from the opposite corner. This is what
+              separates these directions from a single-accent dark theme. */}
+          <div aria-hidden className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-[radial-gradient(95%_75%_at_22%_115%,var(--color-gold-700),transparent_60%)] opacity-70" />
+            <div className="absolute inset-0 bg-[radial-gradient(65%_55%_at_88%_-15%,var(--color-info),transparent_62%)] opacity-[0.18]" />
+            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent opacity-60" />
+          </div>
           <Container>
             <div className="max-w-3xl">
+              <div className="mb-6">
+                <span className="inline-flex items-center gap-2 rounded-full border border-info/30 bg-info/10 px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-info">
+                  <span aria-hidden className="h-1.5 w-1.5 animate-live rounded-full bg-info" />
+                  6 cars available tonight
+                </span>
+              </div>
               <Eyebrow>Certified exotic cars &amp; private estates</Eyebrow>
               <h1 className="mt-6 font-display text-display-1 text-balance text-cream max-sm:text-[3rem]">
                 Your dream car.

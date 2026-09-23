@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Bodoni_Moda, Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Outfit, Space_Grotesk } from "next/font/google";
 
 /**
  * Theme preview shell.
@@ -9,8 +9,8 @@ import { Bodoni_Moda, Inter, Space_Grotesk } from "next/font/google";
  * chosen, the two that lose are removed along with this whole route.
  */
 
-const bodoni = Bodoni_Moda({
-  variable: "--font-bodoni",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
   display: "swap",
 });
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 
 export default function PreviewLayout({ children }: { children: ReactNode }) {
   return (
-    <div className={`${bodoni.variable} ${inter.variable} ${spaceGrotesk.variable}`}>
+    <div className={`${outfit.variable} ${inter.variable} ${spaceGrotesk.variable}`}>
       {children}
     </div>
   );
