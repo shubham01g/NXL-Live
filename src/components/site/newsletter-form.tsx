@@ -45,7 +45,7 @@ export function NewsletterForm() {
       />
       <button
         type="submit"
-        className="flex items-center gap-1.5 bg-gold px-5 text-sm font-semibold text-ink transition-colors hover:bg-gold-200"
+        className="metal-fill flex items-center gap-1.5 px-5 text-sm font-semibold"
       >
         Join
         <ArrowRight aria-hidden width={14} height={14} />

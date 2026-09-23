@@ -30,7 +30,13 @@ export function LegalPage({
 }) {
   return (
     <>
-      <PageHero eyebrow={eyebrow} title={title} lede={lede} />
+      {/* The title is kept a plain string for metadata; the metal treatment is
+          applied here so all three legal pages carry it identically. */}
+      <PageHero
+        eyebrow={eyebrow}
+        title={<span className="text-metal block">{title}</span>}
+        lede={lede}
+      />
 
       <Section size="sm">
         <Container>
@@ -48,7 +54,7 @@ export function LegalPage({
               {sections.map((section, i) => (
                 <section key={section.heading}>
                   <h2 className="flex gap-4 font-display text-xl font-semibold text-cream">
-                    <span className="font-mono text-sm text-gold">
+                    <span className="text-metal-soft font-mono text-sm">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {section.heading}

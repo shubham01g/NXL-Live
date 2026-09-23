@@ -50,7 +50,12 @@ export default function ContactPage() {
     <>
       <PageHero
         eyebrow="Contact us"
-        title="Let's line up your drive."
+        title={
+          <>
+            Let&apos;s line up
+            <span className="text-metal block">your drive.</span>
+          </>
+        }
         lede="Call, email or chat — whichever is fastest for you. The concierge team handles bookings, estate stays, partnerships and anything in between."
       />
 

@@ -56,7 +56,12 @@ export default async function AboutPage() {
     <>
       <PageHero
         eyebrow="About NXL"
-        title="The modern marketplace for exotic cars and private estates."
+        title={
+          <>
+            The modern marketplace for
+            <span className="text-metal block">exotic cars and private estates.</span>
+          </>
+        }
         lede="We built NXL because renting something extraordinary should not feel like a negotiation. Transparent rates, hourly windows, certified inventory, and a concierge who picks up the phone."
       />
 

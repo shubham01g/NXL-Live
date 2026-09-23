@@ -64,7 +64,12 @@ export default async function SubscriptionsPage() {
     <>
       <PageHero
         eyebrow="Drive Credit Wallet"
-        title="A rotating garage. A growing membership."
+        title={
+          <>
+            A rotating garage.
+            <span className="text-metal block">A growing membership.</span>
+          </>
+        }
         lede="Buy credit once, spend it across the entire fleet, and activate a loyalty tier the moment it lands. One-time purchase — credits load instantly, and nothing auto-bills."
       />
 
@@ -86,7 +91,7 @@ export default async function SubscriptionsPage() {
                   )}
                 >
                   {plan.featured ? (
-                    <span className="absolute -top-3 left-8 rounded-full bg-gold px-3 py-1 font-mono text-[0.5625rem] uppercase tracking-[0.16em] text-ink">
+                    <span className="metal-plate absolute -top-3 left-8 rounded-full px-3 py-1 font-mono text-[0.5625rem] uppercase tracking-[0.16em]">
                       Most popular
                     </span>
                   ) : null}
@@ -106,7 +111,7 @@ export default async function SubscriptionsPage() {
                   <p className="mt-2 text-sm text-muted">{plan.tagline}</p>
 
                   <div className="mt-7">
-                    <p className="font-mono text-display-4 tabular-nums text-cream">
+                    <p className="text-metal-soft font-mono text-display-4 tabular-nums">
                       {money(plan.price)}
                     </p>
                     <p className="mt-1 text-sm text-muted">
@@ -173,7 +178,7 @@ export default async function SubscriptionsPage() {
                   >
                     {tier.name}
                   </p>
-                  <p className="mt-3 font-mono text-2xl tabular-nums text-cream">
+                  <p className="text-metal-soft mt-3 font-mono text-2xl tabular-nums">
                     {Math.round(tier.rate * 100)}%
                   </p>
                   <p className="text-xs text-muted">back in points</p>
@@ -236,7 +241,7 @@ export default async function SubscriptionsPage() {
               },
             ].map((step) => (
               <Card key={step.index} className="p-6">
-                <span className="font-mono text-sm text-gold">{step.index}</span>
+                <span className="text-metal-soft font-mono text-sm">{step.index}</span>
                 <h3 className="mt-4 font-display text-lg font-semibold text-cream">
                   {step.title}
                 </h3>

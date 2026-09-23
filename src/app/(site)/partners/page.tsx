@@ -44,7 +44,12 @@ export default async function PartnersPage() {
     <>
       <PageHero
         eyebrow="Partnership program"
-        title="Send us your guests. Earn on every rental."
+        title={
+          <>
+            Send us your guests.
+            <span className="text-metal block">Earn on every rental.</span>
+          </>
+        }
         lede="We work with boutique hotels, resorts, concierges, yacht charters, private aviation and anyone whose clients live at the top. Free to join, and you earn every time they drive or stay with us."
       />
 
@@ -70,7 +75,7 @@ export default async function PartnersPage() {
               <ol className="mt-10 space-y-6">
                 {STEPS.map((step) => (
                   <li key={step.index} className="flex gap-5">
-                    <span className="mt-1 shrink-0 font-mono text-sm text-gold">
+                    <span className="text-metal-soft mt-1 shrink-0 font-mono text-sm">
                       {step.index}
                     </span>
                     <div>

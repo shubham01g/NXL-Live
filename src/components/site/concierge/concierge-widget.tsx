@@ -93,8 +93,8 @@ export function ConciergeWidget() {
         aria-label={open ? "Close concierge chat" : "Chat with JERALD, the NXL concierge"}
         className={cn(
           "fixed bottom-5 right-5 z-[var(--z-float)] grid h-14 w-14 place-items-center rounded-full",
-          "bg-gold text-ink shadow-glow-gold transition-all duration-300 ease-editorial",
-          "hover:scale-105 hover:bg-gold-200",
+          "metal-fill shadow-glow-gold transition-all duration-300 ease-editorial",
+          "hover:scale-105 hover:shadow-glow-gold-lg",
         )}
       >
         {open ? <X width={22} height={22} /> : <MessageCircle width={22} height={22} />}
@@ -108,11 +108,11 @@ export function ConciergeWidget() {
           className={cn(
             "fixed bottom-24 right-5 z-[var(--z-float)] flex flex-col",
             "h-[min(560px,calc(100dvh-8rem))] w-[min(92vw,400px)]",
-            "animate-rise overflow-hidden rounded-xl border border-line bg-surface-1 shadow-elev-3",
+            "edge-gold animate-rise overflow-hidden rounded-xl shadow-elev-3",
           )}
         >
           <header className="flex items-center gap-3 border-b border-line bg-surface-2 px-4 py-3.5">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold font-display text-lg font-bold text-ink">
+            <span className="metal-plate grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-lg font-bold">
               J
             </span>
             <div className="min-w-0">
@@ -137,7 +137,7 @@ export function ConciergeWidget() {
                   className={cn(
                     "max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed",
                     msg.from === "guest"
-                      ? "ml-auto bg-gold text-ink"
+                      ? "metal-plate ml-auto"
                       : "bg-surface-3 text-cream/90",
                   )}
                 >
@@ -213,7 +213,7 @@ export function ConciergeWidget() {
                 type="submit"
                 disabled={!draft.trim()}
                 aria-label="Send message"
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold text-ink transition-colors hover:bg-gold-200 disabled:opacity-40"
+                className="metal-fill grid h-10 w-10 shrink-0 place-items-center rounded-full disabled:opacity-40"
               >
                 <Send width={16} height={16} />
               </button>

@@ -40,7 +40,8 @@ export default async function WhoWeArePage() {
             <div>
               <Eyebrow>Who we are</Eyebrow>
               <h1 className="mt-6 font-display text-display-2 text-balance text-cream max-sm:text-[2.75rem]">
-                We rent the cars we grew up dreaming about.
+                We rent the cars
+                <span className="text-metal block">we grew up dreaming about.</span>
               </h1>
               <div className="mt-7 space-y-5 text-lg leading-relaxed text-muted">
                 <p>
@@ -108,7 +109,7 @@ export default async function WhoWeArePage() {
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {VALUES.map((value, i) => (
               <Card key={value.title} className="p-7">
-                <span className="font-mono text-sm text-gold">0{i + 1}</span>
+                <span className="text-metal-soft font-mono text-sm">0{i + 1}</span>
                 <h2 className="mt-4 font-display text-xl font-semibold text-cream">
                   {value.title}
                 </h2>

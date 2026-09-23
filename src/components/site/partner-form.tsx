@@ -46,7 +46,7 @@ export function PartnerForm() {
 
         <div className="mt-7 rounded-lg border border-gold/25 bg-gold/5 p-6">
           <p className="font-mono text-2xs uppercase text-muted">Your referral code</p>
-          <p className="mt-2 font-display text-3xl font-semibold tracking-wide text-gold">
+          <p className="text-metal-soft mt-2 font-display text-3xl font-semibold tracking-wide">
             {submitted.code}
           </p>
           <p className="mt-3 text-xs text-muted">

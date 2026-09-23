@@ -34,7 +34,10 @@ const LEGAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-line bg-surface-1/50">
+    <footer className="relative mt-auto bg-surface-1/50">
+      {/* Metal filament along the seam, so the footer is introduced by the
+          brand rather than by a grey hairline. */}
+      <div aria-hidden className="rule-gold absolute inset-x-0 top-0" />
       <Container className="grid gap-12 py-16 lg:grid-cols-[1.5fr_1fr_1fr_1.4fr]">
         <div>
           <Wordmark className="h-8 w-auto" />

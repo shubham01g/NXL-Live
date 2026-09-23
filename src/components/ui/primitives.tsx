@@ -25,10 +25,7 @@ export function Eyebrow({
         className,
       )}
     >
-      <span
-        aria-hidden
-        className="h-px w-6 bg-gradient-to-r from-gold-700 via-gold to-gold-200"
-      />
+      <span aria-hidden className="metal-track h-px w-6" />
       {children}
     </span>
   );
@@ -115,15 +112,21 @@ export function Card({
   children,
   className,
   as: Tag = "div",
+  tone = "default",
 }: {
   children: ReactNode;
   className?: string;
   as?: "div" | "article" | "section" | "li";
+  /** "gold" trades the flat hairline for the metal gradient edge. */
+  tone?: "default" | "gold";
 }) {
   return (
     <Tag
       className={cn(
-        "rounded-xl border border-line bg-surface-1/70 backdrop-blur-sm",
+        "rounded-xl",
+        tone === "gold"
+          ? "edge-gold"
+          : "border border-line bg-surface-1/70 backdrop-blur-sm",
         className,
       )}
     >

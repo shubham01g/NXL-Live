@@ -95,7 +95,7 @@ export default async function HomePage() {
                 as="article"
                 className="group relative p-7 transition-all duration-300 ease-editorial hover:border-gold/40 hover:bg-surface-2/60"
               >
-                <span className="font-mono text-sm text-gold">{item.index}</span>
+                <span className="text-metal-soft font-mono text-sm">{item.index}</span>
                 <h3 className="mt-5 font-display text-2xl font-semibold text-cream">
                   <a href={item.href} className="after:absolute after:inset-0">
                     {item.title}

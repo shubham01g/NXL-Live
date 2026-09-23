@@ -13,7 +13,8 @@ export default function NotFound() {
         <Container className="text-center">
           <Eyebrow className="justify-center">Error 404</Eyebrow>
           <h1 className="mx-auto mt-6 max-w-2xl font-display text-display-2 text-balance text-cream max-sm:text-[2.75rem]">
-            This one has already left the garage.
+            This one has
+            <span className="text-metal block">already left the garage.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-lg text-lg text-muted">
             The page you are after does not exist, or the listing has moved. The rest of

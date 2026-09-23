@@ -135,6 +135,18 @@
     #eec84f 70%,
     #c9a23a 100%
   );
+  /* The 142deg ramps show almost no travel across a 6px-tall bar, so thin
+     horizontal surfaces — progress fills, step indicators — get their own
+     left-to-right ramp with the highlight parked off-centre. */
+  --metal-gold-h: linear-gradient(
+    90deg,
+    #a87d1e 0%,
+    #e0b944 22%,
+    #fff8dd 44%,
+    #f0cf6a 58%,
+    #c99f2e 82%,
+    #a87d1e 100%
+  );
   --metal-edge: linear-gradient(
     140deg,
     rgba(233, 191, 69, 0.55) 0%,
@@ -295,6 +307,22 @@ body {
     opacity: 1;
     animation: sheen-sweep 0.85s var(--ease-editorial);
   }
+}
+
+/**
+ * Brushed metal without the sheen — for gold surfaces that are not buttons:
+ * avatars, active pills, chips, toggle tracks, dots. Anything that would have
+ * been a flat `bg-gold` block belongs here instead, so no single surface on
+ * the platform is painted in the unmodulated colour.
+ */
+@utility metal-plate {
+  background-image: var(--metal-gold);
+  color: #1a1206;
+}
+
+/** Thin horizontal metal: progress fills and step indicators. */
+@utility metal-track {
+  background-image: var(--metal-gold-h);
 }
 
 /** A gold rule that fades at both ends. */

@@ -16,7 +16,7 @@ export function ConciergeTrigger({ className }: { className?: string }) {
         className,
       )}
     >
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold text-ink">
+      <span className="metal-plate grid h-10 w-10 shrink-0 place-items-center rounded-full">
         <MessageCircle aria-hidden width={18} height={18} />
       </span>
       <span className="min-w-0">

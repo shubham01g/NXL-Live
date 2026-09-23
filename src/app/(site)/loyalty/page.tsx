@@ -74,7 +74,12 @@ export default function LoyaltyPage() {
     <>
       <PageHero
         eyebrow="Level Rewards"
-        title="Simple loyalty. Real rewards."
+        title={
+          <>
+            Simple loyalty.
+            <span className="text-metal block">Real rewards.</span>
+          </>
+        }
         lede="Free to join, and it starts paying from your first rental. Four tiers, a rising earn rate, and points you can actually spend — not a points balance you can only look at."
         actions={
           <>
@@ -96,7 +101,7 @@ export default function LoyaltyPage() {
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {HOW_IT_WORKS.map((step) => (
               <Card key={step.index} className="p-6">
-                <span className="font-mono text-sm text-gold">{step.index}</span>
+                <span className="text-metal-soft font-mono text-sm">{step.index}</span>
                 <h3 className="mt-4 font-display text-lg font-semibold text-cream">
                   {step.title}
                 </h3>
@@ -137,7 +142,7 @@ export default function LoyaltyPage() {
                   ) : null}
                 </div>
 
-                <p className="mt-4 font-mono text-3xl tabular-nums text-cream">
+                <p className="text-metal-soft mt-4 font-mono text-3xl tabular-nums">
                   {Math.round(tier.rate * 100)}%
                 </p>
                 <p className="text-xs text-muted">back in points</p>

@@ -155,7 +155,7 @@ export function WalletJourney() {
                 aria-current={i === step}
                 className={cn(
                   "h-1 w-full rounded-full transition-colors",
-                  i <= step ? "bg-gold" : "bg-surface-3 hover:bg-surface-4",
+                  i <= step ? "metal-track" : "bg-surface-3 hover:bg-surface-4",
                 )}
               />
             </li>
@@ -163,7 +163,7 @@ export function WalletJourney() {
         </ol>
 
         <div className="mt-8">
-          <span className="font-mono text-sm text-gold">{current.index}</span>
+          <span className="text-metal-soft font-mono text-sm">{current.index}</span>
           <h3 className="mt-3 font-display text-2xl font-semibold text-cream">
             {current.title}
           </h3>
@@ -185,7 +185,7 @@ export function WalletJourney() {
             <button
               type="button"
               onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
-              className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2 text-sm font-semibold text-ink transition-colors hover:bg-gold-200"
+              className="metal-fill inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold"
             >
               Next step
               <ArrowRight aria-hidden width={14} height={14} />
@@ -205,7 +205,7 @@ export function WalletJourney() {
 
       {/* --------------------------------- panel --------------------------------- */}
       <div className="space-y-4">
-        <Card className="p-6">
+        <Card tone="gold" className="p-6">
           <div className="flex items-baseline justify-between gap-4">
             <Eyebrow>Drive wallet</Eyebrow>
             {current.totalCredits > 0 ? (
@@ -222,7 +222,7 @@ export function WalletJourney() {
             ) : null}
           </div>
 
-          <p className="mt-4 font-mono text-3xl tabular-nums text-cream">
+          <p className="text-metal-soft mt-4 font-mono text-3xl tabular-nums">
             {money(current.balance)}
           </p>
           <p className="text-xs text-muted">
@@ -242,7 +242,7 @@ export function WalletJourney() {
         <Card className="p-6">
           <Eyebrow>Level Rewards</Eyebrow>
           <div className="mt-4 flex items-baseline justify-between gap-4">
-            <p className="font-mono text-3xl tabular-nums text-cream">
+            <p className="text-metal-soft font-mono text-3xl tabular-nums">
               {current.points.toLocaleString()}
             </p>
             <p className="text-sm" style={{ color: tierByName("Gold").color }}>

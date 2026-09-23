@@ -141,7 +141,7 @@ function Reviews({ reviews, average }: { reviews: Review[]; average: number }) {
         <>
           <div className="mt-6 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-center">
             <div>
-              <p className="font-display text-display-4 text-cream">
+              <p className="text-metal-soft font-display text-display-4">
                 {ratingText(average)}
               </p>
               <Stars value={average} className="mt-2" />
@@ -176,7 +176,7 @@ function Reviews({ reviews, average }: { reviews: Review[]; average: number }) {
                 <div className="flex items-center gap-3">
                   <span
                     aria-hidden
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold/15 font-display text-sm font-semibold text-gold"
+                    className="metal-plate grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-sm font-semibold"
                   >
                     {review.authorName.charAt(0)}
                   </span>

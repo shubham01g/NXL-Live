@@ -20,7 +20,7 @@ export default async function HomesPage() {
     <>
       <PageHero
         eyebrow="Private estates"
-        title="Luxury Homes"
+        title={<span className="text-metal block">Luxury Homes</span>}
         lede={`Book by the day, week or month. Oceanfront villas and Ocean Drive penthouses with room for every key — from ${money(entryRate)} a night. Bring the fleet home.`}
         aside={
           <p className="flex items-center gap-2.5 text-sm text-muted lg:justify-end">

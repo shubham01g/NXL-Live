@@ -168,7 +168,7 @@ export function ListingBrowser({ listings }: { listings: Listing[] }) {
                 className={cn(
                   "rounded-full px-4 py-1.5 text-sm transition-colors",
                   category === c
-                    ? "bg-gold font-medium text-ink"
+                    ? "metal-plate font-medium"
                     : "border border-line text-cream/75 hover:border-line-strong hover:text-cream",
                 )}
               >

@@ -86,10 +86,10 @@ function MediaPlaceholder({ label, alt }: { label?: string; alt: string }) {
       <div aria-hidden className="grain absolute inset-0 opacity-50" />
 
       <div className="relative flex flex-col items-center gap-2 px-4 text-center">
-        <span className="font-display text-2xl font-semibold tracking-tight text-gold/45">
+        <span className="text-metal font-display text-2xl font-semibold tracking-tight opacity-50">
           NXL
         </span>
-        <span aria-hidden className="h-px w-8 bg-gold/25" />
+        <span aria-hidden className="metal-track h-px w-8 opacity-40" />
         {label ? (
           <span className="font-mono text-[0.5625rem] uppercase tracking-[0.22em] text-muted-dim">
             {label}

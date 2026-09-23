@@ -57,17 +57,37 @@ At M3 we implement that same interface against Supabase and swap the export in
 
 Flat gold reads as mustard. Anything meant to look like gold is painted with a
 multi-stop ramp carrying a specular highlight, defined once in `globals.css`
-(`--metal-gold`, `--metal-gold-soft`, `--metal-edge`) and applied through four
-utilities:
+(`--metal-gold`, `--metal-gold-soft`, `--metal-gold-h`, `--metal-edge`) and
+applied through these utilities:
 
 | Utility | Use |
 |---|---|
 | `text-metal` | Headline fragments and the wordmark's X. Clipped to the glyphs. |
-| `text-metal-soft` | Large numerals and prices — brighter ramp so it stays readable. |
-| `edge-gold` | Gradient hairline borders (booking panel, featured plan card). |
-| `metal-fill` | Primary buttons: brushed fill plus a sheen that sweeps on hover. |
+| `text-metal-soft` | Numerals and prices — brighter ramp so it stays readable. |
+| `edge-gold` / `edge-gold-ink` | Gradient hairline borders, over surface-1 and over ink. |
+| `metal-fill` | Buttons: brushed fill plus a sheen that sweeps on hover. |
+| `metal-plate` | Gold surfaces that are **not** buttons — avatars, active pills, chips, toggle tracks, badges. Same ramp, no sheen. |
+| `metal-track` | Thin horizontal metal: progress fills, step indicators, the eyebrow hairline. Uses the left-to-right ramp, because the 142° one shows no travel across a 6px bar. |
+| `rule-gold` | A gold rule that fades out at both ends (the footer seam, the hero horizon). |
 
-Reserve `text-metal` for accents. A paragraph in gradient gold reads cheap.
+Two rules keep it from tipping into kitsch:
+
+1. **No surface is painted in unmodulated gold.** There is no bare `bg-gold`
+   block left in the app — every one is `metal-plate`, `metal-fill` or
+   `metal-track`. `text-gold` on the other hand is correct and intentional for
+   small type: eyebrows, mono caps, icons, inline emphasis, required-field
+   asterisks. Gradient type below ~16px reads muddy.
+2. **Metal marks accents, not bodies.** Headline *fragments* (never a whole
+   multi-sentence headline), and figures that are the point of their block —
+   prices, stat values, earn rates, step numerals. Dense number **tables** stay
+   flat cream: a grid of gradient figures is unscannable.
+
+When a metal fragment can wrap, give the span `block`. `background-clip: text`
+on a wrapping inline element restarts the gradient per line box; on a block it
+runs continuously across the whole headline.
+
+Adding a new custom `text-*` utility means registering it in
+`lib/utils/cn.ts` — see the note there.
 
 ### Single source of truth
 

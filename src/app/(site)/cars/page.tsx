@@ -20,7 +20,7 @@ export default async function CarsPage() {
     <>
       <PageHero
         eyebrow="The fleet"
-        title="Exotic Cars"
+        title={<span className="text-metal block">Exotic Cars</span>}
         lede={`Book by the hour — your dream car, no full-day commitment. Daily, weekly and monthly windows when you want more road. Rates start at ${money(entryRate)} an hour, and the price you see is the price you pay.`}
         aside={
           <p className="flex items-center gap-2.5 text-sm text-muted lg:justify-end">

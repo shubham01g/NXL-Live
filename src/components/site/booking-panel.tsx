@@ -154,7 +154,7 @@ export function BookingPanel({ listing }: { listing: Listing }) {
 
         <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3.5">
           <dt className="font-semibold text-cream">Due at booking</dt>
-          <dd className="font-mono text-lg font-semibold tabular-nums text-gold">
+          <dd className="text-metal-soft font-mono text-lg font-semibold tabular-nums">
             {money(q.dueNow)}
           </dd>
         </div>

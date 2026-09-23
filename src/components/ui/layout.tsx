@@ -145,7 +145,9 @@ export function StatGrid({
           <dt className="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-muted">
             {stat.label}
           </dt>
-          <dd className="mt-2 font-display text-2xl font-semibold text-cream">
+          {/* Stat figures are the page's headline numbers, so they are struck
+              in metal on the same rule as <Price>. */}
+          <dd className="text-metal-soft mt-2 font-display text-2xl font-semibold">
             {stat.value}
           </dd>
           {stat.hint ? (
@@ -159,6 +161,17 @@ export function StatGrid({
 
 /* -------------------------------- divider --------------------------------- */
 
-export function Divider({ className }: { className?: string }) {
-  return <hr className={cn("border-0 border-t border-line", className)} />;
+export function Divider({
+  className,
+  tone = "line",
+}: {
+  className?: string;
+  /** "gold" draws the metal rule that fades out at both ends. */
+  tone?: "line" | "gold";
+}) {
+  return tone === "gold" ? (
+    <hr className={cn("rule-gold", className)} />
+  ) : (
+    <hr className={cn("border-0 border-t border-line", className)} />
+  );
 }

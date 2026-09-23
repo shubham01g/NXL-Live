@@ -55,7 +55,7 @@ export function SegmentedControl<T extends string>({
               size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
               "disabled:cursor-not-allowed disabled:opacity-40",
               active
-                ? "bg-gold text-ink shadow-glow-gold"
+                ? "metal-plate shadow-glow-gold"
                 : "text-cream/70 hover:bg-surface-2 hover:text-cream",
             )}
           >
@@ -93,7 +93,7 @@ export function Toggle({
       className={cn(
         "relative h-6 w-11 shrink-0 rounded-full border transition-colors duration-300",
         "disabled:cursor-not-allowed disabled:opacity-40",
-        checked ? "border-gold bg-gold" : "border-line bg-surface-3",
+        checked ? "border-gold metal-plate" : "border-line bg-surface-3",
         className,
       )}
     >

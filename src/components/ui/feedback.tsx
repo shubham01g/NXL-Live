@@ -94,7 +94,7 @@ export function ProgressBar({
 }) {
   const pct = Math.round(Math.min(1, Math.max(0, value)) * 100);
   const fills = {
-    gold: "bg-gradient-to-r from-gold-600 to-gold-200",
+    gold: "metal-track",
     success: "bg-success",
     warning: "bg-warning",
     danger: "bg-danger",
