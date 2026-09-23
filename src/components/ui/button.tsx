@@ -17,8 +17,9 @@ const BASE =
   "disabled:pointer-events-none disabled:opacity-40";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    "bg-gold text-ink shadow-glow-gold hover:bg-gold-200 hover:shadow-glow-gold-lg active:bg-gold-300",
+  // Brushed metal rather than flat gold — the ramp carries a specular
+  // highlight and a sheen sweeps across it on hover.
+  primary: "metal-fill shadow-glow-gold hover:shadow-glow-gold-lg",
   outline:
     "border border-gold/40 text-gold hover:border-gold hover:bg-gold/10 active:bg-gold/15",
   ghost: "text-cream/80 hover:text-gold",

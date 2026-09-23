@@ -54,15 +54,22 @@ function HeroBackdrop({ image }: { image?: string | null }) {
         <Image src={image} alt="" fill priority sizes="100vw" className="object-cover" />
       ) : (
         <>
-          {/* Horizon glow — reads as a car emerging from low light. */}
-          <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_100%,rgba(200,161,94,0.18),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_15%_20%,rgba(29,44,72,0.7),transparent_70%)]" />
-          {/* Faint horizontal rule suggesting a road plane. */}
-          <div className="absolute bottom-[22%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
+          {/* Key light: a warm pool off the upper right, like a showroom
+              spot raking across the back wall. */}
+          <div className="absolute inset-0 bg-[radial-gradient(65%_75%_at_78%_8%,rgba(233,191,69,0.28),transparent_64%)]" />
+          {/* Fill: deep bronze behind the headline so the black never reads dead. */}
+          <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_12%_30%,rgba(138,107,26,0.35),transparent_68%)]" />
+          {/* Bounce off the floor, under the copy. */}
+          <div className="absolute inset-0 bg-[radial-gradient(110%_55%_at_45%_108%,rgba(195,154,43,0.22),transparent_62%)]" />
+          {/* Horizon filament across the back wall. */}
+          <div className="rule-gold absolute inset-x-0 bottom-[16%] opacity-50" />
         </>
       )}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/30" />
+      {/* Legibility scrim, kept light enough not to flatten the light above. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/15" />
+      {/* Soft vignette to settle the corners without crushing them. */}
+      <div className="absolute inset-0 bg-[radial-gradient(125%_100%_at_50%_45%,transparent_58%,rgba(7,6,5,0.7)_100%)]" />
       <div className="grain absolute inset-0 opacity-40" />
     </div>
   );
@@ -88,10 +95,10 @@ export function PageHero({
 }) {
   return (
     <section className={cn("relative isolate overflow-hidden pb-4 pt-28 sm:pt-32", className)}>
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_20%_0%,rgba(200,161,94,0.1),transparent_65%)]"
-      />
+      <div aria-hidden className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(85%_70%_at_18%_-10%,rgba(233,191,69,0.16),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(55%_60%_at_92%_0%,rgba(138,107,26,0.24),transparent_68%)]" />
+      </div>
       <Container>
         <div
           className={cn(

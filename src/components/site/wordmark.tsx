@@ -18,7 +18,7 @@ export function Wordmark({ className }: { className?: string }) {
       aria-hidden
     >
       <span className="font-display text-[1.6em] font-bold tracking-[-0.04em] text-cream">
-        N<span className="text-gold">X</span>L
+        N<span className="text-metal">X</span>L
       </span>
 
       <span className="h-[2.1em] w-px shrink-0 bg-line-strong" />

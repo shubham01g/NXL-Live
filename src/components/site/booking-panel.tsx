@@ -56,7 +56,7 @@ export function BookingPanel({ listing }: { listing: Listing }) {
   };
 
   return (
-    <div className="rounded-xl border border-line bg-surface-1/80 p-6 backdrop-blur">
+    <div className="edge-gold rounded-xl p-6 shadow-elev-2">
       <div className="flex items-end justify-between gap-4">
         <Price amount={rateFor(listing, unit)} suffix={unitSuffix(unit)} size="lg" />
         <span className="rounded-full border border-line px-3 py-1 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-muted">

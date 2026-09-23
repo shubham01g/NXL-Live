@@ -53,6 +53,22 @@ throwaway UI, every page reads through an async **repository interface**
 At M3 we implement that same interface against Supabase and swap the export in
 `lib/data/index.ts`. **No page or component changes.**
 
+### Gold is treated as a metal, not a colour
+
+Flat gold reads as mustard. Anything meant to look like gold is painted with a
+multi-stop ramp carrying a specular highlight, defined once in `globals.css`
+(`--metal-gold`, `--metal-gold-soft`, `--metal-edge`) and applied through four
+utilities:
+
+| Utility | Use |
+|---|---|
+| `text-metal` | Headline fragments and the wordmark's X. Clipped to the glyphs. |
+| `text-metal-soft` | Large numerals and prices — brighter ramp so it stays readable. |
+| `edge-gold` | Gradient hairline borders (booking panel, featured plan card). |
+| `metal-fill` | Primary buttons: brushed fill plus a sheen that sweeps on hover. |
+
+Reserve `text-metal` for accents. A paragraph in gradient gold reads cheap.
+
 ### Single source of truth
 
 `lib/domain/pricing.ts` and `lib/domain/loyalty.ts` own every number the

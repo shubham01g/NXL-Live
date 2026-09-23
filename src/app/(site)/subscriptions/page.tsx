@@ -82,8 +82,7 @@ export default async function SubscriptionsPage() {
                   as="article"
                   className={cn(
                     "relative flex flex-col p-8",
-                    plan.featured &&
-                      "border-gold/50 bg-gradient-to-br from-surface-2 to-ink shadow-glow-gold-lg",
+                    plan.featured && "edge-gold border-0 shadow-glow-gold-lg",
                   )}
                 >
                   {plan.featured ? (

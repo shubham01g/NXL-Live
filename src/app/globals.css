@@ -1,60 +1,57 @@
 @import "tailwindcss";
-@import "../styles/themes.css";
 
 /* ============================================================
-   NXL Design System — tokens
-   Brand: ink + gold, editorial luxury.
+   NXL Design System — Black & Metallic Gold
+   ============================================================
    Everything the UI uses is declared here. No ad-hoc values.
+
+   The gold is treated as a METAL, not a colour: flat gold reads
+   as mustard, so anything meant to look like gold is painted
+   with a multi-stop ramp carrying a specular highlight. Those
+   ramps live in the utilities at the bottom of this file.
    ============================================================ */
 
 @theme {
-  /* ---------- Color: ground & elevation ---------- */
-  --color-ink: #070b14;
-  --color-surface-1: #0b1120;
-  --color-surface-2: #111a2d;
-  --color-surface-3: #16223a;
-  --color-surface-4: #1d2c48;
+  /* ---------- Ground: warm blacks, so gold sits on them ---------- */
+  --color-ink: #070605;
+  --color-surface-1: #100e0b;
+  --color-surface-2: #181511;
+  --color-surface-3: #231e18;
+  --color-surface-4: #2f2820;
 
-  /* ---------- Color: brand gold ramp ---------- */
-  --color-gold-100: #f7ecd6;
-  --color-gold-200: #e7c98f;
-  --color-gold-300: #d9b473;
-  --color-gold: #c8a15e;
-  --color-gold-600: #a88347;
-  --color-gold-700: #7d6034;
-  --color-gold-800: #4a3a20;
+  /* ---------- Metallic gold ramp ---------- */
+  --color-gold-100: #fff8dd; /* specular highlight */
+  --color-gold-200: #f9e7a8; /* champagne */
+  --color-gold-300: #f2d370; /* light gold */
+  --color-gold: #e9bf45; /* core — bright metallic gold */
+  --color-gold-600: #c39a2b; /* shadowed gold */
+  --color-gold-700: #8a6b1a; /* deep bronze */
+  --color-gold-800: #4a380d; /* near-black bronze */
 
-  /* ---------- Color: text ---------- */
-  --color-cream: #f4f1ea;
-  --color-muted: #9aa2b4;
-  --color-muted-dim: #6f7789;
+  /* ---------- Text ---------- */
+  --color-cream: #f8f4ea;
+  --color-muted: #a99f8f;
+  --color-muted-dim: #7b7264;
 
-  /* ---------- Color: lines ---------- */
-  --color-line: rgba(255, 255, 255, 0.09);
-  --color-line-strong: rgba(255, 255, 255, 0.16);
+  /* ---------- Lines: gold-tinted, never plain grey ---------- */
+  --color-line: rgba(233, 191, 69, 0.16);
+  --color-line-strong: rgba(233, 191, 69, 0.34);
 
-  /* ---------- Color: semantic status (single unified set) ---------- */
-  --color-success: #37d67a;
-  --color-success-dim: #16391f;
-  --color-warning: #e5b45a;
-  --color-warning-dim: #3d2f14;
-  --color-danger: #ef5a6f;
-  --color-danger-dim: #3d161d;
-  --color-info: #6aa8ff;
-  --color-info-dim: #152540;
-
-  /* ---------- Color: loyalty tiers ---------- */
-  --color-tier-bronze: #cd7f32;
-  --color-tier-silver: #a8a9ad;
-  --color-tier-gold: #c8a15e;
-  --color-tier-platinum: #e5e4e2;
+  /* ---------- Semantic status ---------- */
+  --color-success: #46d98a;
+  --color-success-dim: #0c2e1d;
+  --color-warning: #ff9f43;
+  --color-warning-dim: #3a2409;
+  --color-danger: #ff5566;
+  --color-danger-dim: #3a1016;
+  --color-info: #7aa9e0;
+  --color-info-dim: #12233a;
 
   /* ---------- Typography ---------- */
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* Editorial display scale — tuned line-height + tracking per step */
   --text-display-1: 5.25rem;
   --text-display-1--line-height: 0.92;
   --text-display-1--letter-spacing: -0.035em;
@@ -75,7 +72,6 @@
   --text-display-4--letter-spacing: -0.016em;
   --text-display-4--font-weight: 600;
 
-  /* Label / eyebrow step */
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1.45;
   --text-2xs--letter-spacing: 0.28em;
@@ -89,11 +85,11 @@
   --radius-2xl: 2.25rem;
 
   /* ---------- Shadows ---------- */
-  --shadow-elev-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px -6px rgba(0, 0, 0, 0.5);
-  --shadow-elev-2: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
-  --shadow-elev-3: 0 24px 60px -30px rgba(0, 0, 0, 0.85);
-  --shadow-glow-gold: 0 10px 30px -12px rgba(200, 161, 94, 0.7);
-  --shadow-glow-gold-lg: 0 30px 80px -40px rgba(200, 161, 94, 0.55);
+  --shadow-elev-1: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 12px -6px rgba(0, 0, 0, 0.7);
+  --shadow-elev-2: 0 8px 24px -12px rgba(0, 0, 0, 0.85);
+  --shadow-elev-3: 0 24px 60px -30px rgba(0, 0, 0, 0.95);
+  --shadow-glow-gold: 0 8px 28px -10px rgba(233, 191, 69, 0.45);
+  --shadow-glow-gold-lg: 0 28px 80px -36px rgba(233, 191, 69, 0.5);
 
   /* ---------- Motion ---------- */
   --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
@@ -114,6 +110,39 @@
   --z-overlay: 80;
   --z-modal: 90;
   --z-toast: 100;
+
+  /* The metal ramps. One definition, reused by every gold surface. */
+  /* The darkest stops sit at the ends, which is where the first and last
+     glyphs of a headline land — so the floor has to stay bright enough to
+     read on black rather than bottoming out in bronze. */
+  --metal-gold: linear-gradient(
+    142deg,
+    #b98b22 0%,
+    #e6c356 15%,
+    #f7e49a 32%,
+    #fff8dd 46%,
+    #f0cf6a 59%,
+    #d3a733 77%,
+    #ab801f 100%
+  );
+  /* Brighter than --metal-gold across the whole ramp: numerals are read,
+     not admired, so the darkest stop still has to hold contrast on black. */
+  --metal-gold-soft: linear-gradient(
+    142deg,
+    #d9b23c 0%,
+    #f4e099 34%,
+    #fff8dd 50%,
+    #eec84f 70%,
+    #c9a23a 100%
+  );
+  --metal-edge: linear-gradient(
+    140deg,
+    rgba(233, 191, 69, 0.55) 0%,
+    rgba(233, 191, 69, 0.08) 38%,
+    rgba(233, 191, 69, 0.06) 62%,
+    rgba(242, 211, 112, 0.45) 100%
+  );
+
   color-scheme: dark;
 }
 
@@ -134,6 +163,11 @@
   from { background-position: -200% 0; }
   to   { background-position: 200% 0; }
 }
+/* Specular band that sweeps a metal surface on hover. */
+@keyframes sheen-sweep {
+  0%   { transform: translateX(-130%) skewX(-18deg); }
+  100% { transform: translateX(240%) skewX(-18deg); }
+}
 
 /* ============================================================
    Base
@@ -153,27 +187,25 @@ body {
 
 ::selection {
   background: var(--color-gold);
-  color: var(--color-ink);
+  color: #1a1206;
 }
 
-/* Focus: always visible, always gold. */
 :focus-visible {
   outline: 2px solid var(--color-gold);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 
-/* Scrollbars stay out of the way until you scroll. */
 * {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
 *:hover {
-  scrollbar-color: rgba(200, 161, 94, 0.35) transparent;
+  scrollbar-color: rgba(233, 191, 69, 0.4) transparent;
 }
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: transparent; border-radius: 999px; }
-*:hover::-webkit-scrollbar-thumb { background: rgba(200, 161, 94, 0.3); }
+*:hover::-webkit-scrollbar-thumb { background: rgba(233, 191, 69, 0.35); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -185,6 +217,99 @@ body {
 }
 
 /* ============================================================
+   Metal
+   ============================================================ */
+
+/**
+ * Gold type. Painted with the metal ramp and clipped to the glyphs,
+ * so the specular highlight runs through the letterforms.
+ * Reserve this for accent lines and headline fragments — a whole
+ * paragraph in gradient gold reads cheap.
+ */
+@utility text-metal {
+  background-image: var(--metal-gold);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/** Numerals and prices — a softer ramp that stays readable small. */
+@utility text-metal-soft {
+  background-image: var(--metal-gold-soft);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/**
+ * A gradient hairline border. Two backgrounds: the panel fill clipped
+ * to the padding box, the metal ramp clipped to the border box.
+ */
+@utility edge-gold {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--color-surface-1), var(--color-surface-1)),
+    var(--metal-edge);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/** Same, over the deepest ground. */
+@utility edge-gold-ink {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--color-ink), var(--color-ink)),
+    var(--metal-edge);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/** Brushed-metal fill for primary actions, with a hover sheen. */
+@utility metal-fill {
+  position: relative;
+  overflow: hidden;
+  background-image: var(--metal-gold);
+  color: #1a1206;
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    width: 42%;
+    transform: translateX(-130%) skewX(-18deg);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    animation: sheen-sweep 0.85s var(--ease-editorial);
+  }
+}
+
+/** A gold rule that fades at both ends. */
+@utility rule-gold {
+  height: 1px;
+  border: 0;
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgba(233, 191, 69, 0.55),
+    transparent
+  );
+}
+
+/* ============================================================
    Signature brand utilities
    ============================================================ */
 
@@ -193,16 +318,14 @@ body {
   font-optical-sizing: auto;
 }
 
-/* Fine film grain over hero imagery. */
 @utility grain {
   background-image: radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 3px 3px;
   pointer-events: none;
 }
 
-/* Gold underline that draws in on hover — used across nav and inline links. */
 @utility gold-underline {
-  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+  background-image: var(--metal-gold);
   background-repeat: no-repeat;
   background-position: 0 100%;
   background-size: 0% 1.5px;
@@ -213,7 +336,6 @@ body {
   }
 }
 
-/* 1px-gutter grid — the stat strip motif. */
 @utility hairline-grid {
   gap: 1px;
   background-color: var(--color-line);

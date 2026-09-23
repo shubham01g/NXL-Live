@@ -30,7 +30,7 @@ export default async function HomePage() {
         title={
           <>
             Your dream car.
-            <span className="block text-gold">By the hour.</span>
+            <span className="text-metal block">By the hour.</span>
           </>
         }
         lede={`You do not need a whole day to live the fantasy. Book a supercar for as little as an hour — concierge delivery, one flat rate card, and daily or weekly windows when you want more. Estates by the day, week or month.`}
@@ -250,7 +250,7 @@ export default async function HomePage() {
               ))}
               <div className="rounded-lg border border-gold/25 bg-gradient-to-br from-surface-2 to-ink p-6 sm:col-span-2">
                 <p className="font-mono text-2xs uppercase text-muted">Partner earnings</p>
-                <p className="mt-2.5 font-display text-3xl font-semibold text-cream">
+                <p className="text-metal mt-2.5 font-display text-3xl font-semibold">
                   Up to 12% per rental
                 </p>
                 <p className="mt-1.5 text-sm text-muted">

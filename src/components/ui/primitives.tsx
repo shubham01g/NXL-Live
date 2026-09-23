@@ -25,7 +25,10 @@ export function Eyebrow({
         className,
       )}
     >
-      <span aria-hidden className="h-px w-6 bg-gold/60" />
+      <span
+        aria-hidden
+        className="h-px w-6 bg-gradient-to-r from-gold-700 via-gold to-gold-200"
+      />
       {children}
     </span>
   );
@@ -149,9 +152,19 @@ export function Price({
     xl: "text-display-4",
   } as const;
 
+  // Headline figures are struck in metal; small ones stay flat so they
+  // remain crisp at size.
+  const isHeadline = size === "lg" || size === "xl";
+
   return (
     <span className={cn("inline-flex items-baseline gap-1.5", className)}>
-      <span className={cn("font-mono font-medium tabular-nums text-cream", sizes[size])}>
+      <span
+        className={cn(
+          "font-mono font-medium tabular-nums",
+          sizes[size],
+          isHeadline ? "text-metal-soft" : "text-cream",
+        )}
+      >
         {money(amount)}
       </span>
       {suffix ? <span className="text-xs text-muted">{suffix}</span> : null}
