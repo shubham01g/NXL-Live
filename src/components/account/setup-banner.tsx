@@ -29,10 +29,10 @@ export function SetupBanner({ member }: { member: MemberAccount }) {
           <Link
             key={task.id}
             href={task.href}
-            className="inline-flex items-center gap-1.5 rounded-full border border-warning/40 px-3.5 py-1.5 text-xs font-medium text-warning transition-colors hover:bg-warning/10"
+            className="inline-flex items-center gap-1.5 rounded-full border border-warning/40 px-4 py-2 text-sm font-medium text-warning transition-colors hover:bg-warning/10"
           >
             {task.action}
-            <ArrowRight aria-hidden width={12} height={12} />
+            <ArrowRight aria-hidden width={14} height={14} />
           </Link>
         ))}
       </div>

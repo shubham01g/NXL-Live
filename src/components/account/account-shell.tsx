@@ -37,7 +37,7 @@ export function AccountShell({
 
   if (session.status !== "signed-in") {
     return (
-      <Container className="pb-24 pt-28">
+      <Container className="pb-24 pt-8 lg:pt-10">
         <p className="sr-only" role="status">
           {session.status === "loading"
             ? "Loading your account"
@@ -45,7 +45,7 @@ export function AccountShell({
         </p>
         <div aria-hidden className="space-y-4">
           <div className="skeleton h-48 rounded-xl" />
-          <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+          <div className="grid gap-6 lg:grid-cols-[17rem_1fr]">
             <div className="skeleton h-80 rounded-xl" />
             <div className="skeleton h-80 rounded-xl" />
           </div>
@@ -57,18 +57,23 @@ export function AccountShell({
   const member = session.member;
 
   return (
-    <Container className="pb-24 pt-28">
-      <ProfileCard member={member} plans={plans} />
+    <Container className="pb-24 pt-8 lg:pt-10">
+      {/* On desktop the rail is its own full-height column, level with the
+          profile card, and pinned under the header — every section stays one
+          click away without scrolling back up. If a short viewport still can't
+          fit it, the rail scrolls inside itself rather than clipping. */}
+      <div className="grid gap-8 [grid-template-areas:'head'_'nav'_'main'] lg:grid-cols-[17rem_1fr] lg:gap-x-10 lg:[grid-template-areas:'nav_head'_'nav_main'] lg:grid-rows-[auto_1fr]">
+        <div className="min-w-0 [grid-area:head]">
+          <ProfileCard member={member} plans={plans} />
+          <div className="mt-4">
+            <SetupBanner member={member} />
+          </div>
+        </div>
 
-      <div className="mt-4">
-        <SetupBanner member={member} />
-      </div>
-
-      <div className="mt-8 grid gap-8 lg:grid-cols-[260px_1fr] lg:gap-10">
         {/* min-w-0: a grid item defaults to min-width:auto, which would let the
             mobile nav's horizontal scroller size the column to its full content
             width instead of clamping and scrolling inside it. */}
-        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+        <aside className="min-w-0 [grid-area:nav] lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto">
           <div className="hidden lg:block">
             <AccountNav member={member} />
           </div>
@@ -77,7 +82,7 @@ export function AccountShell({
           </div>
         </aside>
 
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 [grid-area:main]">{children}</div>
       </div>
     </Container>
   );

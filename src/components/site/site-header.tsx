@@ -12,7 +12,7 @@ import { useSession } from "@/lib/auth/use-session";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/layout";
 import { TierChip } from "@/components/account/tier-chip";
-import { Wordmark } from "./wordmark";
+import { Logo } from "./logo";
 
 /**
  * Primary navigation.
@@ -110,10 +110,10 @@ export function SiteHeader() {
           : "border-b border-transparent bg-transparent",
       )}
     >
-      <Container className="flex items-center justify-between gap-6 py-3.5">
+      <Container className="flex items-center justify-between gap-6 py-2">
         <div className="flex min-w-0 items-center gap-8">
           <Link href="/" aria-label={`${SITE.name} — home`} className="shrink-0">
-            <Wordmark className="h-8 w-auto" />
+            <Logo decorative priority className="h-12 w-auto sm:h-16" />
           </Link>
 
           <nav aria-label="Primary" className="hidden items-center gap-4 xl:flex">
@@ -123,7 +123,7 @@ export function SiteHeader() {
                 href={item.href}
                 aria-current={isActive(item.href) ? "page" : undefined}
                 className={cn(
-                  "gold-underline whitespace-nowrap pb-0.5 text-[0.8125rem] font-medium transition-colors",
+                  "gold-underline whitespace-nowrap pb-0.5 text-[0.8125rem] font-medium transition-colors 2xl:text-sm",
                   isActive(item.href) ? "text-gold" : "text-cream/75 hover:text-cream",
                 )}
               >

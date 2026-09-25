@@ -62,7 +62,7 @@ applied through these utilities:
 
 | Utility | Use |
 |---|---|
-| `text-metal` | Headline fragments and the wordmark's X. Clipped to the glyphs. |
+| `text-metal` | Headline fragments. Clipped to the glyphs. |
 | `text-metal-soft` | Numerals and prices — brighter ramp so it stays readable. |
 | `edge-gold` / `edge-gold-ink` | Gradient hairline borders, over surface-1 and over ink. |
 | `metal-fill` | Buttons: brushed fill plus a sheen that sweeps on hover. |
@@ -173,9 +173,11 @@ The phone number appears at `2xl`, where there is finally room for it.
    placeholder at the correct aspect ratio. The listing gallery shows the shot list
    we need per vehicle and estate. Dropping images into the fixtures requires no
    code change.
-2. **Logo** — the supplied `logo.png` is a navy raster wordmark, invisible on the
-   dark background. `components/site/wordmark.tsx` is a typographic stand-in; swap
-   it for an inverted SVG when available.
+2. **Logo** — the client badge is live everywhere (header, footer, favicon, iOS icon,
+   link previews, Organization schema). The supplied file was a JPEG with a
+   checkerboard painted in; `brand-src/nxl-logo-cut.png` is the cleaned master and
+   every size is generated from it. A vector (SVG) original would still be sharper,
+   especially at favicon size.
 3. **Contact details** — the prototype carried three conflicting sets. Current
    values live in `lib/domain/site.ts` and need confirming.
 4. **Fleet inventory** — fixtures carry 8 cars and 4 estates. Confirm the real list.

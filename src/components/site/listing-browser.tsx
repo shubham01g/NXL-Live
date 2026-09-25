@@ -77,7 +77,7 @@ export function ListingBrowser({ listings }: { listings: Listing[] }) {
 
   return (
     <>
-      <div className="sticky top-[68px] z-[var(--z-sticky)] border-y border-line bg-ink/85 backdrop-blur-xl">
+      <div className="sticky top-16 sm:top-20 z-[var(--z-sticky)] border-y border-line bg-ink/85 backdrop-blur-xl">
         <Container className="flex flex-col gap-4 py-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative lg:max-w-xs lg:flex-1">

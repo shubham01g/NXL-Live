@@ -18,9 +18,6 @@ import { cn } from "@/lib/utils/cn";
 import { money } from "@/lib/domain/format";
 import { cardLabel, setupTasks, isLowBalance } from "@/lib/domain/account";
 import type { MemberAccount } from "@/lib/domain/types";
-import { Avatar } from "./avatar";
-import { TierChip } from "./tier-chip";
-import { tierFor } from "@/lib/domain/loyalty";
 
 type Icon = ComponentType<{ width?: number; height?: number; className?: string }>;
 
@@ -104,19 +101,10 @@ const ELSEWHERE: { href: string; label: string; icon: Icon }[] = [
 
 export function AccountNav({ member }: { member: MemberAccount }) {
   const pathname = usePathname();
-  const tier = tierFor(member.points);
 
   return (
     <nav aria-label="Account" className="flex flex-col gap-2">
-      <div className="flex items-center gap-3 rounded-lg border border-line bg-surface-1/60 p-3">
-        <Avatar name={member.name} photo={member.photo} size="sm" />
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-cream">{member.name}</p>
-          <TierChip tier={tier} className="mt-1 border-0 bg-transparent px-0 py-0" />
-        </div>
-      </div>
-
-      <ul className="mt-2 flex flex-col gap-1">
+      <ul className="flex flex-col gap-1">
         {items(member).map((item) => {
           const Icon = item.icon;
           // Overview owns /account exactly; the rest own their subtree.
@@ -131,7 +119,7 @@ export function AccountNav({ member }: { member: MemberAccount }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors",
+                  "flex items-start gap-3 rounded-lg px-3.5 py-3 transition-colors",
                   active
                     ? "edge-gold"
                     : "border border-transparent hover:bg-surface-1/70",
@@ -139,14 +127,14 @@ export function AccountNav({ member }: { member: MemberAccount }) {
               >
                 <Icon
                   aria-hidden
-                  width={16}
-                  height={16}
+                  width={18}
+                  height={18}
                   className={cn("mt-0.5 shrink-0", active ? "text-gold" : "text-muted")}
                 />
                 <span className="min-w-0 flex-1">
                   <span
                     className={cn(
-                      "block truncate text-sm font-medium",
+                      "block truncate text-[0.9375rem] font-medium",
                       active ? "text-cream" : "text-cream/85",
                     )}
                   >
@@ -186,11 +174,11 @@ export function AccountNav({ member }: { member: MemberAccount }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[0.9375rem] transition-colors",
                   active ? "text-gold" : "text-cream/75 hover:text-gold",
                 )}
               >
-                <Icon aria-hidden width={15} height={15} className="shrink-0 text-gold" />
+                <Icon aria-hidden width={17} height={17} className="shrink-0 text-gold" />
                 {item.label}
               </Link>
             </li>

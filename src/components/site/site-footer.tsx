@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { SITE } from "@/lib/domain/site";
 import { Container } from "@/components/ui/layout";
-import { Wordmark } from "./wordmark";
+import { Logo } from "./logo";
 import { NewsletterForm } from "./newsletter-form";
 
 const COLUMNS = [
@@ -40,7 +40,7 @@ export function SiteFooter() {
       <div aria-hidden className="rule-gold absolute inset-x-0 top-0" />
       <Container className="grid gap-12 py-16 lg:grid-cols-[1.5fr_1fr_1fr_1.4fr]">
         <div>
-          <Wordmark className="h-8 w-auto" />
+          <Logo className="h-24 w-auto" />
           <p className="mt-6 max-w-xs text-sm leading-relaxed text-muted">
             Certified exotic cars and private estates, delivered across South Beach.
             Book by the hour or the month — transparent pricing, no surge, no surprises.

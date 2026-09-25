@@ -85,7 +85,7 @@ export function ProfileCard({
         <div className="flex shrink-0 gap-2">
           <Link
             href="/account/security"
-            className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-xs text-cream/85 transition-colors hover:border-gold/50 hover:text-gold"
+            className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-2.5 text-sm text-cream/85 transition-colors hover:border-gold/50 hover:text-gold"
           >
             <Settings aria-hidden width={14} height={14} />
             Settings
@@ -96,7 +96,7 @@ export function ProfileCard({
               signOut();
               router.push("/membership");
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-xs text-cream/85 transition-colors hover:border-danger/50 hover:text-danger"
+            className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-2.5 text-sm text-cream/85 transition-colors hover:border-danger/50 hover:text-danger"
           >
             <LogOut aria-hidden width={14} height={14} />
             Sign out

@@ -25,6 +25,7 @@ export function HomeSchema({
           name: SITE.name,
           alternateName: SITE.shortName,
           url: SITE.url,
+          logo: `${SITE.url}/brand/nxl-logo.png`,
           description: SITE.description,
           telephone: SITE.contact.phone,
           email: SITE.contact.email,

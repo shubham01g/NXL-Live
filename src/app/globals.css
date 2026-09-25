@@ -199,6 +199,17 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Scale the whole UI on wide screens. Every size in the app is rem-based, so
+   type, controls and spacing grow together and fill the wider container
+   instead of leaving a small layout floating in it. Percentages, not px, so
+   a visitor's own browser font-size setting still applies. */
+@media (min-width: 1440px) {
+  html { font-size: 112.5%; }
+}
+@media (min-width: 1680px) {
+  html { font-size: 118.75%; }
+}
+
 body {
   background-color: var(--color-ink);
   color: var(--color-cream);
