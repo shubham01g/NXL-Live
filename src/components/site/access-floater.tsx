@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils/cn";
 import { count } from "@/lib/domain/format";
 import { signOut, useSession } from "@/lib/auth/use-session";
 import { enterBackOffice, useStaff } from "@/lib/auth/staff-session";
+import { resetDemo } from "@/lib/data/demo-store";
+import { toast } from "@/components/ui/toast";
 import { ButtonLink } from "@/components/ui/button";
 import type { SiteStats } from "@/lib/data/repository";
 
@@ -25,7 +27,7 @@ import type { SiteStats } from "@/lib/data/repository";
  *    back office at /admin, which has its own layout.
  */
 
-type View = "user" | "member" | "partner" | "employee" | "master";
+type View = "user" | "member" | "partner" | "driver" | "employee" | "admin" | "master";
 
 interface ViewOption {
   view: View;
@@ -33,7 +35,7 @@ interface ViewOption {
   blurb: string;
   href: (signedIn: boolean) => string;
   /** Staff views sign into their demo account before navigating. */
-  staffRole?: "employee" | "master";
+  staffRole?: "employee" | "admin" | "master";
   badge?: string;
 }
 
@@ -53,8 +55,16 @@ const VIEWS: ViewOption[] = [
   {
     view: "partner",
     label: "Partner",
-    blurb: "Referral programme, earnings, and payout terms.",
-    href: () => "/partners",
+    blurb: "Referrals, earnings, links and payouts.",
+    href: () => "/partner",
+    badge: "Portal",
+  },
+  {
+    view: "driver",
+    label: "Driver",
+    blurb: "Delivery jobs, routes, inspections and GPS.",
+    href: () => "/driver",
+    badge: "Portal",
   },
   {
     view: "employee",
@@ -62,6 +72,14 @@ const VIEWS: ViewOption[] = [
     blurb: "Manage the fleet, availability, and reservations.",
     href: () => "/admin",
     staffRole: "employee",
+    badge: "Back office",
+  },
+  {
+    view: "admin",
+    label: "Admin",
+    blurb: "Operations plus customers, partners and team.",
+    href: () => "/admin",
+    staffRole: "admin",
     badge: "Back office",
   },
   {
@@ -86,16 +104,18 @@ export function AccessFloater({ stats }: { stats: SiteStats }) {
   // so the floater steps right of it. The sidebar only exists once a staff
   // view has been entered; the sign-in gate is full width.
   const inBackOffice = pathname.startsWith("/admin") && staff.status === "signed-in";
+  // The driver portal pins its primary action to the bottom of the screen.
+  const lifted = pathname.startsWith("/driver");
 
   const current: View = inBackOffice
-    ? staff.staff.role === "employee"
-      ? "employee"
-      : "master"
-    : pathname.startsWith("/partners")
+    ? staff.staff.role
+    : pathname.startsWith("/partner")
       ? "partner"
-      : pathname.startsWith("/account") || signedIn
-        ? "member"
-        : "user";
+      : pathname.startsWith("/driver")
+        ? "driver"
+        : pathname.startsWith("/account") || signedIn
+          ? "member"
+          : "user";
   const currentLabel = VIEWS.find((v) => v.view === current)?.label ?? "User";
 
   // Escape closes the panel.
@@ -124,7 +144,8 @@ export function AccessFloater({ stats }: { stats: SiteStats }) {
         aria-label={open ? "Close control panel" : `Open control panel — viewing as ${currentLabel}`}
         className={cn(
           // Above every menu and overlay: the floater is always reachable.
-          "fixed bottom-5 left-5 z-[var(--z-modal)] flex h-14 items-center gap-2.5 rounded-full",
+          "fixed left-5 z-[var(--z-modal)] flex h-14 items-center gap-2.5 rounded-full",
+          lifted ? "bottom-28" : "bottom-5",
           inBackOffice && "lg:left-[calc(17rem+1.25rem)]",
           "border border-gold/40 bg-ink/90 px-3 text-cream shadow-elev-3 backdrop-blur sm:pr-5",
           "transition-transform duration-300 ease-editorial hover:scale-[1.03]",
@@ -147,7 +168,8 @@ export function AccessFloater({ stats }: { stats: SiteStats }) {
           role="dialog"
           aria-label="Control panel"
           className={cn(
-            "fixed bottom-24 left-5 z-[var(--z-modal)] w-[min(92vw,340px)]",
+            "fixed left-5 z-[var(--z-modal)] w-[min(92vw,340px)]",
+            lifted ? "bottom-48" : "bottom-24",
             inBackOffice && "lg:left-[calc(17rem+1.25rem)]",
             "max-h-[calc(100dvh-8rem)] overflow-y-auto",
             "edge-gold animate-rise rounded-xl shadow-elev-3",
@@ -183,7 +205,7 @@ export function AccessFloater({ stats }: { stats: SiteStats }) {
             </div>
           </div>
 
-          <div className="bg-surface p-3">
+          <div className="bg-surface-1 p-3">
             <p className="px-2 pb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
               Switch view
             </p>
@@ -252,6 +274,20 @@ export function AccessFloater({ stats }: { stats: SiteStats }) {
                 Join / Sign in
               </ButtonLink>
             )}
+
+            <button
+              type="button"
+              onClick={() => {
+                resetDemo();
+                signOut();
+                toast("Demo data reset — every portal is back to its starting state.", "warning");
+                setOpen(false);
+                router.push("/");
+              }}
+              className="mt-3 w-full text-center text-[0.6875rem] text-muted-dim transition-colors hover:text-gold"
+            >
+              Reset demo data
+            </button>
           </div>
         </div>
       ) : null}

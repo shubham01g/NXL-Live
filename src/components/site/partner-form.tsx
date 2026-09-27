@@ -6,20 +6,18 @@ import { PARTNER_TYPES } from "@/lib/data/fixtures/catalog";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Card } from "@/components/ui/primitives";
-
-/** Referral code from the business name: six alphanumerics plus two digits. */
-function codeFrom(business: string): string {
-  const stem = business.replace(/[^a-z0-9]/gi, "").slice(0, 6).toUpperCase();
-  const suffix = Math.floor(10 + Math.random() * 90);
-  return `${stem || "PARTNER"}${suffix}`;
-}
+import type { Partner } from "@/lib/domain/types";
+import { PARTNERS } from "@/lib/data/fixtures/operations";
+import { C, logAudit, raiseAlert } from "@/lib/data/demo";
+import { create, newId, readCollection } from "@/lib/data/demo-store";
+import { codeFor, DEFAULT_COMMISSION } from "@/lib/data/partners";
 
 /**
  * Partner application.
  *
- * Submits locally for M1 — the partner record, referral code and commission
- * ledger are created server-side at M3/M4. The generated code below is a
- * preview of what the business will receive on approval.
+ * Creates a pending partner in the demo store, so it lands in the back
+ * office's "Applications awaiting review" list; approving it there makes the
+ * code live and opens the partner portal to it. M3 moves this to the API.
  */
 export function PartnerForm() {
   const [submitted, setSubmitted] = useState<{ business: string; code: string } | null>(
@@ -50,7 +48,7 @@ export function PartnerForm() {
             {submitted.code}
           </p>
           <p className="mt-3 text-xs text-muted">
-            Status: pending review · Commission: 12% per rental
+            Status: pending review · Commission from {DEFAULT_COMMISSION}% per rental
           </p>
         </div>
 
@@ -78,7 +76,27 @@ export function PartnerForm() {
         className="mt-7 space-y-5"
         onSubmit={(e) => {
           e.preventDefault();
-          setSubmitted({ business, code: codeFrom(business) });
+          const form = new FormData(e.currentTarget);
+          const taken = readCollection<Partner>(C.partners, PARTNERS).map((p) => p.code);
+          const code = codeFor(business, taken);
+          create<Partner>(C.partners, {
+            id: newId("ptn"),
+            business: business.trim(),
+            contact: String(form.get("contact") ?? "").trim(),
+            email: String(form.get("email") ?? "").trim(),
+            phone: String(form.get("phone") ?? "").trim(),
+            type: String(form.get("type") ?? ""),
+            status: "pending",
+            code,
+            commission: DEFAULT_COMMISSION,
+            referrals: 0,
+            earnings: 0,
+            paidOut: 0,
+            joinedAt: Date.now(),
+          });
+          raiseAlert("partner", "New partner application", `${business.trim()} applied to the partner programme.`);
+          logAudit(String(form.get("contact") ?? "Applicant"), "partner.applied", business.trim(), `Code ${code} reserved`);
+          setSubmitted({ business, code });
         }}
       >
         <Field label="Business name" htmlFor="partner-business" required>

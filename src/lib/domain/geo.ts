@@ -68,7 +68,14 @@ export function seed(text: string): number {
     h ^= text.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
-  return (h >>> 0) / 4294967295;
+  // Murmur3 finaliser: FNV alone barely moves the high bits for strings that
+  // differ only in their last character ("CODE#g1", "CODE#g2").
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
 }
 
 /**
