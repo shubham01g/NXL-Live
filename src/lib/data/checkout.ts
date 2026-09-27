@@ -7,6 +7,7 @@ import { durationMs, overlaps } from "@/lib/domain/pricing";
 import { geocode } from "@/lib/domain/geo";
 import { unitLabel } from "@/lib/domain/pricing";
 import { PROMOS, RESERVATIONS } from "./fixtures/operations";
+import { LISTINGS } from "./fixtures/listings";
 import { create, patch, readCollection } from "./demo-store";
 import { C, logAudit, nextReference, raiseAlert, scheduleReminders, toRental } from "./demo";
 import { updateMember } from "@/lib/auth/use-session";
@@ -45,7 +46,9 @@ export function clashes(listing: Listing, window: { start: number; end: number }
   const booked = readCollection<Reservation>(C.reservations, RESERVATIONS)
     .filter((r) => r.listingId === listing.id && r.status !== "cancelled" && r.status !== "completed")
     .map((r) => r.window);
-  return [...listing.bookedRanges, ...booked].filter((w) => overlaps(w, window));
+  // Dates blocked in the back office live on the store's copy of the listing.
+  const current = readCollection<Listing>(C.listings, LISTINGS).find((l) => l.id === listing.id) ?? listing;
+  return [...current.bookedRanges, ...booked].filter((w) => overlaps(w, window));
 }
 
 export function placeBooking(draft: BookingDraft, member: MemberAccount): Reservation {

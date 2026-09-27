@@ -5,14 +5,10 @@ import { ReservationsScreen } from "@/components/admin/screens/reservations";
 export const metadata: Metadata = { title: "Reservations" };
 
 export default async function AdminReservationsPage() {
-  const [initial, drivers] = await Promise.all([
+  const [initial, drivers, listings] = await Promise.all([
     repo.listReservations(),
     repo.listDrivers(),
+    repo.listListings(),
   ]);
-  return (
-    <ReservationsScreen
-      initial={initial}
-      drivers={drivers}
-    />
-  );
+  return <ReservationsScreen initial={initial} drivers={drivers} listings={listings} />;
 }

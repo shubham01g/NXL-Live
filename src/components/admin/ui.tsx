@@ -107,12 +107,15 @@ export function DataTable<T>({
   rowKey,
   empty = "Nothing matches.",
   caption,
+  onRowClick,
 }: {
   columns: Column<T>[];
   rows: T[];
   rowKey: (row: T) => string;
   empty?: string;
   caption: string;
+  /** Opens a detail view. Clicks on buttons, links and selects inside the row are ignored. */
+  onRowClick?: (row: T) => void;
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-surface-1/50">
@@ -141,7 +144,18 @@ export function DataTable<T>({
               rows.map((row) => (
                 <tr
                   key={rowKey(row)}
-                  className="border-b border-line transition-colors last:border-0 hover:bg-surface-2/40"
+                  onClick={
+                    onRowClick
+                      ? (e) => {
+                          if ((e.target as HTMLElement).closest("button,a,select,input,label")) return;
+                          onRowClick(row);
+                        }
+                      : undefined
+                  }
+                  className={cn(
+                    "border-b border-line transition-colors last:border-0 hover:bg-surface-2/40",
+                    onRowClick && "cursor-pointer",
+                  )}
                 >
                   {columns.map((c) => (
                     <td

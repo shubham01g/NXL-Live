@@ -6,6 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import type { Plan } from "@/lib/domain/types";
 import { Container } from "@/components/ui/layout";
 import { useSession } from "@/lib/auth/use-session";
+import { startSession } from "@/lib/auth/session-store";
+import { C } from "@/lib/data/demo";
+import { useCollection } from "@/lib/data/demo-store";
+import type { MemberAccount } from "@/lib/domain/types";
 import { AccountNav, AccountNavCompact } from "./account-nav";
 import { ProfileCard } from "./profile-card";
 import { SetupBanner } from "./setup-banner";
@@ -31,6 +35,17 @@ export function AccountShell({
   const session = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const registry = useCollection<MemberAccount>(C.members, []);
+
+  // The back office edits the registry copy (licence verified, credit
+  // adjusted). Adopt it so the member sees the change on their next render.
+  const current = session.status === "signed-in" ? session.member : null;
+  const stored = current ? registry.find((m) => m.id === current.id) : undefined;
+  useEffect(() => {
+    if (current && stored && stored !== current && JSON.stringify(stored) !== JSON.stringify(current)) {
+      startSession(stored);
+    }
+  }, [current, stored]);
 
   // Come back to the page they asked for once they have signed in.
   useEffect(() => {

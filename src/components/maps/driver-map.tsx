@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Radio } from "lucide-react";
 import { BASE } from "@/lib/domain/geo";
 import { initials } from "@/lib/domain/account";
@@ -42,6 +43,14 @@ export function DriverMap({
   const onDuty = drivers.filter((d) => d.status !== "off-duty");
   const colorOf = (d: Driver, i: number) => d.color ?? PIN_COLORS[i % PIN_COLORS.length];
   const fixes = onDuty.map((d) => driverPosition(d, reservations, now));
+
+  // Frame every driver (and their destinations) once the map is ready.
+  useEffect(() => {
+    if (!ctx) return;
+    const pts = [BASE, ...fixes.flatMap((f) => [f, ...(f.job ? [destinationFor(f.job)] : [])])];
+    ctx.map.fitBounds(ctx.L.latLngBounds(pts.map((p) => [p.lat, p.lng])).pad(0.15), { maxZoom: 13 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctx]);
 
   useLayer(
     ctx,

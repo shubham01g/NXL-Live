@@ -135,7 +135,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </header>
 
         <main id="main" className="min-w-0 flex-1 px-4 pb-32 pt-8 sm:px-6 lg:px-10 lg:pt-10">
-          {allowed ? children : <Locked label={section!.label} role={staff.role} />}
+          {allowed ? children : <Locked label={section!.label} role={staff.role} needs={section!.minRole} />}
         </main>
       </div>
     </div>
@@ -155,7 +155,7 @@ function Sidebar({ staff, pathname }: { staff: StaffMember; pathname: string }) 
         </Link>
         <div className="min-w-0">
           <p className="font-display text-base font-semibold leading-tight text-cream">
-            {staff.role === "employee" ? "Back Office" : "Master Control"}
+            {staff.role === "master" ? "Master Control" : "Back Office"}
           </p>
           <p className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">
             Operator portal
@@ -220,8 +220,8 @@ function Sidebar({ staff, pathname }: { staff: StaffMember; pathname: string }) 
 /* ------------------------------- access gate ------------------------------ */
 
 /**
- * Shown when nobody has entered the back office. At M2 the choice is the two
- * demo staff accounts; M3 replaces this card with the real staff sign-in.
+ * Shown when nobody has entered the back office. At M2 the choice is the
+ * three demo staff accounts; M3 replaces this card with the real staff sign-in.
  */
 function AccessGate() {
   const options = [
@@ -229,6 +229,11 @@ function AccessGate() {
       role: "employee" as const,
       title: "Employee",
       body: "Fleet, estates, reservations and driver dispatch — the day-to-day operation.",
+    },
+    {
+      role: "admin" as const,
+      title: "Admin",
+      body: "Operations plus customers, partners and the team — no revenue or system settings.",
     },
     {
       role: "master" as const,
@@ -239,7 +244,7 @@ function AccessGate() {
 
   return (
     <div className="grid min-h-dvh place-items-center px-4 py-16">
-      <div className="w-full max-w-xl text-center">
+      <div className="w-full max-w-3xl text-center">
         <Logo className="mx-auto h-16" />
         <Eyebrow className="mt-8 justify-center">Operator portal</Eyebrow>
         <h1 className="mt-4 font-display text-3xl font-semibold text-cream sm:text-4xl">
@@ -250,7 +255,7 @@ function AccessGate() {
           two-factor sign-in replace it when the database goes live.
         </p>
 
-        <div className="mt-8 grid gap-3 text-left sm:grid-cols-2">
+        <div className="mt-8 grid gap-3 text-left sm:grid-cols-3">
           {options.map((o) => (
             <button
               key={o.role}
@@ -280,21 +285,21 @@ function AccessGate() {
   );
 }
 
-function Locked({ label, role }: { label: string; role: StaffMember["role"] }) {
+function Locked({ label, role, needs }: { label: string; role: StaffMember["role"]; needs: StaffMember["role"] }) {
   return (
     <div className="mx-auto max-w-md py-20 text-center">
       <span className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-gold/40 text-gold">
         <Lock aria-hidden width={22} height={22} />
       </span>
       <h1 className="mt-6 font-display text-2xl font-semibold text-cream">
-        {label} is for Master Admin
+        {label} needs {STAFF_ROLE_LABEL[needs]} access
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted">
-        You are signed in as {STAFF_ROLE_LABEL[role]}. Switch to Master Admin from the access
-        panel in the bottom-left corner to open this section.
+        You are signed in as {STAFF_ROLE_LABEL[role]}. Switch roles from the access panel in the
+        bottom-left corner, or below.
       </p>
-      <Button variant="outline" className="mt-6" onClick={() => enterBackOffice("master")}>
-        Switch to Master Admin
+      <Button variant="outline" className="mt-6" onClick={() => enterBackOffice(needs)}>
+        Switch to {STAFF_ROLE_LABEL[needs]}
       </Button>
     </div>
   );

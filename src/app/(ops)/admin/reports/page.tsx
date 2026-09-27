@@ -5,12 +5,14 @@ import { ReportsScreen } from "@/components/admin/screens/revenue";
 export const metadata: Metadata = { title: "Reports" };
 
 export default async function AdminReportsPage() {
-  const [reservations, customers, payouts, purchases, audit] = await Promise.all([
+  const [reservations, customers, payouts, purchases, audit, partners, listings] = await Promise.all([
     repo.listReservations(),
     repo.listCustomers(),
     repo.listPayouts(),
     repo.listPlanPurchases(),
     repo.listAuditLog(),
+    repo.listPartners(),
+    repo.listListings(),
   ]);
   return (
     <ReportsScreen
@@ -19,6 +21,8 @@ export default async function AdminReportsPage() {
       payouts={payouts}
       purchases={purchases}
       audit={audit}
+      partners={partners}
+      listings={listings}
     />
   );
 }

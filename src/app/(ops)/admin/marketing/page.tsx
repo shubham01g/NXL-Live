@@ -5,5 +5,6 @@ import { MarketingScreen } from "@/components/admin/screens/growth";
 export const metadata: Metadata = { title: "Marketing" };
 
 export default async function AdminMarketingPage() {
-  return <MarketingScreen initial={await repo.listPromos()} />;
+  const [initial, partners] = await Promise.all([repo.listPromos(), repo.listPartners()]);
+  return <MarketingScreen initial={initial} partners={partners} />;
 }

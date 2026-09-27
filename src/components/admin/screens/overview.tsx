@@ -8,6 +8,9 @@ import { money, relativeTime } from "@/lib/domain/format";
 import type { Listing } from "@/lib/domain/types";
 import type { Driver, OpsAlert, Payout, Reservation, RevenueMonth } from "@/lib/domain/operations";
 import { useStaff } from "@/lib/auth/staff-session";
+import { C } from "@/lib/data/demo";
+import { useCollection } from "@/lib/data/demo-store";
+import { FleetMap } from "@/components/maps/fleet-map";
 import { PageHeader } from "../ui";
 import { Status } from "../status";
 
@@ -17,10 +20,10 @@ const time = (ms: number) =>
   new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(new Date(ms));
 
 export function OverviewScreen({
-  reservations,
+  reservations: baseReservations,
   listings,
-  drivers,
-  alerts,
+  drivers: baseDrivers,
+  alerts: baseAlerts,
   revenue,
   payouts,
 }: {
@@ -31,6 +34,9 @@ export function OverviewScreen({
   revenue: RevenueMonth[];
   payouts: Payout[];
 }) {
+  const reservations = useCollection<Reservation>(C.reservations, baseReservations);
+  const drivers = useCollection<Driver>(C.drivers, baseDrivers);
+  const alerts = useCollection<OpsAlert>(C.alerts, baseAlerts);
   const session = useStaff();
   const staff = session.status === "signed-in" ? session.staff : null;
   const isMaster = staff?.role === "master";
@@ -188,6 +194,18 @@ export function OverviewScreen({
           </Panel>
         </div>
       </div>
+
+      <Panel
+        title="Live fleet"
+        description="Cars on the road right now."
+        action={
+          <Link href="/admin/reservations" className="inline-flex items-center gap-1.5 text-sm text-gold hover:opacity-80">
+            Reservations <ArrowRight aria-hidden width={14} height={14} />
+          </Link>
+        }
+      >
+        <FleetMap reservations={reservations} compact height={300} />
+      </Panel>
 
       <Panel title="Fleet & estates" description="Operational state of every listing.">
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
