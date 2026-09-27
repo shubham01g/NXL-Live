@@ -140,7 +140,7 @@ export default async function SubscriptionsPage() {
                   </ul>
 
                   <ButtonLink
-                    href="/contact"
+                    href={`/account/wallet?plan=${plan.id}`}
                     variant={plan.featured ? "primary" : "outline"}
                     className="mt-8 w-full"
                   >

@@ -415,8 +415,13 @@ body {
    ============================================================ */
 
 .nxl-map .leaflet-container {
-  background: var(--color-surface-2);
+  background: #1b1b1f;
   font-family: var(--font-sans);
+}
+/* OSM's light tiles, inverted into a warm dark basemap. Only the tile pane is
+   filtered — markers, routes and popups keep their true colours. */
+.nxl-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.92) saturate(0.35) sepia(0.18);
 }
 .nxl-map .leaflet-control-zoom {
   border: 1px solid var(--color-line-strong) !important;

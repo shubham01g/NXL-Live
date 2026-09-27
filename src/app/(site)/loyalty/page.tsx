@@ -7,6 +7,7 @@ import { Container, Section, SectionHeading } from "@/components/ui/layout";
 import { Card, Eyebrow } from "@/components/ui/primitives";
 import { Accordion } from "@/components/ui/disclosure";
 import { PageHero } from "@/components/site/hero";
+import { LoyaltyStatus } from "@/components/site/loyalty-status";
 
 export const metadata: Metadata = {
   title: "Level Rewards",
@@ -93,6 +94,8 @@ export default function LoyaltyPage() {
           </>
         }
       />
+
+      <LoyaltyStatus />
 
       {/* ------------------------------ how it works ------------------------------ */}
       <Section>

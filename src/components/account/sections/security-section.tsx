@@ -1,15 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, KeyRound, Trash2 } from "lucide-react";
-import { shortDate } from "@/lib/domain/format";
+import { Camera, Trash2 } from "lucide-react";
 import { readProfilePhoto } from "@/lib/auth/photo";
 import { useMember, updateMember } from "@/lib/auth/use-session";
 import { Button } from "@/components/ui/button";
-import { Toggle } from "@/components/ui/controls";
 import { Field, Input } from "@/components/ui/field";
 import { Alert } from "@/components/ui/feedback";
-import { SectionHeader, Panel, DetailRow, SavedNote } from "../panel";
+import { SectionHeader, Panel, SavedNote } from "../panel";
+import { SecurityPanel } from "./security-panel";
 import { Avatar } from "../avatar";
 
 /**
@@ -185,60 +184,7 @@ export function SecuritySection() {
         </form>
       </Panel>
 
-      {/* -------------------------------- security -------------------------------- */}
-      <Panel
-        tone={member.security.mfaEnabled ? "gold" : "default"}
-        title="Password, MFA & OTP"
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-sm text-cream">Two-factor authentication</p>
-            <p className="mt-1 text-sm leading-relaxed text-muted">
-              {member.security.otpPhoneLast4
-                ? `A one-time code goes to the number ending ${member.security.otpPhoneLast4} on every sign-in from a new device.`
-                : "Add a phone number above and codes will be sent there."}
-            </p>
-          </div>
-          <Toggle
-            label="Two-factor authentication"
-            checked={member.security.mfaEnabled}
-            disabled={!member.security.otpPhoneLast4}
-            onChange={(next) =>
-              updateMember((current) => ({
-                ...current,
-                security: { ...current.security, mfaEnabled: next },
-              }))
-            }
-          />
-        </div>
-
-        <dl className="mt-6">
-          <DetailRow label="Password">
-            {member.security.passwordUpdatedAt
-              ? `Updated ${shortDate(member.security.passwordUpdatedAt)}`
-              : "Not set"}
-          </DetailRow>
-          <DetailRow label="OTP destination">
-            {member.security.otpPhoneLast4
-              ? `··· ${member.security.otpPhoneLast4}`
-              : "No number on file"}
-          </DetailRow>
-          <DetailRow label="Recovery codes">
-            {member.security.recoveryCodesRemaining > 0
-              ? `${member.security.recoveryCodesRemaining} remaining`
-              : "None generated"}
-          </DetailRow>
-        </dl>
-
-        <Alert tone="info" className="mt-5" title="Credentials arrive with the backend">
-          <span className="flex items-start gap-2">
-            <KeyRound aria-hidden width={13} height={13} className="mt-0.5 shrink-0" />
-            Passwords, real one-time codes and recovery codes are issued by the auth
-            service, which lands at the backend milestone. The preference you set here
-            carries over — nothing on this page is thrown away.
-          </span>
-        </Alert>
-      </Panel>
+      <SecurityPanel />
     </div>
   );
 }

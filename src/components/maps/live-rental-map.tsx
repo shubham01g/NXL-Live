@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { MapPin, Radio } from "lucide-react";
-import { BASE } from "@/lib/domain/geo";
+import { BASE, routeBetween } from "@/lib/domain/geo";
 import type { Reservation } from "@/lib/domain/operations";
 import {
   carPosition,
@@ -28,17 +28,21 @@ export function LiveRentalMap({ reservation: r, height = 280 }: { reservation: R
   const dest = destinationFor(r);
   const progress = rentalProgress(r, now);
 
+  // Before handover the only route that matters is depot → guest.
+  const plannedRoute = () => (live ? rentalRoute(r) : routeBetween(BASE, dest, `${r.id}:out`));
+
   useEffect(() => {
     if (!ctx) return;
-    const pts = rentalRoute(r);
+    const pts = plannedRoute();
     ctx.map.fitBounds(ctx.L.latLngBounds(pts.map((p) => [p.lat, p.lng])).pad(0.2), { maxZoom: 14 });
-  }, [ctx, r]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctx, r, live]);
 
   useLayer(
     ctx,
     (L, group) => {
       L.marker([BASE.lat, BASE.lng], { icon: basePin(L) }).bindPopup(popupHtml("NXL depot", [["Address", "1200 Ocean Drive"]])).addTo(group);
-      const planned = rentalRoute(r).map((p) => [p.lat, p.lng] as [number, number]);
+      const planned = plannedRoute().map((p) => [p.lat, p.lng] as [number, number]);
       L.polyline(planned, { color: "#c4a068", weight: 2, opacity: 0.55, dashArray: "6 8" }).addTo(group);
       if (r.deliveryAddress) {
         L.marker([dest.lat, dest.lng], { icon: dotPin(L, "#3f7fd0") })

@@ -9,11 +9,19 @@ import { useMember } from "@/lib/auth/use-session";
 import { ProgressBar, EmptyState } from "@/components/ui/feedback";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionHeader, Panel } from "../panel";
+import { useMemberBookings } from "@/lib/data/member-bookings";
+import { BookingCard } from "./bookings-section";
 
 export function OverviewSection() {
   const member = useMember();
   if (!member) return null;
 
+  return <Overview member={member} />;
+}
+
+function Overview({ member }: { member: NonNullable<ReturnType<typeof useMember>> }) {
+  const bookings = useMemberBookings(member);
+  const next = bookings.find((b) => ["pending", "confirmed", "checked_out", "active"].includes(b.status));
   const standing = standingFor(member);
   const remaining = creditsRemaining(member);
 
@@ -23,6 +31,19 @@ export function OverviewSection() {
         title="Overview"
         description="Where your points stand, what is left in the wallet, and everything you have driven."
       />
+
+      {next ? (
+        <Panel
+          title={next.status === "checked_out" || next.status === "active" ? "On your trip now" : "Your next trip"}
+          action={
+            <Link href="/account/bookings" className="text-sm text-gold hover:opacity-80">
+              All bookings
+            </Link>
+          }
+        >
+          <BookingCard r={next} />
+        </Panel>
+      ) : null}
 
       <div className="grid gap-6 sm:grid-cols-2">
         {/* ------------------------------- standing ------------------------------ */}
@@ -132,7 +153,7 @@ export function OverviewSection() {
           <ul className="divide-y divide-line">
             {member.rentals.map((rental) => {
               const Icon = rental.listingKind === "car" ? Car : Home;
-              const href = `/${rental.listingKind === "car" ? "cars" : "homes"}/${rental.listingSlug}`;
+              const href = `/account/bookings/${rental.id}`;
               return (
                 <li key={rental.id} className="flex flex-wrap items-center gap-4 py-4">
                   <Icon

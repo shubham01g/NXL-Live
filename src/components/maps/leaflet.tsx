@@ -10,16 +10,16 @@ import { BASE, type GeoPoint } from "@/lib/domain/geo";
  * Leaflet, loaded on demand.
  *
  * Leaflet touches `window` at import time, so it is imported inside an effect
- * and never during server rendering. Tiles are CARTO's dark basemap: no API
- * key, no account (the milestone plan keeps third-party accounts out until
- * M3+), and it sits in the carbon-and-gold palette instead of fighting it.
+ * and never during server rendering. Tiles are OpenStreetMap's standard
+ * layer — no API key, no account (the milestone plan keeps third-party
+ * accounts out until M3+) — inverted to a dark basemap in CSS so it sits in
+ * the carbon-and-gold palette. M5 can swap in a keyed provider here.
  */
 
 export type L = typeof Leaflet;
 
-const TILES = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 export interface MapContext {
   L: L;
@@ -49,7 +49,7 @@ export function useLeafletMap({
         attributionControl: true,
       }).setView([center.lat, center.lng], zoom);
       L.control.zoom({ position: "bottomright" }).addTo(map);
-      L.tileLayer(TILES, { attribution: ATTRIBUTION, subdomains: "abcd", maxZoom: 19 }).addTo(map);
+      L.tileLayer(TILES, { attribution: ATTRIBUTION, maxZoom: 19 }).addTo(map);
       setCtx({ L, map });
     });
     return () => {

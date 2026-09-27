@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { Plan } from "@/lib/domain/types";
 import { Container } from "@/components/ui/layout";
 import { useSession } from "@/lib/auth/use-session";
@@ -30,10 +30,14 @@ export function AccountShell({
 }) {
   const session = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
+  // Come back to the page they asked for once they have signed in.
   useEffect(() => {
-    if (session.status === "signed-out") router.replace("/membership");
-  }, [session.status, router]);
+    if (session.status === "signed-out") {
+      router.replace(`/membership?next=${encodeURIComponent(pathname + window.location.search)}`);
+    }
+  }, [session.status, router, pathname]);
 
   if (session.status !== "signed-in") {
     return (

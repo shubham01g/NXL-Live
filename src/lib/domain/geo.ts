@@ -109,13 +109,13 @@ export function geocode(address: string): { point: GeoPoint; place: Place | null
  */
 export function routeBetween(from: GeoPoint, to: GeoPoint, key: string, steps = 8): GeoPoint[] {
   const pts: GeoPoint[] = [];
-  const bow = (seed(key) - 0.5) * 0.35;
+  const bow = (seed(key) - 0.5) * 0.22;
   const dx = to.lng - from.lng;
   const dy = to.lat - from.lat;
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
     const arc = Math.sin(Math.PI * t) * bow;
-    const jitter = i === 0 || i === steps ? 0 : (seed(`${key}:${i}`) - 0.5) * 0.004;
+    const jitter = i === 0 || i === steps ? 0 : (seed(`${key}:${i}`) - 0.5) * 0.0012;
     pts.push({
       lat: from.lat + dy * t - dx * arc + jitter,
       lng: from.lng + dx * t + dy * arc + jitter,

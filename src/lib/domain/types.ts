@@ -189,6 +189,21 @@ export interface InsurancePolicy {
   expiresAt: number | null;
   /** Own policies are checked by the team before delivery. */
   verified: boolean;
+  /** Declarations page, uploaded by the member (data URL at M2). */
+  document?: string | null;
+}
+
+/** The member's driver's licence, reviewed by staff before a first delivery. */
+export interface DriverLicence {
+  number: string;
+  state: string;
+  /** ms epoch */
+  expiresAt: number;
+  front: string | null;
+  back: string | null;
+  status: "pending" | "verified" | "rejected";
+  note?: string | null;
+  submittedAt: number;
 }
 
 export interface BillingAddress {
@@ -270,6 +285,8 @@ export interface MemberAccount {
   insurance: InsurancePolicy | null;
   address: BillingAddress | null;
   security: SecuritySettings;
+  /** Optional so accounts created before licence upload existed still load. */
+  licence?: DriverLicence | null;
   rentals: MemberRental[];
   wallet: WalletEntry[];
 }

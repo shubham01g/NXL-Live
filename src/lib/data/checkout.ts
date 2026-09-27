@@ -103,9 +103,11 @@ export function placeBooking(draft: BookingDraft, member: MemberAccount): Reserv
       points: m.points - s.pointsUsed + s.pointsEarned,
       credits,
       rentals: [toRental(reservation, listing.slug), ...m.rentals],
+      // The ledger is oldest-first; the wallet panel reverses it for display.
       wallet:
         s.walletApplied > 0
           ? [
+              ...m.wallet,
               {
                 id: `w-${reservation.id}`,
                 kind: "spend",
@@ -114,7 +116,6 @@ export function placeBooking(draft: BookingDraft, member: MemberAccount): Reserv
                 balanceAfter: credits,
                 createdAt: Date.now(),
               },
-              ...m.wallet,
             ]
           : m.wallet,
     };

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Bell,
+  CalendarCheck,
   Car,
   CreditCard,
   Home,
@@ -52,6 +54,13 @@ function items(member: MemberAccount): NavItem[] {
       flag: null,
     },
     {
+      href: "/account/bookings",
+      label: "Bookings",
+      icon: CalendarCheck,
+      subtitle: "Trips, live tracking & receipts",
+      flag: null,
+    },
+    {
       href: "/account/wallet",
       label: "Drive Wallet",
       icon: Wallet,
@@ -82,6 +91,13 @@ function items(member: MemberAccount): NavItem[] {
       icon: MapPin,
       subtitle: member.address ? member.address.city : "Billing & delivery",
       flag: flagFor("address"),
+    },
+    {
+      href: "/account/notifications",
+      label: "Notifications",
+      icon: Bell,
+      subtitle: "Feed & delivery preferences",
+      flag: null,
     },
     {
       href: "/account/security",

@@ -19,3 +19,6 @@ export function useClock(tickMs = 60_000): number {
   }, [tickMs]);
   return now;
 }
+
+/** The current time, for event handlers (writes, timestamps) — never for render output. */
+export const timestamp = () => Date.now();

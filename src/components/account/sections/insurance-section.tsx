@@ -11,6 +11,7 @@ import { SegmentedControl } from "@/components/ui/controls";
 import { Field, Input } from "@/components/ui/field";
 import { Alert } from "@/components/ui/feedback";
 import { SectionHeader, Panel, DetailRow, SavedNote } from "../panel";
+import { LicencePanel, PolicyDocument } from "./licence-panel";
 
 /**
  * Insurance on file.
@@ -75,8 +76,8 @@ export function InsuranceSection() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Insurance"
-        description="Every rental needs coverage. Use your own policy at no extra cost, or take the NXL package by the day."
+        title="Insurance & licence"
+        description="Every rental needs coverage and a verified licence. Use your own policy at no extra cost, or take the NXL package by the day."
       />
 
       {policy ? (
@@ -136,6 +137,8 @@ export function InsuranceSection() {
               </>
             )}
           </dl>
+
+          {policy.kind === "own" ? <PolicyDocument /> : null}
 
           {saved ? <SavedNote>Insurance saved.</SavedNote> : null}
         </Panel>
@@ -208,6 +211,8 @@ export function InsuranceSection() {
           </form>
         </Panel>
       )}
+
+      <LicencePanel />
     </div>
   );
 }

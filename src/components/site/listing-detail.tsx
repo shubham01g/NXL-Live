@@ -7,6 +7,7 @@ import { Card, Eyebrow, RatingInline, Stars } from "@/components/ui/primitives";
 import { EmptyState, ProgressBar } from "@/components/ui/feedback";
 import { Gallery } from "./gallery";
 import { BookingPanel } from "./booking-panel";
+import { MemberReviews } from "./member-reviews";
 
 export function ListingDetail({
   listing,
@@ -107,7 +108,7 @@ export function ListingDetail({
             </section>
           ) : null}
 
-          <Reviews reviews={reviews} average={average} />
+          <Reviews reviews={reviews} average={average} listingId={listing.id} />
         </div>
 
         {/* ------------------------------ right column ------------------------------ */}
@@ -119,7 +120,7 @@ export function ListingDetail({
   );
 }
 
-function Reviews({ reviews, average }: { reviews: Review[]; average: number }) {
+function Reviews({ reviews, average, listingId }: { reviews: Review[]; average: number; listingId: string }) {
   const distribution = [5, 4, 3, 2, 1].map((star) => ({
     star,
     count: reviews.filter((r) => Math.round(r.rating) === star).length,
@@ -197,12 +198,9 @@ function Reviews({ reviews, average }: { reviews: Review[]; average: number }) {
             ))}
           </ul>
 
-          <p className="mt-6 text-xs text-muted-dim">
-            Reviews are left by members after a completed rental. Member sign-in and
-            review submission arrive with the account experience.
-          </p>
         </>
       )}
+      <MemberReviews listingId={listingId} />
     </Section>
   );
 }
