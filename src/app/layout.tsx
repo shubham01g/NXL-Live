@@ -3,6 +3,8 @@ import { Fraunces, Manrope, Geist_Mono } from "next/font/google";
 import { SITE } from "@/lib/domain/site";
 import { repo } from "@/lib/data";
 import { AccessFloater } from "@/components/site/access-floater";
+import { ReferralCapture } from "@/components/site/referral-capture";
+import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -66,6 +68,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         {/* Mounted here, not per section, so it is on every page — public
             site, back office and the 404 alike. */}
         <AccessFloater stats={stats} />
+        <Toaster />
+        <ReferralCapture />
       </body>
     </html>
   );

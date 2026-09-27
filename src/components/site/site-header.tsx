@@ -7,12 +7,14 @@ import { Bell, Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { SITE } from "@/lib/domain/site";
 import { tierFor } from "@/lib/domain/loyalty";
-import { notificationsFor } from "@/lib/domain/account";
+import type { Listing } from "@/lib/domain/types";
 import { useSession } from "@/lib/auth/use-session";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/layout";
 import { TierChip } from "@/components/account/tier-chip";
 import { Logo } from "./logo";
+import { NotificationPanel, useFeed } from "./notification-center";
+import { QuickReserve } from "./quick-reserve";
 
 /**
  * Primary navigation.
@@ -38,23 +40,24 @@ const NAV = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export function SiteHeader() {
+export function SiteHeader({ listings }: { listings: Listing[] }) {
   const pathname = usePathname();
   const session = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
+  const [reserveOpen, setReserveOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
 
   const member = session.status === "signed-in" ? session.member : null;
 
   /**
-   * The badge counts the same list the panel renders, both derived from the
-   * account. There is no stored counter that could drift, and a signed-out
-   * visitor has nothing to be notified about — so no badge, rather than the
-   * prototype's hard-coded "1".
+   * The badge counts unread items in the same feed the panel renders — account
+   * tasks plus booking notices. A signed-out visitor has nothing to be
+   * notified about, so no badge, rather than the prototype's hard-coded "1".
    */
-  const notifications = member ? notificationsFor(member) : [];
+  const feed = useFeed(member);
+  const notifications = feed.filter((i) => !i.read);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -168,9 +171,9 @@ export function SiteHeader() {
             </Link>
           )}
 
-          <ButtonLink href="/cars" size="sm" className="px-5 py-2.5">
+          <Button size="sm" className="px-5 py-2.5" onClick={() => setReserveOpen(true)}>
             Reserve
-          </ButtonLink>
+          </Button>
         </div>
 
         <button
@@ -258,9 +261,15 @@ export function SiteHeader() {
                 </Button>
               </div>
 
-              <ButtonLink href="/cars" onClick={() => setOpen(false)} className="w-full">
-                Reserve a car
-              </ButtonLink>
+              <Button
+                onClick={() => {
+                  setOpen(false);
+                  setReserveOpen(true);
+                }}
+                className="w-full"
+              >
+                Reserve
+              </Button>
 
               <a
                 href={SITE.contact.phoneHref}
@@ -281,73 +290,11 @@ export function SiteHeader() {
           aria-label="Notifications"
           className="absolute right-4 top-full z-[var(--z-float)] mt-2 w-[min(92vw,22rem)] animate-rise sm:right-6 lg:right-8"
         >
-          <div className="edge-gold rounded-lg p-5 shadow-elev-3">
-            <div className="flex items-start justify-between gap-4">
-              <p className="font-display text-base font-semibold text-cream">
-                Notifications
-              </p>
-              <button
-                type="button"
-                onClick={() => setBellOpen(false)}
-                aria-label="Close"
-                className="-mr-1 -mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted transition-colors hover:text-gold"
-              >
-                <X width={14} height={14} />
-              </button>
-            </div>
-
-            {!member ? (
-              <>
-                <p className="mt-2 text-sm leading-relaxed text-muted">
-                  Booking confirmations, delivery updates and low-balance alerts appear
-                  here once you have an account.
-                </p>
-                <ButtonLink
-                  href="/membership"
-                  variant="outline"
-                  size="sm"
-                  className="mt-4 w-full"
-                  onClick={() => setBellOpen(false)}
-                >
-                  Join / Sign in
-                </ButtonLink>
-              </>
-            ) : notifications.length === 0 ? (
-              <p className="mt-2 text-sm leading-relaxed text-muted">
-                You are all set — nothing needs your attention.
-              </p>
-            ) : (
-              <ul className="mt-3 divide-y divide-line">
-                {notifications.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setBellOpen(false)}
-                      className="flex gap-3 py-3 transition-opacity hover:opacity-80"
-                    >
-                      <span
-                        aria-hidden
-                        className={cn(
-                          "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                          item.tone === "warning" ? "bg-warning" : "bg-info",
-                        )}
-                      />
-                      <span className="min-w-0">
-                        <span className="block text-sm font-medium text-cream">
-                          {item.title}
-                        </span>
-                        <span className="mt-0.5 block text-xs leading-relaxed text-muted">
-                          {item.body}
-                        </span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <NotificationPanel member={member} onClose={() => setBellOpen(false)} />
         </div>
       ) : null}
+
+      <QuickReserve listings={listings} open={reserveOpen} onClose={() => setReserveOpen(false)} />
     </header>
   );
 }

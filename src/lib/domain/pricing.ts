@@ -139,7 +139,7 @@ export interface QuoteInput {
 
 /**
  * Build the full price breakdown. This is what the listing page renders and
- * what M2's checkout will submit, so the customer and the invoice agree.
+ * what checkout submits, so the customer and the invoice agree.
  */
 export function quote(input: QuoteInput): Quote {
   const {
@@ -225,4 +225,134 @@ export function quote(input: QuoteInput): Quote {
     depositDue: listing.deposit || PRICING.defaultDeposit,
     pointsEarned: pointsFor(dueNow, memberPoints, enrolled),
   };
+}
+
+/* ------------------------------ adjustments ------------------------------- */
+
+/** The subset of a promo code pricing needs — keeps this module free of the ops types. */
+export interface PromoRule {
+  code: string;
+  type: "percent" | "flat" | "free-delivery" | "free-insurance";
+  value: number;
+  appliesTo: "all" | "cars" | "homes";
+  status: "active" | "scheduled" | "expired" | "paused";
+  expiresAt: number | null;
+  uses: number;
+  maxUses: number | null;
+  minSpend?: Money;
+  description: string;
+}
+
+export type PromoCheck = { ok: true; promo: PromoRule } | { ok: false; error: string };
+
+/** Validate a code against a booking, with a reason when it does not apply. */
+export function checkPromo(
+  raw: string,
+  promos: PromoRule[],
+  listing: Listing,
+  subtotal: Money,
+  now = Date.now(),
+): PromoCheck {
+  const code = raw.trim().toUpperCase();
+  if (!code) return { ok: false, error: "Enter a code." };
+  const promo = promos.find((p) => p.code === code);
+  if (!promo) return { ok: false, error: "That code isn't recognised." };
+  if (promo.status === "paused") return { ok: false, error: "That code is paused right now." };
+  if (promo.status === "scheduled") return { ok: false, error: "That code isn't live yet." };
+  if (promo.status === "expired" || (promo.expiresAt !== null && promo.expiresAt < now)) {
+    return { ok: false, error: "That code has expired." };
+  }
+  if (promo.maxUses !== null && promo.uses >= promo.maxUses) return { ok: false, error: "That code has been fully redeemed." };
+  if (promo.appliesTo === "cars" && listing.kind !== "car") return { ok: false, error: "That code is for car rentals only." };
+  if (promo.appliesTo === "homes" && listing.kind !== "home") return { ok: false, error: "That code is for estate stays only." };
+  if (promo.minSpend && subtotal < promo.minSpend) {
+    return { ok: false, error: `That code needs a booking of $${promo.minSpend.toLocaleString()} or more.` };
+  }
+  return { ok: true, promo };
+}
+
+export interface Settlement {
+  /** The quote's lines plus any discount lines. */
+  lineItems: QuoteLineItem[];
+  /** Total after promo and points — the booking's value. */
+  total: Money;
+  promoDiscount: Money;
+  pointsUsed: number;
+  pointsValue: Money;
+  walletApplied: Money;
+  /** What the card is charged today. */
+  cardCharge: Money;
+  pointsEarned: number;
+}
+
+/**
+ * Apply a promo, a points redemption and drive credit to a quote, in that
+ * order — the order the prototype's Loyalty page promised ("stacks with
+ * promo codes"). Credits and points never create a negative balance.
+ */
+export function settle(
+  q: Quote,
+  opts: {
+    promo?: PromoRule | null;
+    redeemPoints?: boolean;
+    memberPoints?: number;
+    enrolled?: boolean;
+    walletCredits?: Money;
+    useWallet?: boolean;
+  },
+): Settlement {
+  const lines = [...q.lineItems];
+  const charge = (key: string) => lines.find((l) => l.key === key && l.kind === "charge")?.amount ?? 0;
+  let total = q.dueNow;
+
+  let promoDiscount = 0;
+  const promo = opts.promo;
+  if (promo) {
+    if (promo.type === "percent") promoDiscount = Math.round((charge("rental") * promo.value) / 100);
+    else if (promo.type === "flat") promoDiscount = Math.min(promo.value, total);
+    else if (promo.type === "free-delivery") promoDiscount = charge("delivery") + charge("pickup");
+    else if (promo.type === "free-insurance") promoDiscount = charge("insurance");
+    promoDiscount = Math.min(promoDiscount, total);
+    if (promoDiscount > 0) {
+      lines.push({ key: "promo", label: `Promo ${promo.code}`, amount: -promoDiscount, kind: "credit" });
+      total -= promoDiscount;
+    }
+  }
+
+  let pointsUsed = 0;
+  let pointsValue = 0;
+  if (opts.redeemPoints && opts.memberPoints) {
+    const dollars = Math.min(redeemableDollars(opts.memberPoints), total);
+    if (dollars > 0) {
+      pointsValue = dollars;
+      pointsUsed = dollars * 100;
+      lines.push({ key: "points", label: `Level Rewards · ${pointsUsed.toLocaleString()} pts`, amount: -dollars, kind: "credit" });
+      total -= dollars;
+    }
+  }
+
+  const walletApplied = opts.useWallet ? Math.min(opts.walletCredits ?? 0, total) : 0;
+
+  return {
+    lineItems: lines,
+    total,
+    promoDiscount,
+    pointsUsed,
+    pointsValue,
+    walletApplied,
+    cardCharge: total - walletApplied,
+    pointsEarned: pointsFor(total, opts.memberPoints ?? 0, opts.enrolled ?? false),
+  };
+}
+
+/** Whole dollars a points balance is worth at checkout (100 pts = $1, 500 minimum). */
+function redeemableDollars(points: number): number {
+  if (points < 500) return 0;
+  return Math.floor(points / 100);
+}
+
+/* ------------------------------ availability ------------------------------ */
+
+export function overlaps(a: { start: number; end: number }, b: { start: number; end: number }) {
+  return a.start < b.end && b.start < a.end;
 }

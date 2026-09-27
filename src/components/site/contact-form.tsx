@@ -19,9 +19,9 @@ const TOPICS = [
 /**
  * Concierge contact form.
  *
- * Listing pages hand off here with the vehicle and window in the query string,
- * so the message arrives pre-written. At M2 the Reserve action goes straight
- * to checkout instead and this returns to being a general enquiry form.
+ * A general enquiry form. Listings that are in service hand off here as a
+ * waitlist request, with the vehicle and window in the query string, so the
+ * message arrives pre-written; everything bookable goes to /checkout.
  */
 export function ContactForm() {
   const params = useSearchParams();

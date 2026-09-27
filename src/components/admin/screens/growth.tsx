@@ -31,6 +31,7 @@ const PROMO_TYPE_LABEL: Record<PromoType, string> = {
   percent: "% off",
   flat: "$ off",
   "free-delivery": "Free delivery",
+  "free-insurance": "Free NXL coverage",
 };
 
 const promoValue = (p: Promo) =>

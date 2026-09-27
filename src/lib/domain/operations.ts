@@ -1,4 +1,14 @@
-import type { Booking, DateRange, Money, Partner, TierName } from "./types";
+import type {
+  BillingAddress,
+  Booking,
+  DateRange,
+  InsurancePolicy,
+  Money,
+  Partner,
+  PaymentCard,
+  TierName,
+} from "./types";
+import type { GeoPoint } from "./geo";
 
 /**
  * Back-office domain: what the Employee and Master Admin consoles read.
@@ -48,12 +58,66 @@ export interface StaffMember {
 
 export type BookingChannel = "web" | "concierge" | "partner" | "walk-in";
 
+/** Where a delivery job stands, from the driver's side. */
+export type DriverJobStatus = "assigned" | "en_route" | "picked_up" | "delivered";
+
+export const DRIVER_JOB_STEPS: DriverJobStatus[] = ["assigned", "en_route", "picked_up", "delivered"];
+
+export type FuelLevel = "E" | "1/4" | "1/2" | "3/4" | "F";
+export type Condition = "clean" | "minor" | "major";
+
+/** A walk-around, captured by the driver at pickup and delivery, or staff at return. */
+export interface Inspection {
+  id: string;
+  stage: "pickup" | "delivery" | "return";
+  at: number;
+  by: string;
+  mileage: number | null;
+  fuel: FuelLevel | null;
+  exterior: Condition;
+  interior: Condition;
+  damage: string | null;
+  checklist: Record<string, boolean>;
+  /** Data URLs at M2 (downscaled); storage URLs at M3. */
+  photos: string[];
+  notes: string | null;
+}
+
+export interface CarPosition extends GeoPoint {
+  at: number;
+  source: "driver" | "renter";
+}
+
+/** Deposit settlement recorded when a booking is closed out. */
+export interface Closeout {
+  at: number;
+  by: string;
+  damageCharge: Money;
+  cleaningFee: Money;
+  notes: string | null;
+  refunded: Money;
+}
+
 /** A booking as the back office sees it: who brought it and who delivers it. */
 export interface Reservation extends Booking {
   channel: BookingChannel;
   partnerCode: string | null;
   driverId: string | null;
   deliveryAddress: string | null;
+  /* The fields below arrive with checkout and dispatch at M2; older fixture
+     rows simply do not carry them. */
+  deliveryPoint?: GeoPoint | null;
+  pickupAddress?: string | null;
+  pickupPoint?: GeoPoint | null;
+  driverJob?: DriverJobStatus | null;
+  inspections?: Inspection[];
+  carPosition?: CarPosition | null;
+  payment?: { method: "card" | "wallet" | "cash" | "split"; last4: string | null } | null;
+  walletApplied?: Money;
+  pointsRedeemed?: number;
+  promoCode?: string | null;
+  notes?: string | null;
+  closeout?: Closeout | null;
 }
 
 /* --------------------------------- drivers -------------------------------- */
@@ -70,6 +134,19 @@ export interface Driver {
   zone: string;
   rating: number;
   deliveries: number;
+  /* Portal and dispatch fields. Optional so a roster row can be added with
+     just a name and phone, as the admin form does. */
+  username?: string;
+  /** Demo only — M3 moves driver credentials to real auth. */
+  password?: string;
+  vehicle?: string;
+  /** Map pin colour. */
+  color?: string;
+  licenseFront?: string | null;
+  licenseBack?: string | null;
+  licenseExpiry?: number | null;
+  licenseNote?: string | null;
+  position?: (GeoPoint & { at: number }) | null;
 }
 
 /* -------------------------------- customers ------------------------------- */
@@ -87,6 +164,16 @@ export interface Customer {
   joinedAt: number;
   enrolled: boolean;
   flagged: boolean;
+  /* Detail-drawer fields. Optional: the list only needs the ones above. */
+  channel?: "web" | "walk-in" | "referral" | "concierge";
+  referredBy?: string | null;
+  notes?: string | null;
+  mfaEnabled?: boolean;
+  card?: PaymentCard | null;
+  insurance?: InsurancePolicy | null;
+  address?: BillingAddress | null;
+  license?: { number: string; state: string; expiresAt: number; verified: boolean } | null;
+  suspended?: boolean;
 }
 
 /* ------------------------------ credit plans ------------------------------ */
@@ -176,7 +263,7 @@ export function fillMergeTags(text: string): string {
 
 /* --------------------------------- marketing ------------------------------- */
 
-export type PromoType = "percent" | "flat" | "free-delivery";
+export type PromoType = "percent" | "flat" | "free-delivery" | "free-insurance";
 export type PromoStatus = "active" | "scheduled" | "expired" | "paused";
 
 export interface Promo {
@@ -190,6 +277,8 @@ export interface Promo {
   maxUses: number | null;
   expiresAt: number | null;
   status: PromoStatus;
+  /** Smallest booking the code applies to. */
+  minSpend?: Money;
 }
 
 /* ----------------------------------- seo ---------------------------------- */
@@ -240,4 +329,66 @@ export interface PlatformSettings {
   pointsPerDollar: number;
   hourlyBookings: boolean;
   maintenanceMode: boolean;
+}
+
+/* -------------------------------- partners -------------------------------- */
+
+export type ReferralStatus = "pending" | "cleared" | "paid";
+
+/** One referred booking in a partner's ledger. */
+export interface PartnerReferral {
+  id: string;
+  partnerCode: string;
+  guest: string;
+  reference: string;
+  listingName: string;
+  at: number;
+  amount: Money;
+  commission: Money;
+  status: ReferralStatus;
+}
+
+/* ------------------------------ notifications ------------------------------ */
+
+export type NotificationKind = "confirmation" | "reminder" | "pickup" | "return" | "update" | "system" | "promo";
+
+/**
+ * A member-facing notification. `at` may be in the future — reminders are
+ * written when the booking is made and surface once their time arrives, which
+ * is exactly how the M5 scheduler will send them.
+ */
+export interface MemberNotice {
+  id: string;
+  email: string;
+  kind: NotificationKind;
+  title: string;
+  body: string;
+  at: number;
+  read: boolean;
+  href?: string;
+  media?: { url: string; type: "image" | "video" } | null;
+}
+
+/** A broadcast sent from the Notifications console. */
+export interface Broadcast {
+  id: string;
+  at: number;
+  by: string;
+  audience: string;
+  recipients: number;
+  channels: ("push" | "email" | "sms")[];
+  title: string;
+  body: string;
+  media?: { url: string; type: "image" | "video" } | null;
+}
+
+/** Outbound message log. Nothing is sent until M5 — rows are marked "queued". */
+export interface MessageLogEntry {
+  id: string;
+  at: number;
+  to: string;
+  channel: "email" | "sms" | "push";
+  subject: string;
+  template: string;
+  status: "queued" | "sent" | "failed";
 }

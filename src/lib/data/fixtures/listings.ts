@@ -4,8 +4,10 @@ import type { CarListing, HomeListing } from "@/lib/domain/types";
  * Fleet and estate fixtures.
  *
  * The fleet is the client's own four cars, photographed outside the South
- * Beach storefront; their images live under `public/fleet/<slug>/`. Homes
- * still render the branded placeholder until estate photography arrives.
+ * Beach storefront; their images live under `public/fleet/<slug>/`. Estate
+ * photography comes from the client's Figma Make prototype (Unsplash, free for
+ * commercial use) and lives under `public/estates/<slug>/` until the client
+ * supplies shots of the real properties.
  */
 
 const DAY = 86_400_000;
@@ -14,6 +16,10 @@ const fromNow = (days: number) => Date.now() + days * DAY;
 /** `/fleet/<slug>/01.webp` … `/fleet/<slug>/NN.webp`, in shot order. */
 const fleetGallery = (slug: string, count: number) =>
   Array.from({ length: count }, (_, i) => `/fleet/${slug}/${String(i + 1).padStart(2, "0")}.webp`);
+
+/** `/estates/<slug>/01.webp` … `04.webp` — exterior first, then interiors. */
+const estateGallery = (slug: string) =>
+  Array.from({ length: 4 }, (_, i) => `/estates/${slug}/${String(i + 1).padStart(2, "0")}.webp`);
 
 export const CARS: CarListing[] = [
   {
@@ -153,8 +159,8 @@ export const HOMES: HomeListing[] = [
       "Two hundred feet of private beachfront, a ninety-foot infinity pool, and a motor court that comfortably holds the entire fleet. Villa Serena is where our members bring the cars home — six suites, a chef's kitchen, and nothing between the terrace and the Atlantic.",
     rates: { day: 4500, week: 27000, month: 95000 },
     deposit: 1500,
-    photo: null,
-    gallery: [],
+    photo: "/estates/villa-serena-oceanfront-estate/cover.webp",
+    gallery: estateGallery("villa-serena-oceanfront-estate"),
     video: null,
     featured: true,
     bookedRanges: [],
@@ -185,8 +191,8 @@ export const HOMES: HomeListing[] = [
       "The top two floors of an Ocean Drive landmark, with a wraparound terrace that reads the whole coastline from South Pointe to Bal Harbour. Floor-to-ceiling glass on every wall, private elevator entry, and a rooftop plunge pool that is worth the booking on its own.",
     rates: { day: 3200, week: 19500, month: 68000 },
     deposit: 1500,
-    photo: null,
-    gallery: [],
+    photo: "/estates/the-vantage-ocean-drive-penthouse/cover.webp",
+    gallery: estateGallery("the-vantage-ocean-drive-penthouse"),
     video: null,
     featured: true,
     bookedRanges: [],
@@ -216,8 +222,8 @@ export const HOMES: HomeListing[] = [
       "A glass-and-travertine retreat on the Venetian Islands with its own dock, moments from both South Beach and downtown. Built around a central courtyard pool, it is the quietest address we list — and the easiest to get everywhere from.",
     rates: { day: 2800, week: 16800, month: 59000 },
     deposit: 1500,
-    photo: null,
-    gallery: [],
+    photo: "/estates/mirage-house-waterfront-retreat/cover.webp",
+    gallery: estateGallery("mirage-house-waterfront-retreat"),
     video: null,
     featured: false,
     bookedRanges: [{ start: fromNow(2), end: fromNow(9) }],
@@ -246,8 +252,8 @@ export const HOMES: HomeListing[] = [
       "North Bay Road, west-facing, which means the sunset lands in the living room every evening. Five suites over three levels, a bayfront pool deck, and a garage that was designed around a collection rather than a commute.",
     rates: { day: 3800, week: 22800, month: 79000 },
     deposit: 1500,
-    photo: null,
-    gallery: [],
+    photo: "/estates/still-water-bayfront-modern/cover.webp",
+    gallery: estateGallery("still-water-bayfront-modern"),
     video: null,
     featured: false,
     bookedRanges: [],

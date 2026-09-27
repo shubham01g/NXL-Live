@@ -8,6 +8,7 @@ import type {
   MessageTemplate,
   OpsAlert,
   Partner,
+  PartnerReferral,
   Payout,
   PlanPurchase,
   PlatformSettings,
@@ -18,6 +19,7 @@ import type {
   StaffMember,
 } from "@/lib/domain/operations";
 import { SITE } from "@/lib/domain/site";
+import { geocode, seed } from "@/lib/domain/geo";
 import { LISTINGS } from "./listings";
 
 /**
@@ -36,11 +38,11 @@ const at = (days: number, hours = 0) => now + days * DAY + hours * HOUR;
 /* ---------------------------------- drivers -------------------------------- */
 
 export const DRIVERS: Driver[] = [
-  { id: "drv-1", name: "Marcus Hale", phone: "+1 (305) 555-0141", status: "on-delivery", license: "verified", zone: "South Beach", rating: 4.98, deliveries: 312 },
-  { id: "drv-2", name: "Elena Soto", phone: "+1 (305) 555-0172", status: "available", license: "verified", zone: "Brickell", rating: 4.95, deliveries: 204 },
-  { id: "drv-3", name: "Jordan Pike", phone: "+1 (305) 555-0118", status: "available", license: "verified", zone: "Wynwood", rating: 4.9, deliveries: 147 },
-  { id: "drv-4", name: "Andre Laurent", phone: "+1 (305) 555-0190", status: "off-duty", license: "pending", zone: "Coral Gables", rating: 4.87, deliveries: 88 },
-  { id: "drv-5", name: "Priya Nair", phone: "+1 (305) 555-0163", status: "available", license: "expired", zone: "Miami Airport", rating: 4.93, deliveries: 61 },
+  { id: "drv-1", name: "Marcus Hale", phone: "+1 (305) 555-0141", status: "on-delivery", license: "verified", zone: "South Beach", rating: 4.98, deliveries: 312, username: "marcushale", password: "nxl2024", vehicle: "Chase car · Tesla Model Y", color: "#c4a068", licenseExpiry: at(420) },
+  { id: "drv-2", name: "Elena Soto", phone: "+1 (305) 555-0172", status: "available", license: "verified", zone: "Brickell", rating: 4.95, deliveries: 204, username: "elenasoto", password: "nxl2024", vehicle: "Chase car · Audi Q5", color: "#3f7fd0", licenseExpiry: at(610) },
+  { id: "drv-3", name: "Jordan Pike", phone: "+1 (305) 555-0118", status: "available", license: "verified", zone: "Wynwood", rating: 4.9, deliveries: 147, username: "jordanpike", password: "nxl2024", vehicle: "Scooter · folding e-bike", color: "#46d98a", licenseExpiry: at(290) },
+  { id: "drv-4", name: "Andre Laurent", phone: "+1 (305) 555-0190", status: "off-duty", license: "pending", zone: "Coral Gables", rating: 4.87, deliveries: 88, username: "andrelaurent", password: "nxl2024", vehicle: "Chase car · BMW X3", color: "#c0508a", licenseExpiry: at(200) },
+  { id: "drv-5", name: "Priya Nair", phone: "+1 (305) 555-0163", status: "available", license: "expired", zone: "Miami Airport", rating: 4.93, deliveries: 61, username: "priyanair", password: "nxl2024", vehicle: "Chase car · Lexus RX", color: "#ff9f43", licenseExpiry: at(-6), licenseNote: "Expired last week. Upload the renewed card to go back on the roster." },
 ];
 
 /* -------------------------------- reservations ------------------------------ */
@@ -59,6 +61,7 @@ function reservation(input: {
   partnerCode?: string;
   driverId?: string;
   delivery?: string;
+  job?: Reservation["driverJob"];
 }): Reservation {
   const listing = LISTINGS.find((l) => l.id === input.listingId)!;
   const rate = listing.rates[input.unit] ?? 0;
@@ -102,29 +105,40 @@ function reservation(input: {
     partnerCode: input.partnerCode ?? null,
     driverId: input.driverId ?? null,
     deliveryAddress: input.delivery ?? null,
+    deliveryPoint: input.delivery ? geocode(input.delivery).point : null,
+    driverJob: input.driverId ? (input.job ?? "assigned") : null,
+    payment: { method: "card", last4: String(4000 + input.n * 37).slice(-4) },
   };
 }
 
 export const RESERVATIONS: Reservation[] = [
   reservation({ n: 17, listingId: "car-rolls-cullinan", guest: "Alex Rivera", email: "alex@example.com", unit: "hour", qty: 6, startDays: 0, startHour: 2, status: "confirmed", channel: "web", driverId: "drv-2", delivery: "Faena Hotel, 3201 Collins Ave" }),
-  reservation({ n: 16, listingId: "car-range-rover-autobiography", guest: "Sofia Marchetti", email: "sofia.m@example.com", unit: "day", qty: 2, startDays: 0, startHour: 5, status: "confirmed", channel: "partner", partnerCode: "FAENA12" }),
-  reservation({ n: 15, listingId: "car-cadillac-escalade-iq", guest: "Darnell Brooks", email: "dbrooks@example.com", unit: "day", qty: 1, startDays: -1, status: "checked_out", channel: "concierge", driverId: "drv-1", delivery: "1 Hotel South Beach" }),
+  reservation({ n: 16, listingId: "car-range-rover-autobiography", guest: "Sofia Marchetti", email: "sofia.m@example.com", unit: "day", qty: 2, startDays: 0, startHour: 5, status: "confirmed", channel: "partner", partnerCode: "FAENA12", delivery: "Faena Hotel, 3201 Collins Ave" }),
+  reservation({ n: 15, listingId: "car-cadillac-escalade-iq", guest: "Darnell Brooks", email: "dbrooks@example.com", unit: "day", qty: 1, startDays: -1, status: "checked_out", channel: "concierge", driverId: "drv-1", delivery: "1 Hotel South Beach", job: "delivered" }),
   reservation({ n: 14, listingId: "home-villa-serena", guest: "The Whitmore Group", email: "events@whitmore.example.com", unit: "week", qty: 1, startDays: -3, status: "active", channel: "partner", partnerCode: "LUXEVT" }),
-  reservation({ n: 18, listingId: "car-bentley-bentayga", guest: "Hannah Cole", email: "hcole@example.com", unit: "day", qty: 3, startDays: 1, status: "pending", channel: "web" }),
+  reservation({ n: 22, listingId: "car-bentley-bentayga", guest: "Victor Almeida", email: "v.almeida@example.com", unit: "hour", qty: 8, startDays: 0, startHour: -3, status: "checked_out", channel: "web", delivery: "Fontainebleau", driverId: "drv-2", job: "delivered" }),
+  reservation({ n: 18, listingId: "car-bentley-bentayga", guest: "Hannah Cole", email: "hcole@example.com", unit: "day", qty: 3, startDays: 1, status: "pending", channel: "web", delivery: "Brickell City Centre" }),
   reservation({ n: 19, listingId: "home-the-vantage", guest: "Kenji Watanabe", email: "kenji.w@example.com", unit: "day", qty: 4, startDays: 2, status: "confirmed", channel: "web" }),
-  reservation({ n: 20, listingId: "car-rolls-cullinan", guest: "Isabella Duarte", email: "isa.duarte@example.com", unit: "day", qty: 1, startDays: 3, status: "pending", channel: "concierge" }),
+  reservation({ n: 20, listingId: "car-rolls-cullinan", guest: "Isabella Duarte", email: "isa.duarte@example.com", unit: "day", qty: 1, startDays: 3, status: "pending", channel: "concierge", delivery: "Opa-locka Executive Airport", driverId: "drv-3" }),
   reservation({ n: 21, listingId: "home-mirage-house", guest: "Omar Haddad", email: "ohaddad@example.com", unit: "week", qty: 2, startDays: 6, status: "confirmed", channel: "partner", partnerCode: "SKYJET" }),
-  reservation({ n: 13, listingId: "car-cadillac-escalade-iq", guest: "Chloe Bennett", email: "chloe.b@example.com", unit: "hour", qty: 4, startDays: -2, status: "completed", channel: "web", driverId: "drv-3" }),
+  reservation({ n: 13, listingId: "car-cadillac-escalade-iq", guest: "Chloe Bennett", email: "chloe.b@example.com", unit: "hour", qty: 4, startDays: -2, status: "completed", channel: "web", driverId: "drv-3", job: "delivered" }),
   reservation({ n: 12, listingId: "home-still-water", guest: "Lucas Moreau", email: "lmoreau@example.com", unit: "day", qty: 3, startDays: -9, status: "completed", channel: "web" }),
   reservation({ n: 11, listingId: "car-range-rover-autobiography", guest: "Ava Thompson", email: "ava.t@example.com", unit: "week", qty: 1, startDays: -12, status: "completed", channel: "walk-in" }),
   reservation({ n: 10, listingId: "car-bentley-bentayga", guest: "Mateo Alvarez", email: "mateo.a@example.com", unit: "day", qty: 2, startDays: -5, status: "cancelled", channel: "web" }),
-  reservation({ n: 9, listingId: "car-rolls-cullinan", guest: "Grace Kim", email: "grace.kim@example.com", unit: "day", qty: 2, startDays: -16, status: "completed", channel: "partner", partnerCode: "FAENA12", driverId: "drv-1" }),
+  reservation({ n: 9, listingId: "car-rolls-cullinan", guest: "Grace Kim", email: "grace.kim@example.com", unit: "day", qty: 2, startDays: -16, status: "completed", channel: "partner", partnerCode: "FAENA12", driverId: "drv-1", job: "delivered" }),
 ];
 
 /* --------------------------------- customers -------------------------------- */
 
 export const CUSTOMERS: Customer[] = [
-  { id: "cus-1", name: "Alex Rivera", email: "alex@example.com", phone: "+1 (305) 555-0101", tier: "Gold", points: 2480, credits: 640, rentals: 11, lifetimeSpend: 18_420, joinedAt: at(-410), enrolled: true, flagged: false },
+  {
+    id: "cus-1", name: "Alex Rivera", email: "alex@example.com", phone: "+1 (305) 555-0101", tier: "Gold", points: 2480, credits: 640, rentals: 11, lifetimeSpend: 18_420, joinedAt: at(-410), enrolled: true, flagged: false,
+    channel: "web", referredBy: null, notes: "Prefers the Cullinan. Deliver to the Faena valet stand.", mfaEnabled: false,
+    card: { id: "card-alex", brand: "visa", last4: "4242", expMonth: 8, expYear: 2029, holder: "Alex Rivera", isDefault: true },
+    insurance: { kind: "own", carrier: "Chubb", policyNumber: "CH-88213-FL", expiresAt: at(210), verified: false },
+    address: { line1: "1500 Bay Rd", line2: "Apt 1204", city: "Miami Beach", state: "FL", zip: "33139", country: "US" },
+    license: { number: "R163-221-84-117-0", state: "FL", expiresAt: at(900), verified: true },
+  },
   { id: "cus-2", name: "Sofia Marchetti", email: "sofia.m@example.com", phone: "+1 (786) 555-0144", tier: "Platinum", points: 9120, credits: 12_400, rentals: 26, lifetimeSpend: 61_300, joinedAt: at(-620), enrolled: true, flagged: false },
   { id: "cus-3", name: "Darnell Brooks", email: "dbrooks@example.com", phone: "+1 (305) 555-0188", tier: "Silver", points: 1180, credits: 0, rentals: 5, lifetimeSpend: 7_950, joinedAt: at(-190), enrolled: true, flagged: false },
   { id: "cus-4", name: "Hannah Cole", email: "hcole@example.com", phone: "+1 (954) 555-0120", tier: "Bronze", points: 240, credits: 0, rentals: 1, lifetimeSpend: 1_199, joinedAt: at(-21), enrolled: true, flagged: false },
@@ -149,6 +163,36 @@ export const PARTNERS: Partner[] = [
   { id: "ptn-6", business: "Coral Key Realty", contact: "Nadia Brooks", email: "nadia@coralkey.example.com", phone: "+1 (786) 555-0391", type: "Real Estate Brokerage", status: "pending", code: "CORALKEY", commission: 8, referrals: 0, earnings: 0, paidOut: 0, joinedAt: at(-3) },
   { id: "ptn-7", business: "Atlas Corporate Travel", contact: "Evan Price", email: "evan@atlastravel.example.com", phone: "+1 (212) 555-0302", type: "Corporate Travel", status: "pending", code: "ATLASCT", commission: 8, referrals: 0, earnings: 0, paidOut: 0, joinedAt: at(-1) },
 ];
+
+/* ----------------------------- partner referrals ---------------------------- */
+
+const GUESTS = ["J. Laurent", "M. Okafor", "S. Petrov", "A. Chen", "R. Delgado", "K. Suzuki", "L. Ferreira", "D. Walsh", "N. Haddad", "P. Rossi", "T. Nguyen", "E. Novak"];
+const REFERRED_LISTINGS = ["Rolls-Royce Cullinan Black Badge", "Villa Serena", "Range Rover Autobiography", "The Vantage", "Bentley Bentayga", "Cadillac Escalade IQ", "Mirage House", "Still Water"];
+
+/**
+ * Each partner's referral ledger: the most recent dozen referred bookings,
+ * generated deterministically from the partner code so the portal and the
+ * payouts console always agree. Newest rows are still clearing; older rows
+ * are cleared or already paid out.
+ */
+export function referralsFor(partner: Partner): PartnerReferral[] {
+  const rows = Math.min(12, partner.referrals);
+  return Array.from({ length: rows }, (_, i) => {
+    const r = seed(`${partner.code}:${i}`);
+    const amount = Math.round((900 + r * 8200) / 10) * 10;
+    return {
+      id: `ref-${partner.code}-${i}`,
+      partnerCode: partner.code,
+      guest: GUESTS[Math.floor(seed(`${partner.code}#g${i}`) * GUESTS.length)],
+      reference: `NXL-${23000 + Math.floor(r * 1700)}`,
+      listingName: REFERRED_LISTINGS[Math.floor(seed(`${partner.code}#l${i}`) * REFERRED_LISTINGS.length)],
+      at: at(-(2 + i * 6 + Math.floor(r * 4))),
+      amount,
+      commission: Math.round((amount * partner.commission) / 100),
+      status: i < 2 ? "pending" : i < 5 ? "cleared" : "paid",
+    } satisfies PartnerReferral;
+  });
+}
 
 /* ---------------------------------- payouts -------------------------------- */
 
@@ -180,6 +224,7 @@ export const STAFF: StaffMember[] = [
 /** Who the demo consoles sign in as. */
 export const DEMO_STAFF = {
   employee: STAFF[2],
+  admin: STAFF[1],
   master: STAFF[0],
 } as const;
 

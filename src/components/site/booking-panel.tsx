@@ -15,16 +15,17 @@ import {
 } from "@/lib/domain/pricing";
 import type { InsuranceChoice, Listing } from "@/lib/domain/types";
 import { SegmentedControl, Stepper, Toggle } from "@/components/ui/controls";
+import { useMember } from "@/lib/auth/use-session";
 import { buttonStyles } from "@/components/ui/button";
 import { Price } from "@/components/ui/primitives";
 
 /**
  * Live price calculator for a listing.
  *
- * M1 renders the complete breakdown; the Reserve action hands off to the
- * concierge request form. M2 replaces that handoff with the real checkout,
- * submitting this exact quote — which is why the maths lives in
- * lib/domain/pricing rather than in this component.
+ * Reserve carries every selection into /checkout, which re-prices with the
+ * same `quote()` — so the figure here is the figure there. A signed-in
+ * member sees their own tier applied: complimentary delivery from Silver and
+ * the points this booking would earn.
  */
 export function BookingPanel({ listing }: { listing: Listing }) {
   const units = unitsFor(listing);
@@ -34,8 +35,10 @@ export function BookingPanel({ listing }: { listing: Listing }) {
   const [delivery, setDelivery] = useState(false);
   const [pickup, setPickup] = useState(false);
 
+  const member = useMember();
   const isCar = listing.kind === "car";
-  const unavailable = listing.status !== "available";
+  const inService = listing.status === "maintenance";
+  const bookedNow = listing.status === "booked";
 
   const q = useMemo(
     () =>
@@ -46,14 +49,25 @@ export function BookingPanel({ listing }: { listing: Listing }) {
         insurance,
         delivery: isCar ? { enabled: delivery } : undefined,
         pickup: isCar ? { enabled: pickup } : undefined,
+        memberPoints: member?.points ?? 0,
+        enrolled: member?.enrolled ?? false,
       }),
-    [listing, unit, qty, insurance, delivery, pickup, isCar],
+    [listing, unit, qty, insurance, delivery, pickup, isCar, member?.points, member?.enrolled],
   );
 
-  const requestHref = {
-    pathname: "/contact",
-    query: { listing: listing.slug, kind: listing.kind, unit, qty: String(qty) },
-  };
+  const href = inService
+    ? { pathname: "/contact", query: { listing: listing.slug, kind: listing.kind, unit, qty: String(qty) } }
+    : {
+        pathname: "/checkout",
+        query: {
+          listing: listing.slug,
+          unit,
+          qty: String(qty),
+          insurance,
+          ...(delivery ? { delivery: "1" } : {}),
+          ...(pickup ? { pickup: "1" } : {}),
+        },
+      };
 
   return (
     <div className="edge-gold rounded-xl p-6 shadow-elev-2">
@@ -159,6 +173,13 @@ export function BookingPanel({ listing }: { listing: Listing }) {
           </dd>
         </div>
 
+        {member?.enrolled && q.pointsEarned > 0 ? (
+          <div className="flex items-baseline justify-between gap-4">
+            <dt className="text-muted">Level Rewards you&apos;ll earn</dt>
+            <dd className="shrink-0 font-mono tabular-nums text-gold">+{q.pointsEarned.toLocaleString()} pts</dd>
+          </div>
+        ) : null}
+
         <div className="flex items-baseline justify-between gap-4">
           <dt className="text-muted">Refundable deposit</dt>
           <dd className="shrink-0 font-mono tabular-nums text-cream/70">
@@ -173,22 +194,21 @@ export function BookingPanel({ listing }: { listing: Listing }) {
         return.
       </p>
 
-      {unavailable ? (
+      {inService || bookedNow ? (
         <div className="mt-5 rounded-md border border-danger/25 bg-danger-dim/40 p-4 text-center">
           <p className="text-sm font-semibold text-danger">
-            {listing.status === "booked" ? "Currently booked" : "In service"}
+            {bookedNow ? "Booked right now" : "In service"}
           </p>
           <p className="mt-1 text-xs text-cream/70">
-            Ask the concierge and we will tell you the moment it frees up.
+            {bookedNow
+              ? "Pick later dates at checkout — availability is checked live."
+              : "Ask the concierge and we will tell you the moment it is back."}
           </p>
         </div>
       ) : null}
 
-      <Link
-        href={requestHref}
-        className={cn(buttonStyles({ size: "lg" }), "mt-5 w-full")}
-      >
-        {unavailable ? "Join the waitlist" : "Reserve now"}
+      <Link href={href} className={cn(buttonStyles({ size: "lg" }), "mt-5 w-full")}>
+        {inService ? "Join the waitlist" : bookedNow ? "Choose other dates" : "Reserve now"}
         <ArrowRight aria-hidden width={16} height={16} />
       </Link>
 

@@ -4,11 +4,13 @@ import { Container } from "@/components/ui/layout";
 import { Eyebrow } from "@/components/ui/primitives";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { repo } from "@/lib/data";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const listings = await repo.listListings();
   return (
     <>
-      <SiteHeader />
+      <SiteHeader listings={listings} />
       <main className="flex flex-1 items-center py-32">
         <Container className="text-center">
           <Eyebrow className="justify-center">Error 404</Eyebrow>

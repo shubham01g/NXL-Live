@@ -407,3 +407,145 @@ body {
   background-size: 200% 100%;
   animation: var(--animate-shimmer);
 }
+
+/* ============================================================
+   Maps — Leaflet chrome restyled for the carbon & gold palette.
+   Leaflet ships a light theme; everything it draws outside the
+   tiles (controls, popups, attribution) is re-skinned here.
+   ============================================================ */
+
+.nxl-map .leaflet-container {
+  background: var(--color-surface-2);
+  font-family: var(--font-sans);
+}
+.nxl-map .leaflet-control-zoom {
+  border: 1px solid var(--color-line-strong) !important;
+  border-radius: 0.625rem;
+  overflow: hidden;
+}
+.nxl-map .leaflet-control-zoom a {
+  background: rgba(8, 8, 10, 0.85) !important;
+  color: var(--color-cream) !important;
+  border-bottom-color: var(--color-line) !important;
+}
+.nxl-map .leaflet-control-zoom a:hover {
+  color: var(--color-gold) !important;
+}
+.nxl-map .leaflet-control-attribution {
+  background: rgba(8, 8, 10, 0.7) !important;
+  color: var(--color-muted-dim) !important;
+  font-size: 9px;
+}
+.nxl-map .leaflet-control-attribution a {
+  color: var(--color-muted) !important;
+}
+.nxl-map .leaflet-popup-content-wrapper,
+.nxl-map .leaflet-popup-tip {
+  background: var(--color-surface-2);
+  color: var(--color-cream);
+  border: 1px solid var(--color-line-strong);
+  box-shadow: var(--shadow-elev-3);
+}
+.nxl-map .leaflet-popup-content {
+  margin: 12px 14px;
+}
+.nxl-map .leaflet-popup-close-button {
+  color: var(--color-muted) !important;
+}
+
+.nxl-pin {
+  background: none;
+  border: 0;
+}
+.nxl-pin-base {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background-image: var(--metal-gold);
+  color: #140f08;
+  font: 700 10px/1 var(--font-display);
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 0 3px rgba(8, 8, 10, 0.85), 0 6px 18px -6px rgba(196, 160, 104, 0.8);
+}
+.nxl-pin-car,
+.nxl-pin-person {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--pin);
+  color: #0b0b0d;
+  box-shadow: 0 0 0 2px rgba(8, 8, 10, 0.9), 0 6px 16px -4px rgba(0, 0, 0, 0.8);
+}
+.nxl-pin-person {
+  width: 32px;
+  height: 32px;
+  font: 700 11px/1 var(--font-sans);
+}
+.nxl-pin-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--pin);
+  animation: var(--animate-halo);
+  z-index: -1;
+}
+.nxl-pin-live {
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--color-success);
+  box-shadow: 0 0 0 2px #08080a;
+}
+.nxl-pin-dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--pin);
+  box-shadow: 0 0 0 3px rgba(8, 8, 10, 0.85);
+}
+.nxl-pin-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 4px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(8, 8, 10, 0.85);
+  color: var(--color-cream);
+  font: 600 10px/1.3 var(--font-sans);
+  border: 1px solid var(--color-line);
+}
+.nxl-popup {
+  min-width: 170px;
+  font-size: 12px;
+}
+.nxl-popup p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 3px 0 !important;
+}
+.nxl-popup span {
+  color: var(--color-muted);
+}
+.nxl-popup b {
+  color: var(--color-cream);
+  font-weight: 600;
+  text-align: right;
+}
+.nxl-popup .nxl-popup-title {
+  display: block;
+  margin: 0 0 6px !important;
+  font: 600 14px/1.2 var(--font-display);
+  color: var(--color-cream);
+}

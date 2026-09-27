@@ -28,7 +28,10 @@ const UPGRADE = [
   "Priority booking & concierge access",
 ];
 
-export default async function MembershipPage() {
+export default async function MembershipPage({ searchParams }: PageProps<"/membership">) {
+  const params = await searchParams;
+  const next = typeof params.next === "string" ? params.next : undefined;
+  const initialMode = params.mode === "signup" ? "signup" : "signin";
   const stats = await repo.getStats();
 
   return (
@@ -105,7 +108,7 @@ export default async function MembershipPage() {
 
           {/* ------------------------------ the panel ------------------------------ */}
           <div className="lg:sticky lg:top-24">
-            <AuthPanel demoEmail={DEMO_EMAIL} />
+            <AuthPanel demoEmail={DEMO_EMAIL} next={next} initialMode={initialMode} />
           </div>
         </div>
       </Container>

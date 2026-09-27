@@ -184,14 +184,15 @@ export function Primary({ title, sub }: { title: ReactNode; sub?: ReactNode }) {
 
 /**
  * The honest line under any screen that edits data. At M2 there is no
- * database, so changes live until the page reloads.
+ * database: changes persist in this browser (the demo store) so a reviewer
+ * can follow a booking across every portal, and nowhere else.
  */
 export function DemoNote({ className }: { className?: string }) {
   return (
     <p className={cn("flex items-center gap-2 text-xs text-muted-dim", className)}>
       <Info aria-hidden width={14} height={14} className="shrink-0" />
-      Demo data. Edits here last until you reload — they save for real once the database is
-      connected in Milestone 3.
+      Demo data. Edits are saved in this browser only — they save for real, for every
+      user, once the database is connected in Milestone 3.
     </p>
   );
 }

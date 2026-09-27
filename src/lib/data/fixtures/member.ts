@@ -178,3 +178,45 @@ export function blankMember(input: NewMemberInput, now = Date.now()): MemberAcco
     wallet: [],
   };
 }
+
+/**
+ * A few notifications already in the demo member's feed, so the bell and the
+ * notification centre are reviewable before anyone books. Relative to now so
+ * they always read as recent.
+ */
+export function demoNotices(now = Date.now()): import("@/lib/domain/operations").MemberNotice[] {
+  const h = 3_600_000;
+  return [
+    {
+      id: "nt-seed-1",
+      email: DEMO_EMAIL,
+      kind: "promo",
+      title: "Art Basel week is coming",
+      body: "Members get first pick of the fleet for Basel. Reserve early — the Cullinan always goes first.",
+      at: now - 5 * h,
+      read: false,
+      href: "/cars/rolls-royce-cullinan-black-badge",
+      media: { url: "/fleet/rolls-royce-cullinan-black-badge/cover.webp", type: "image" },
+    },
+    {
+      id: "nt-seed-2",
+      email: DEMO_EMAIL,
+      kind: "update",
+      title: "Your Drive Wallet is empty",
+      body: "Top up any time to keep booking from credit — nothing auto-bills.",
+      at: now - 26 * h,
+      read: false,
+      href: "/account/wallet",
+    },
+    {
+      id: "nt-seed-3",
+      email: DEMO_EMAIL,
+      kind: "system",
+      title: "Welcome to Level Rewards",
+      body: "You're earning on every rental. Silver unlocks complimentary delivery and pickup.",
+      at: now - 9 * 24 * h,
+      read: true,
+      href: "/account/rewards",
+    },
+  ];
+}

@@ -1,5 +1,5 @@
 import { tierFor, nextTierAfter, tierProgress, redeemableValue } from "./loyalty";
-import type { CardBrand, LoyaltyTier, MemberAccount, Money } from "./types";
+import type { CardBrand, LoyaltyTier, MemberAccount, Money, PaymentCard } from "./types";
 
 /**
  * Everything the member dashboard derives from an account.
@@ -233,4 +233,43 @@ export function digitsOnly(value: string): string {
 /** Group a card number for display: "4242 4242 4242 4242". */
 export function groupCardDigits(digits: string): string {
   return digits.replace(/(.{4})/g, "$1 ").trim();
+}
+
+/** What the card form collects. The CVC is validated for shape and never kept. */
+export interface CardInput {
+  number: string;
+  expiry: string;
+  cvc: string;
+  holder: string;
+}
+
+export const EMPTY_CARD: CardInput = { number: "", expiry: "", cvc: "", holder: "" };
+
+/** Validate a card form into the stored shape (brand, last four, expiry). */
+export function parseCard(input: CardInput): { ok: true; card: PaymentCard } | { ok: false; error: string } {
+  const digits = digitsOnly(input.number);
+  if (digits.length < 13 || digits.length > 19) return { ok: false, error: "Enter the full card number." };
+  const match = /^(\d{2})\s*\/?\s*(\d{2}|\d{4})$/.exec(input.expiry.trim());
+  if (!match) return { ok: false, error: "Enter the expiry as MM/YY." };
+  const month = Number(match[1]);
+  if (month < 1 || month > 12) return { ok: false, error: "That expiry month does not exist." };
+  const year = match[2].length === 2 ? 2000 + Number(match[2]) : Number(match[2]);
+  const now = new Date();
+  if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) {
+    return { ok: false, error: "That card has expired." };
+  }
+  if (!/^\d{3,4}$/.test(input.cvc.trim())) return { ok: false, error: "Enter the 3 or 4 digit security code." };
+  if (!input.holder.trim()) return { ok: false, error: "Enter the name on the card." };
+  return {
+    ok: true,
+    card: {
+      id: `card-${Date.now().toString(36)}`,
+      brand: detectCardBrand(digits),
+      last4: digits.slice(-4),
+      expMonth: month,
+      expYear: year,
+      holder: input.holder.trim(),
+      isDefault: true,
+    },
+  };
 }

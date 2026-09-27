@@ -68,8 +68,8 @@ export default async function AboutPage() {
       <Section size="sm">
         <Container>
           <Media
-            src={null}
-            alt="The NXL fleet at the South Beach depot"
+            src="/fleet/cadillac-escalade-iq/03.webp"
+            alt="The Cadillac Escalade IQ outside the NXL storefront in South Beach"
             aspect="21/9"
             label="Fleet lineup · South Beach depot"
             sizes="100vw"

@@ -72,8 +72,8 @@ export default async function WhoWeArePage() {
             </div>
 
             <Media
-              src={null}
-              alt="NXL concierge handing over keys at the South Beach depot"
+              src="/fleet/range-rover-autobiography/05.webp"
+              alt="Range Rover Autobiography with its doors open, ready for handover"
               aspect="4/5"
               label="Concierge handover"
               sizes="(max-width: 1024px) 100vw, 40vw"
