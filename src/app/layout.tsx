@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope, Geist_Mono } from "next/font/google";
 import { SITE } from "@/lib/domain/site";
+import { repo } from "@/lib/data";
+import { AccessFloater } from "@/components/site/access-floater";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -51,13 +53,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const stats = await repo.getStats();
+
   return (
     <html
       lang="en"
       className={`${fraunces.variable} ${manrope.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-ink text-cream">{children}</body>
+      <body className="flex min-h-full flex-col bg-ink text-cream">
+        {children}
+        {/* Mounted here, not per section, so it is on every page — public
+            site, back office and the 404 alike. */}
+        <AccessFloater stats={stats} />
+      </body>
     </html>
   );
 }

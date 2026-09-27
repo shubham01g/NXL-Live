@@ -51,7 +51,7 @@ export function SegmentedControl<T extends string>({
             disabled={opt.disabled}
             onClick={() => onChange(opt.value)}
             className={cn(
-              "flex-1 rounded-full font-medium transition-all duration-300 ease-editorial",
+              "flex-1 whitespace-nowrap rounded-full font-medium transition-all duration-300 ease-editorial",
               size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
               "disabled:cursor-not-allowed disabled:opacity-40",
               active

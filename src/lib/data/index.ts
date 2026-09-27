@@ -3,6 +3,23 @@ import type { ListingKind, MemberAccount, NewMemberInput } from "@/lib/domain/ty
 import { CARS, HOMES, LISTINGS } from "./fixtures/listings";
 import { PLANS, REVIEWS } from "./fixtures/catalog";
 import { blankMember, DEMO_MEMBER } from "./fixtures/member";
+import {
+  ALERTS,
+  AUDIT_LOG,
+  CUSTOMERS,
+  DRIVERS,
+  HEALTH_CHECKS,
+  PARTNERS,
+  PAYOUTS,
+  PLAN_PURCHASES,
+  PLATFORM_SETTINGS,
+  PROMOS,
+  RESERVATIONS,
+  REVENUE,
+  SEO_PAGES,
+  STAFF,
+  TEMPLATES,
+} from "./fixtures/operations";
 
 /**
  * In-memory implementation of Repository, used for M1 and M2.
@@ -56,6 +73,52 @@ const fixtureRepository: Repository = {
       throw new Error("An account already exists for that email.");
     }
     return blankMember({ ...input, email: normalized });
+  },
+
+  async listReservations() {
+    return [...RESERVATIONS].sort((a, b) => b.window.start - a.window.start);
+  },
+  async listDrivers() {
+    return DRIVERS;
+  },
+  async listCustomers() {
+    return CUSTOMERS;
+  },
+  async listPartners() {
+    return PARTNERS;
+  },
+  async listPayouts() {
+    return [...PAYOUTS].sort((a, b) => b.scheduledFor - a.scheduledFor);
+  },
+  async listStaff() {
+    return STAFF;
+  },
+  async listPlanPurchases() {
+    return [...PLAN_PURCHASES].sort((a, b) => b.purchasedAt - a.purchasedAt);
+  },
+  async listAuditLog() {
+    return [...AUDIT_LOG].sort((a, b) => b.at - a.at);
+  },
+  async listAlerts() {
+    return [...ALERTS].sort((a, b) => b.at - a.at);
+  },
+  async listTemplates() {
+    return TEMPLATES;
+  },
+  async listPromos() {
+    return PROMOS;
+  },
+  async listSeoPages() {
+    return SEO_PAGES;
+  },
+  async listHealthChecks() {
+    return HEALTH_CHECKS;
+  },
+  async getRevenue() {
+    return REVENUE;
+  },
+  async getPlatformSettings() {
+    return PLATFORM_SETTINGS;
   },
 
   async getStats(): Promise<SiteStats> {

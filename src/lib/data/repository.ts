@@ -8,6 +8,23 @@ import type {
   Plan,
   Review,
 } from "@/lib/domain/types";
+import type {
+  AuditEntry,
+  Customer,
+  Driver,
+  HealthCheck,
+  MessageTemplate,
+  OpsAlert,
+  Partner,
+  Payout,
+  PlanPurchase,
+  PlatformSettings,
+  Promo,
+  Reservation,
+  RevenueMonth,
+  SeoPage,
+  StaffMember,
+} from "@/lib/domain/operations";
 
 /**
  * The data contract.
@@ -48,6 +65,30 @@ export interface Repository {
 
   /** Create an account. Rejects an email that already has one. */
   createMember(input: NewMemberInput): Promise<MemberAccount>;
+
+  /* ----------------------------- back office ----------------------------- */
+
+  /**
+   * Operator reads for the Employee and Master Admin consoles. Newest first
+   * wherever order matters. At M3 each becomes a role-checked query; staff
+   * writes (status changes, payouts, templates) arrive with them — M2's
+   * consoles hold edits in page state only.
+   */
+  listReservations(): Promise<Reservation[]>;
+  listDrivers(): Promise<Driver[]>;
+  listCustomers(): Promise<Customer[]>;
+  listPartners(): Promise<Partner[]>;
+  listPayouts(): Promise<Payout[]>;
+  listStaff(): Promise<StaffMember[]>;
+  listPlanPurchases(): Promise<PlanPurchase[]>;
+  listAuditLog(): Promise<AuditEntry[]>;
+  listAlerts(): Promise<OpsAlert[]>;
+  listTemplates(): Promise<MessageTemplate[]>;
+  listPromos(): Promise<Promo[]>;
+  listSeoPages(): Promise<SeoPage[]>;
+  listHealthChecks(): Promise<HealthCheck[]>;
+  getRevenue(): Promise<RevenueMonth[]>;
+  getPlatformSettings(): Promise<PlatformSettings>;
 }
 
 /** Headline figures shown on the home, about and partner pages. */
