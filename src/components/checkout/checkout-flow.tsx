@@ -154,7 +154,20 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
   const units = unitsFor(listing);
   const [unit, setUnit] = useState<RateUnit>(initial.unit && units.includes(initial.unit) ? initial.unit : units[0]);
   const [qty, setQty] = useState(initial.qty ?? 1);
-  const [date, setDate] = useState(() => isoDate(Date.now() + 86_400_000));
+  // Start on the first free day from tomorrow, so the guest never lands on a clash.
+  const [date, setDate] = useState(() => {
+    const at10 = (days: number) => {
+      const d = new Date(Date.now() + days * 86_400_000);
+      d.setHours(10, 0, 0, 0);
+      return d.getTime();
+    };
+    const u = initial.unit && units.includes(initial.unit) ? initial.unit : units[0];
+    for (let day = 1; day <= 45; day++) {
+      const start = at10(day);
+      if (!clashes(listing, { start, end: start + durationMs(u, initial.qty ?? 1) }).length) return isoDate(start);
+    }
+    return isoDate(at10(1));
+  });
   const [time, setTime] = useState("10:00");
   const isCar = listing.kind === "car";
 

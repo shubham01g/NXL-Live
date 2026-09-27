@@ -30,6 +30,8 @@ const LEGAL = [
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
   { href: "/insurance", label: "Insurance & Coverage" },
+  { href: "/partner", label: "Partner login" },
+  { href: "/driver", label: "Driver login" },
 ] as const;
 
 export function SiteFooter() {
