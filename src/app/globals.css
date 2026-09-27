@@ -1,9 +1,14 @@
 @import "tailwindcss";
 
 /* ============================================================
-   NXL Design System — Black & Metallic Gold
+   NXL Design System — Carbon Black & Antique Gold
    ============================================================
    Everything the UI uses is declared here. No ad-hoc values.
+
+   The palette is sampled from the NXL partner business card:
+   a cool carbon black framed in deep, low-saturation antique
+   gold. Saturated yellow gold read as fake, so every stop here
+   leans brown/champagne and the highlight is warm, never white.
 
    The gold is treated as a METAL, not a colour: flat gold reads
    as mustard, so anything meant to look like gold is painted
@@ -12,39 +17,39 @@
    ============================================================ */
 
 @theme {
-  /* ---------- Ground: warm blacks, so gold sits on them ---------- */
-  --color-ink: #070605;
-  --color-surface-1: #100e0b;
-  --color-surface-2: #181511;
-  --color-surface-3: #231e18;
-  --color-surface-4: #2f2820;
+  /* ---------- Ground: cool carbon blacks, as on the card ---------- */
+  --color-ink: #08080a;
+  --color-surface-1: #111114;
+  --color-surface-2: #18171b;
+  --color-surface-3: #211f24;
+  --color-surface-4: #2c292d;
 
-  /* ---------- Metallic gold ramp ---------- */
-  --color-gold-100: #fff8dd; /* specular highlight */
-  --color-gold-200: #f9e7a8; /* champagne */
-  --color-gold-300: #f2d370; /* light gold */
-  --color-gold: #e9bf45; /* core — bright metallic gold */
-  --color-gold-600: #c39a2b; /* shadowed gold */
-  --color-gold-700: #8a6b1a; /* deep bronze */
-  --color-gold-800: #4a380d; /* near-black bronze */
+  /* ---------- Antique gold ramp (sampled from the card frame) ---------- */
+  --color-gold-100: #f4e4c1; /* specular highlight */
+  --color-gold-200: #e6cc9a; /* champagne */
+  --color-gold-300: #d6b67f; /* light antique gold */
+  --color-gold: #c4a068; /* core — the card's name colour, lifted for screen */
+  --color-gold-600: #a4814f; /* shadowed gold */
+  --color-gold-700: #7a5c36; /* deep bronze */
+  --color-gold-800: #3b2b18; /* near-black bronze */
 
   /* ---------- Text ---------- */
-  --color-cream: #f8f4ea;
-  --color-muted: #a99f8f;
-  --color-muted-dim: #7b7264;
+  --color-cream: #f5f1e8;
+  --color-muted: #a39d93;
+  --color-muted-dim: #77726b;
 
   /* ---------- Lines: gold-tinted, never plain grey ---------- */
-  --color-line: rgba(233, 191, 69, 0.16);
-  --color-line-strong: rgba(233, 191, 69, 0.34);
+  --color-line: rgba(196, 160, 104, 0.16);
+  --color-line-strong: rgba(196, 160, 104, 0.34);
 
   /* ---------- Loyalty tiers ----------
      loyalty.ts hands these out as `tier.color` for inline styles. They were
      referenced before they existed, so every tier name rendered at the
      inherited colour. Silver and Platinum are deliberately cool, so a tier
      chip never reads as the brand gold unless it IS Gold. */
-  --color-tier-bronze: #c88a4a;
+  --color-tier-bronze: #b8743f; /* coppery, so it stays distinct from the antique gold */
   --color-tier-silver: #c9d2dc;
-  --color-tier-gold: #e9bf45;
+  --color-tier-gold: #c4a068;
   --color-tier-platinum: #e6e8f0;
 
   /* ---------- Semantic status ---------- */
@@ -98,8 +103,8 @@
   --shadow-elev-1: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 12px -6px rgba(0, 0, 0, 0.7);
   --shadow-elev-2: 0 8px 24px -12px rgba(0, 0, 0, 0.85);
   --shadow-elev-3: 0 24px 60px -30px rgba(0, 0, 0, 0.95);
-  --shadow-glow-gold: 0 8px 28px -10px rgba(233, 191, 69, 0.45);
-  --shadow-glow-gold-lg: 0 28px 80px -36px rgba(233, 191, 69, 0.5);
+  --shadow-glow-gold: 0 8px 28px -10px rgba(196, 160, 104, 0.4);
+  --shadow-glow-gold-lg: 0 28px 80px -36px rgba(196, 160, 104, 0.45);
 
   /* ---------- Motion ---------- */
   --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
@@ -127,42 +132,44 @@
      read on black rather than bottoming out in bronze. */
   --metal-gold: linear-gradient(
     142deg,
-    #b98b22 0%,
-    #e6c356 15%,
-    #f7e49a 32%,
-    #fff8dd 46%,
-    #f0cf6a 59%,
-    #d3a733 77%,
-    #ab801f 100%
+    #8d6c40 0%,
+    #b08e5a 16%,
+    #d4b680 33%,
+    #efdcb0 47%,
+    #d0af76 60%,
+    #a88552 79%,
+    #86663c 100%
   );
   /* Brighter than --metal-gold across the whole ramp: numerals are read,
      not admired, so the darkest stop still has to hold contrast on black. */
   --metal-gold-soft: linear-gradient(
     142deg,
-    #d9b23c 0%,
-    #f4e099 34%,
-    #fff8dd 50%,
-    #eec84f 70%,
-    #c9a23a 100%
+    #b08e5a 0%,
+    #dcc190 34%,
+    #f1dfb5 50%,
+    #d2b17a 70%,
+    #aa8854 100%
   );
   /* The 142deg ramps show almost no travel across a 6px-tall bar, so thin
      horizontal surfaces — progress fills, step indicators — get their own
      left-to-right ramp with the highlight parked off-centre. */
   --metal-gold-h: linear-gradient(
     90deg,
-    #a87d1e 0%,
-    #e0b944 22%,
-    #fff8dd 44%,
-    #f0cf6a 58%,
-    #c99f2e 82%,
-    #a87d1e 100%
+    #7e5f38 0%,
+    #b49160 22%,
+    #efdcb0 44%,
+    #d2b17a 58%,
+    #a07e4b 82%,
+    #7e5f38 100%
   );
+  /* The card's frame is continuous metal, dark bronze rising to champagne
+     and back — so the hairline never fades out mid-edge. */
   --metal-edge: linear-gradient(
     140deg,
-    rgba(233, 191, 69, 0.55) 0%,
-    rgba(233, 191, 69, 0.08) 38%,
-    rgba(233, 191, 69, 0.06) 62%,
-    rgba(242, 211, 112, 0.45) 100%
+    rgba(214, 182, 127, 0.62) 0%,
+    rgba(164, 129, 79, 0.26) 34%,
+    rgba(122, 92, 54, 0.22) 64%,
+    rgba(230, 204, 154, 0.52) 100%
   );
 
   color-scheme: dark;
@@ -220,7 +227,7 @@ body {
 
 ::selection {
   background: var(--color-gold);
-  color: #1a1206;
+  color: #17110a;
 }
 
 :focus-visible {
@@ -234,11 +241,11 @@ body {
   scrollbar-color: transparent transparent;
 }
 *:hover {
-  scrollbar-color: rgba(233, 191, 69, 0.4) transparent;
+  scrollbar-color: rgba(196, 160, 104, 0.4) transparent;
 }
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: transparent; border-radius: 999px; }
-*:hover::-webkit-scrollbar-thumb { background: rgba(233, 191, 69, 0.35); }
+*:hover::-webkit-scrollbar-thumb { background: rgba(196, 160, 104, 0.35); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -304,7 +311,7 @@ body {
   position: relative;
   overflow: hidden;
   background-image: var(--metal-gold);
-  color: #1a1206;
+  color: #17110a;
   isolation: isolate;
 
   &::after {
@@ -315,7 +322,7 @@ body {
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.55),
+      rgba(255, 240, 212, 0.42),
       transparent
     );
     width: 42%;
@@ -338,7 +345,7 @@ body {
  */
 @utility metal-plate {
   background-image: var(--metal-gold);
-  color: #1a1206;
+  color: #17110a;
 }
 
 /** Thin horizontal metal: progress fills and step indicators. */
@@ -353,7 +360,7 @@ body {
   background-image: linear-gradient(
     90deg,
     transparent,
-    rgba(233, 191, 69, 0.55),
+    rgba(196, 160, 104, 0.55),
     transparent
   );
 }

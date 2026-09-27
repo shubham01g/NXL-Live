@@ -44,7 +44,7 @@ export function ProfileCard({
         {/* Soft key light behind the name, echoing the hero backdrop. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_120%_at_88%_0%,rgba(233,191,69,0.12),transparent_62%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_120%_at_88%_0%,rgba(196,160,104,0.12),transparent_62%)]"
         />
 
         <div className="flex min-w-0 items-center gap-5">
