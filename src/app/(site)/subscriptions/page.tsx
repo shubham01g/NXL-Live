@@ -34,7 +34,7 @@ const FAQS = [
   {
     question: "Can I use credit on estates as well as cars?",
     answer:
-      "Yes. One balance covers the entire fleet — supercars, estates, hourly bookings and monthly stays alike.",
+      "Yes. One balance covers the entire fleet — cars, estates, hourly bookings and monthly stays alike.",
   },
   {
     question: "What happens to my tier if the wallet runs out?",

@@ -33,6 +33,8 @@ interface MediaProps {
   /** Fills its parent instead of enforcing an aspect ratio. */
   fill?: boolean;
   rounded?: boolean;
+  /** `contain` letterboxes mixed portrait and landscape shots instead of cropping. */
+  fit?: "cover" | "contain";
 }
 
 export function Media({
@@ -45,6 +47,7 @@ export function Media({
   sizes = "(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw",
   fill,
   rounded = true,
+  fit = "cover",
 }: MediaProps) {
   return (
     <div
@@ -62,7 +65,7 @@ export function Media({
           fill
           priority={priority}
           sizes={sizes}
-          className="object-cover"
+          className={fit === "contain" ? "object-contain" : "object-cover"}
         />
       ) : (
         <MediaPlaceholder label={label} alt={alt} />
@@ -81,7 +84,7 @@ function MediaPlaceholder({ label, alt }: { label?: string; alt: string }) {
       {/* Diagonal sheen so the plate reads as designed rather than empty. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(115deg,transparent_38%,rgba(200,161,94,0.07)_50%,transparent_62%)]"
+        className="absolute inset-0 bg-[linear-gradient(115deg,transparent_38%,rgba(196,160,104,0.07)_50%,transparent_62%)]"
       />
       <div aria-hidden className="grain absolute inset-0 opacity-50" />
 

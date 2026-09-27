@@ -20,7 +20,7 @@ const OFFERS = [
   {
     href: "/cars",
     title: "Exotic Cars",
-    body: "Supercars and grand tourers by the hour, day, week or month.",
+    body: "Rolls-Royce, Bentley, Range Rover and Cadillac by the hour, day, week or month.",
   },
   {
     href: "/homes",

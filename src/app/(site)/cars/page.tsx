@@ -7,7 +7,7 @@ import { ListingBrowser } from "@/components/site/listing-browser";
 export const metadata: Metadata = {
   title: "Exotic Cars",
   description:
-    "Browse the NXL fleet — Lamborghini, Ferrari, McLaren, Porsche, Rolls-Royce and Bentley, available by the hour, day, week or month with concierge delivery across South Beach, Miami.",
+    "Browse the NXL fleet — the Rolls-Royce Cullinan Black Badge, Cadillac Escalade IQ, Range Rover Autobiography and Bentley Bentayga, available by the hour, day, week or month with concierge delivery across South Beach, Miami.",
   alternates: { canonical: "/cars" },
 };
 

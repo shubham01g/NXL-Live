@@ -40,7 +40,7 @@ export interface MediaVideo {
 
 interface ListingBase {
   id: string;
-  /** URL segment, e.g. "lamborghini-huracan-evo" */
+  /** URL segment, e.g. "rolls-royce-cullinan-black-badge" */
   slug: string;
   name: string;
   category: string;
@@ -54,8 +54,8 @@ interface ListingBase {
   /** Refundable security deposit held at pickup. */
   deposit: Money;
   /**
-   * Hero image. `null` renders the branded placeholder — the client is
-   * supplying real photography, so every listing ships null for now.
+   * Hero image, cropped 4:3 for listing cards. `null` renders the branded
+   * placeholder for listings still waiting on client photography.
    */
   photo: string | null;
   gallery: string[];

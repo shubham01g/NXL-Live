@@ -30,10 +30,10 @@ const COLLECTOR_PRICE = 8_900;
 const COLLECTOR_CREDITS = 9_800;
 const GOLD_RATE = tierByName("Gold").rate;
 
-// McLaren 720S Spider at $1,799/day for 3 days.
-const BOOKING_ONE = 1_799 * 3;
-// Ferrari 488 Spider at $1,599/day for 2 days.
-const BOOKING_TWO = 1_599 * 2;
+// Rolls-Royce Cullinan Black Badge at $2,099/day for 3 days.
+const BOOKING_ONE = 2_099 * 3;
+// Bentley Bentayga at $1,099/day for 2 days.
+const BOOKING_TWO = 1_099 * 2;
 const TOP_UP = 5_000;
 
 const POINTS_ONE = Math.round(BOOKING_ONE * GOLD_RATE);
@@ -69,26 +69,26 @@ const STEPS: Step[] = [
   },
   {
     index: "03",
-    title: "Book the McLaren 720S",
-    detail: `Three days at ${money(1_799)}/day. The cost comes straight out of the wallet, and Gold earns ${Math.round(GOLD_RATE * 100)}% back.`,
+    title: "Book the Rolls-Royce Cullinan",
+    detail: `Three days at ${money(2_099)}/day. The cost comes straight out of the wallet, and Gold earns ${Math.round(GOLD_RATE * 100)}% back.`,
     balance: AFTER_ONE,
     totalCredits: COLLECTOR_CREDITS,
     points: POINTS_ONE,
     entry: {
-      label: "McLaren 720S Spider · 3 days",
+      label: "Rolls-Royce Cullinan · 3 days",
       amount: `−${money(BOOKING_ONE)}`,
       tone: "debit",
     },
   },
   {
     index: "04",
-    title: "Book the Ferrari 488 Spider",
-    detail: `Two days at ${money(1_599)}/day. Points keep accruing on every booking.`,
+    title: "Book the Bentley Bentayga",
+    detail: `Two days at ${money(1_099)}/day. Points keep accruing on every booking.`,
     balance: AFTER_TWO,
     totalCredits: COLLECTOR_CREDITS,
     points: TOTAL_POINTS,
     entry: {
-      label: "Ferrari 488 Spider · 2 days",
+      label: "Bentley Bentayga · 2 days",
       amount: `−${money(BOOKING_TWO)}`,
       tone: "debit",
     },

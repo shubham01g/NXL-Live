@@ -89,7 +89,7 @@ export const PARTNER_TYPES = [
 export const REVIEWS: Review[] = [
   {
     id: "rev-1",
-    listingId: "car-huracan-evo",
+    listingId: "car-rolls-cullinan",
     authorName: "Alex Rivera",
     rating: 5,
     comment:
@@ -98,7 +98,7 @@ export const REVIEWS: Review[] = [
   },
   {
     id: "rev-2",
-    listingId: "car-huracan-evo",
+    listingId: "car-rolls-cullinan",
     authorName: "Priya Nair",
     rating: 5,
     comment:
@@ -107,7 +107,7 @@ export const REVIEWS: Review[] = [
   },
   {
     id: "rev-3",
-    listingId: "car-huracan-evo",
+    listingId: "car-rolls-cullinan",
     authorName: "Marcus Lee",
     rating: 4,
     comment:
@@ -116,16 +116,16 @@ export const REVIEWS: Review[] = [
   },
   {
     id: "rev-4",
-    listingId: "car-ferrari-488",
+    listingId: "car-cadillac-escalade-iq",
     authorName: "Jordan Blake",
     rating: 5,
     comment:
-      "Took it down Ocean Drive with the top down at sunset. Worth every dollar. The pricing was exactly what the site quoted, no surprises at checkout.",
+      "Took the whole family down Ocean Drive at sunset with room to spare. Worth every dollar. The pricing was exactly what the site quoted, no surprises at checkout.",
     createdAt: daysAgo(11),
   },
   {
     id: "rev-5",
-    listingId: "car-ferrari-488",
+    listingId: "car-cadillac-escalade-iq",
     authorName: "Sofia Marín",
     rating: 5,
     comment:
@@ -134,16 +134,16 @@ export const REVIEWS: Review[] = [
   },
   {
     id: "rev-6",
-    listingId: "car-mclaren-720s",
+    listingId: "car-range-rover-autobiography",
     authorName: "Daniel Okafor",
     rating: 5,
     comment:
-      "The 720S is a different category of car and NXL treated it that way. Detailed walkthrough, no pressure, deposit returned two days after I handed it back.",
+      "The Autobiography is a serious car and NXL treated it that way. Detailed walkthrough, no pressure, deposit returned two days after I handed it back.",
     createdAt: daysAgo(8),
   },
   {
     id: "rev-7",
-    listingId: "car-porsche-911-turbo-s",
+    listingId: "car-bentley-bentayga",
     authorName: "Hannah Weiss",
     rating: 5,
     comment:
@@ -152,7 +152,7 @@ export const REVIEWS: Review[] = [
   },
   {
     id: "rev-8",
-    listingId: "car-porsche-911-turbo-s",
+    listingId: "car-range-rover-autobiography",
     authorName: "Tom Bradley",
     rating: 5,
     comment:
@@ -161,16 +161,16 @@ export const REVIEWS: Review[] = [
   },
   {
     id: "rev-9",
-    listingId: "car-aventador-lp780",
+    listingId: "car-bentley-bentayga",
     authorName: "Priya Nair",
     rating: 5,
     comment:
-      "The V12 is the entire reason to book this. Loud, dramatic, and the delivery driver was as excited about it as I was.",
+      "That quilted cabin is the entire reason to book this. Quiet, plush, and the delivery driver was as proud of it as I was.",
     createdAt: daysAgo(14),
   },
   {
     id: "rev-10",
-    listingId: "car-rolls-ghost",
+    listingId: "car-rolls-cullinan",
     authorName: "Evelyn Carter",
     rating: 5,
     comment:

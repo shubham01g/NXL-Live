@@ -14,7 +14,7 @@ export const SITE = {
   url: "https://www.nxlexoticrentals.com",
   tagline: "Certified exotic cars & private estates, delivered.",
   description:
-    "Rent exotic supercars by the hour, day or week and private estates by the day, week or month. Concierge delivery across South Beach, Miami. Transparent pricing, no surge.",
+    "Rent exotic cars by the hour, day or week and private estates by the day, week or month. Concierge delivery across South Beach, Miami. Transparent pricing, no surge.",
 
   serviceArea: "South Beach, Miami, FL",
 

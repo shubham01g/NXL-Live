@@ -33,7 +33,7 @@ export default async function HomePage() {
             <span className="text-metal block">By the hour.</span>
           </>
         }
-        lede={`You do not need a whole day to live the fantasy. Book a supercar for as little as an hour — concierge delivery, one flat rate card, and daily or weekly windows when you want more. Estates by the day, week or month.`}
+        lede={`You do not need a whole day to live the fantasy. Book a Rolls-Royce for as little as an hour — concierge delivery, one flat rate card, and daily or weekly windows when you want more. Estates by the day, week or month.`}
         actions={
           <>
             <ButtonLink href="/cars" size="lg">
@@ -73,7 +73,7 @@ export default async function HomePage() {
                 index: "01",
                 title: "Cars",
                 windows: "Hourly · Daily · Weekly · Monthly",
-                body: "A sunset run in a Huracán costs less than dinner for two. Go daily or weekly when you want more road under you.",
+                body: "A sunset run in the Cullinan costs less than dinner for two. Go daily or weekly when you want more road under you.",
               },
               {
                 href: "/homes",
@@ -172,7 +172,7 @@ export default async function HomePage() {
                 </h2>
                 <p className="mt-5 text-lg leading-relaxed text-cream/75">
                   Buy a credit wallet once and spend it across the entire fleet —
-                  supercars, estates, hourly or monthly. {collector.name} loads{" "}
+                  cars, estates, hourly or monthly. {collector.name} loads{" "}
                   {money(collector.credits)} of drive credit for {money(collector.price)}{" "}
                   and activates {collector.grantsTier} tier on day one.
                 </p>

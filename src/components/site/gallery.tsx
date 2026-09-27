@@ -9,9 +9,10 @@ import type { ListingStatus } from "@/lib/domain/types";
 /**
  * Listing gallery.
  *
- * With no photography yet, this renders the shot list the client needs to
- * supply — each placeholder is labelled with the angle it expects. When real
- * images arrive they slot into the same frames with no layout change.
+ * Without photography it renders the shot list the client needs to supply —
+ * each placeholder is labelled with the angle it expects. Real photos slot
+ * into the same frames; the stage letterboxes them because the client's shots
+ * mix portrait and landscape.
  */
 const CAR_SHOTS = [
   "Front three-quarter",
@@ -43,14 +44,18 @@ export function Gallery({
   const shots = kind === "car" ? CAR_SHOTS : HOME_SHOTS;
   const slots = images.length > 0 ? images : Array.from({ length: shots.length }, () => "");
   const [active, setActive] = useState(0);
+  const hasPhotos = images.length > 0;
+  const shotName = (i: number) =>
+    hasPhotos ? `photo ${i + 1} of ${images.length}` : (shots[i] ?? `photo ${i + 1}`);
 
   return (
     <div>
       <div className="relative">
         <Media
           src={slots[active] || null}
-          alt={`${alt} — ${shots[active] ?? "photo"}`}
+          alt={`${alt} — ${shotName(active)}`}
           aspect="3/2"
+          fit={hasPhotos ? "contain" : "cover"}
           label={shots[active] ?? undefined}
           priority
           sizes="(max-width: 1024px) 100vw, 60vw"
@@ -66,7 +71,7 @@ export function Gallery({
             <button
               type="button"
               onClick={() => setActive(i)}
-              aria-label={`View ${shots[i] ?? `photo ${i + 1}`}`}
+              aria-label={`View ${shotName(i)}`}
               aria-current={i === active}
               className={cn(
                 "block w-full overflow-hidden rounded-md border transition-colors",
@@ -88,7 +93,7 @@ export function Gallery({
         ))}
       </ul>
 
-      {images.length === 0 ? (
+      {!hasPhotos ? (
         <p className="mt-3 text-center text-xs text-muted-dim">
           Photography pending — these frames show the shot list for this listing.
         </p>

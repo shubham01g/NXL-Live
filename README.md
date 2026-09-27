@@ -180,6 +180,8 @@ The phone number appears at `2xl`, where there is finally room for it.
    especially at favicon size.
 3. **Contact details** — the prototype carried three conflicting sets. Current
    values live in `lib/domain/site.ts` and need confirming.
-4. **Fleet inventory** — fixtures carry 8 cars and 4 estates. Confirm the real list.
+4. **Fleet inventory** — the fleet is the client's four photographed cars
+   (`public/fleet/`). Years, trims, specs and rates are estimates to confirm.
+   The 4 estates are still placeholders.
 5. **Legal copy** — Terms, Privacy and Insurance pages are working drafts and are
    marked as pending legal review on the page itself.

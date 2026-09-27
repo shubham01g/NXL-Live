@@ -25,7 +25,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — Exotic Supercars & Luxury Estates`,
+    default: `${SITE.name} — Exotic Cars & Luxury Estates`,
     template: `%s · ${SITE.shortName}`,
   },
   description: SITE.description,
@@ -35,13 +35,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: SITE.name,
     url: SITE.url,
-    title: `${SITE.name} — Exotic Supercars & Luxury Estates`,
+    title: `${SITE.name} — Exotic Cars & Luxury Estates`,
     description: SITE.description,
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.name} — Exotic Supercars & Luxury Estates`,
+    title: `${SITE.name} — Exotic Cars & Luxury Estates`,
     description: SITE.description,
   },
   robots: {
