@@ -6,7 +6,8 @@ import { count, ratingText } from "@/lib/domain/format";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Section, SectionHeading, StatGrid } from "@/components/ui/layout";
 import { Card, Eyebrow } from "@/components/ui/primitives";
-import { Media } from "@/components/ui/media";
+import { LoopVideo } from "@/components/ui/loop-video";
+import { FILMS } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ const OFFERS = [
   {
     href: "/cars",
     title: "Exotic Cars",
-    body: "Rolls-Royce, Bentley, Range Rover and Cadillac by the hour, day, week or month.",
+    body: "Rolls-Royce, Lamborghini, McLaren, Maybach and more, by the hour or the day.",
   },
   {
     href: "/homes",
@@ -67,13 +68,9 @@ export default async function AboutPage() {
 
       <Section size="sm">
         <Container>
-          <Media
-            src="/fleet/cadillac-escalade-iq/03.webp"
-            alt="The Cadillac Escalade IQ outside the NXL storefront in South Beach"
-            aspect="21/9"
-            label="Fleet lineup · South Beach depot"
-            sizes="100vw"
-          />
+          <div className="relative aspect-[21/9] overflow-hidden rounded-lg bg-surface-2 max-sm:aspect-video">
+            <LoopVideo {...FILMS.aerial} />
+          </div>
 
           <StatGrid
             className="mt-8"

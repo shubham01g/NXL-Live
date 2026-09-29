@@ -56,6 +56,7 @@ export function ListingDetail({
             alt={listing.name}
             kind={listing.kind}
             status={listing.status}
+            video={listing.video}
           />
 
           <div className="mt-10">

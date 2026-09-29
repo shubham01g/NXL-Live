@@ -3,8 +3,12 @@ import type { CarListing, HomeListing } from "@/lib/domain/types";
 /**
  * Fleet and estate fixtures.
  *
- * The fleet is the client's own four cars, photographed outside the South
- * Beach storefront; their images live under `public/fleet/<slug>/`. Estate
+ * The fleet is the client's own cars; their images live under
+ * `public/fleet/<slug>/`. The first four were photographed for this site; the
+ * rest, with their hourly and daily rates and deposits, come from the client's
+ * current site (nxlcertifiedexoticrentals.com), which quotes no weekly or
+ * monthly rates. Several of those galleries are low-resolution until the
+ * client supplies the originals. Estate
  * photography comes from the client's Figma Make prototype (Unsplash, free for
  * commercial use) and lives under `public/estates/<slug>/` until the client
  * supplies shots of the real properties.
@@ -36,8 +40,8 @@ export const CARS: CarListing[] = [
     trips: 73,
     description:
       "The darker side of Rolls-Royce. A 592-horsepower V12, a blackened Spirit of Ecstasy, red calipers and a starlight headliner over a red-and-black cabin with rear theatre screens. Nothing on South Beach arrives quite like it.",
-    rates: { hour: 349, day: 2099, week: 12599, month: 44999 },
-    deposit: 1000,
+    rates: { hour: 350, day: 1500 },
+    deposit: 2500,
     photo: "/fleet/rolls-royce-cullinan-black-badge/cover.webp",
     gallery: fleetGallery("rolls-royce-cullinan-black-badge", 9),
     video: null,
@@ -96,8 +100,8 @@ export const CARS: CarListing[] = [
     trips: 126,
     description:
       "The Autobiography P525 is the Range Rover at its most complete: a supercharged V8, a contrast black roof over white paint, and a saddle-tan cabin with reclining rear seats. Equally at home on Collins Avenue or on the way to the Keys.",
-    rates: { hour: 149, day: 899, week: 5399, month: 18999 },
-    deposit: 500,
+    rates: { hour: 150, day: 499 },
+    deposit: 750,
     photo: "/fleet/range-rover-autobiography/cover.webp",
     gallery: fleetGallery("range-rover-autobiography", 11),
     video: null,
@@ -142,7 +146,308 @@ export const CARS: CarListing[] = [
       drivetrain: "All-wheel drive",
     },
   },
+  ...importedCars(),
 ];
+
+/**
+ * The rest of the fleet, carried over from the client's current site. Every
+ * car there is on the South Beach roster, available, hourly and daily only.
+ */
+function importedCars(): CarListing[] {
+  type Row = Pick<CarListing, "slug" | "name" | "make" | "year" | "category" | "rating" | "trips" | "description" | "deposit" | "specs"> & {
+    hour: number;
+    day: number;
+    photos: number;
+  };
+  const rows: Row[] = [
+    {
+      slug: "rolls-royce-wraith",
+      name: "Rolls-Royce Wraith",
+      make: "Rolls-Royce",
+      year: 2018,
+      category: "Luxury Coupe",
+      rating: 4.97,
+      trips: 64,
+      description:
+        "The fastest, most driver-focused Rolls-Royce of its generation. A twin-turbo V12 grand tourer in gloss black on black wheels, with coach doors, a starlight headliner and an intimate four-seat cabin. Made for arrivals.",
+      hour: 250,
+      day: 1000,
+      deposit: 2000,
+      photos: 8,
+      specs: { horsepower: 624, topSpeed: 155, zeroToSixty: 4.4, seats: 4, transmission: "8-speed automatic", drivetrain: "Rear-wheel drive" },
+    },
+    {
+      slug: "rolls-royce-cullinan-white",
+      name: "Rolls-Royce Cullinan",
+      make: "Rolls-Royce",
+      year: 2024,
+      category: "Luxury SUV",
+      rating: 4.98,
+      trips: 52,
+      description:
+        "The Cullinan in white over black wheels: a twin-turbo V12, coach doors and a bespoke leather cabin under a panoramic roof. The quiet counterpart to our Black Badge, and just as hard to overlook.",
+      hour: 350,
+      day: 1500,
+      deposit: 2000,
+      photos: 8,
+      specs: { horsepower: 563, topSpeed: 155, zeroToSixty: 4.8, seats: 5, transmission: "8-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "lamborghini-urus",
+      name: "Lamborghini Urus",
+      make: "Lamborghini",
+      year: 2023,
+      category: "Super SUV",
+      rating: 4.97,
+      trips: 88,
+      description:
+        "The world's first Super SUV. A 641-horsepower twin-turbo V8, air suspension and carbon accents in a matte grey body that looks fast parked. Five seats, a real boot, and all the theatre of the raging bull.",
+      hour: 175,
+      day: 1000,
+      deposit: 2000,
+      photos: 8,
+      specs: { horsepower: 641, topSpeed: 190, zeroToSixty: 3.5, seats: 5, transmission: "8-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "mclaren-gt",
+      name: "McLaren GT",
+      make: "McLaren",
+      year: 2023,
+      category: "Sports Car",
+      rating: 4.96,
+      trips: 47,
+      description:
+        "A 612-horsepower twin-turbo V8 in a carbon-fibre chassis, dihedral doors and a glass roof, tuned for long, fast miles rather than lap times. The supercar you can actually take somewhere, with room for the luggage.",
+      hour: 200,
+      day: 1000,
+      deposit: 2000,
+      photos: 7,
+      specs: { horsepower: 612, topSpeed: 203, zeroToSixty: 3.2, seats: 2, transmission: "7-speed dual-clutch", drivetrain: "Rear-wheel drive" },
+    },
+    {
+      slug: "mercedes-maybach-gls",
+      name: "Mercedes-Maybach GLS",
+      make: "Mercedes-Maybach",
+      year: 2024,
+      category: "Luxury SUV",
+      rating: 4.97,
+      trips: 59,
+      description:
+        "Maybach's take on the full-size SUV: two-tone chrome wheels, the pinstripe grille and an executive rear cabin with ambient lighting, a panoramic roof and Burmester sound. Chauffeur-grade comfort for the whole party.",
+      hour: 175,
+      day: 899,
+      deposit: 1500,
+      photos: 8,
+      specs: { horsepower: 550, topSpeed: 155, zeroToSixty: 4.8, seats: 7, transmission: "9-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "dodge-challenger-srt-hellcat",
+      name: "Dodge Challenger SRT Hellcat",
+      make: "Dodge",
+      year: 2021,
+      category: "Muscle Car",
+      rating: 4.93,
+      trips: 71,
+      description:
+        "Pure American muscle. A supercharged V8 rated at 797 horsepower under a twin-snorkel hood, wrapped in white with race-inspired seats. It announces itself three blocks before it arrives on Ocean Drive.",
+      hour: 150,
+      day: 599,
+      deposit: 2500,
+      photos: 4,
+      specs: { horsepower: 797, topSpeed: 203, zeroToSixty: 3.6, seats: 5, transmission: "8-speed automatic", drivetrain: "Rear-wheel drive" },
+    },
+    {
+      slug: "chevrolet-corvette-c8-stingray",
+      name: "Chevrolet Corvette C8 Stingray",
+      make: "Chevrolet",
+      year: 2023,
+      category: "Sports Car",
+      rating: 4.95,
+      trips: 93,
+      description:
+        "America's mid-engine supercar in Silver Flare. A 495-horsepower 6.2-litre V8 sits right behind you, good for 0–60 in 2.9 seconds, with a tan leather cockpit and a removable roof panel for the run up A1A.",
+      hour: 150,
+      day: 499,
+      deposit: 750,
+      photos: 4,
+      specs: { horsepower: 495, topSpeed: 194, zeroToSixty: 2.9, seats: 2, transmission: "8-speed dual-clutch", drivetrain: "Rear-wheel drive" },
+    },
+    {
+      slug: "chevrolet-corvette-c8-white",
+      name: "Chevrolet Corvette C8 White Edition",
+      make: "Chevrolet",
+      year: 2024,
+      category: "Sports Car",
+      rating: 4.94,
+      trips: 41,
+      description:
+        "The same mid-engine 495-horsepower V8 as the Stingray, finished in bright white over black wheels. Sharp enough for a photoshoot, quick enough to make the drive there the best part.",
+      hour: 150,
+      day: 499,
+      deposit: 750,
+      photos: 1,
+      specs: { horsepower: 495, topSpeed: 194, zeroToSixty: 2.9, seats: 2, transmission: "8-speed dual-clutch", drivetrain: "Rear-wheel drive" },
+    },
+    {
+      slug: "mercedes-benz-s-580",
+      name: "Mercedes-Benz S 580 4MATIC",
+      make: "Mercedes-Benz",
+      year: 2023,
+      category: "Luxury Sedan",
+      rating: 4.95,
+      trips: 66,
+      description:
+        "The benchmark luxury saloon. A biturbo V8 with all-wheel drive, hand-stitched leather, a panoramic roof and configurable ambient light, all behind glass so quiet the city drops away. Ideal for executive travel and big nights out.",
+      hour: 125,
+      day: 450,
+      deposit: 750,
+      photos: 4,
+      specs: { horsepower: 496, topSpeed: 130, zeroToSixty: 4.4, seats: 5, transmission: "9-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "mercedes-benz-s-class",
+      name: "Mercedes-Benz S-Class",
+      make: "Mercedes-Benz",
+      year: 2024,
+      category: "Luxury Sedan",
+      rating: 4.94,
+      trips: 58,
+      description:
+        "A gloss-black S-Class with a two-tone black and cream cabin in diamond-quilted leather, bathed in ambient light. Understated outside, sumptuous within, and exactly right for an airport run or a dinner reservation.",
+      hour: 125,
+      day: 450,
+      deposit: 750,
+      photos: 8,
+      specs: { horsepower: 429, topSpeed: 130, zeroToSixty: 4.8, seats: 5, transmission: "9-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "cadillac-escalade-sport-platinum",
+      name: "Cadillac Escalade Sport Platinum",
+      make: "Cadillac",
+      year: 2023,
+      category: "Luxury SUV",
+      rating: 4.94,
+      trips: 84,
+      description:
+        "The classic Escalade in white with a blacked-out Sport grille. A 6.2-litre V8, seating for eight and a curved OLED dash make it the easy choice for groups, airport pickups and anyone who wants to be seen arriving together.",
+      hour: 125,
+      day: 499,
+      deposit: 500,
+      photos: 6,
+      specs: { horsepower: 420, topSpeed: 112, zeroToSixty: 6.1, seats: 8, transmission: "10-speed automatic", drivetrain: "Four-wheel drive" },
+    },
+    {
+      slug: "mercedes-amg-gt-43",
+      name: "Mercedes-AMG GT 43 4-Door Coupé",
+      make: "Mercedes-AMG",
+      year: 2022,
+      category: "Sports Car",
+      rating: 4.92,
+      trips: 49,
+      description:
+        "An AMG four-door coupé in silver with a Panamericana grille, a turbocharged engine with electric boost and a driver-focused cabin. Supercar posture with four real seats, for Miami cruising and weekend escapes.",
+      hour: 125,
+      day: 399,
+      deposit: 500,
+      photos: 8,
+      specs: { horsepower: 362, topSpeed: 155, zeroToSixty: 4.8, seats: 4, transmission: "9-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "lexus-lc-500-convertible",
+      name: "Lexus LC 500 Convertible",
+      make: "Lexus",
+      year: 2022,
+      category: "Convertible",
+      rating: 4.95,
+      trips: 37,
+      description:
+        "Drop the top on some of the most striking bodywork on the road. A naturally aspirated 471-horsepower V8 with a symphonic exhaust, Mark Levinson audio and heated and ventilated leather. Made for sunset on the causeway.",
+      hour: 125,
+      day: 399,
+      deposit: 750,
+      photos: 3,
+      specs: { horsepower: 471, topSpeed: 155, zeroToSixty: 4.6, seats: 4, transmission: "10-speed automatic", drivetrain: "Rear-wheel drive" },
+    },
+    {
+      slug: "bmw-i8-roadster",
+      name: "BMW i8 Roadster",
+      make: "BMW",
+      year: 2019,
+      category: "Hybrid Sports Car",
+      rating: 4.91,
+      trips: 55,
+      description:
+        "Still looks like the future. A turbocharged three-cylinder and an electric motor combine for 369 horsepower, with butterfly doors, a folding soft top and electric-only running for quiet city miles.",
+      hour: 100,
+      day: 399,
+      deposit: 750,
+      photos: 3,
+      specs: { horsepower: 369, topSpeed: 155, zeroToSixty: 4.4, seats: 2, transmission: "6-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "maserati-levante",
+      name: "Maserati Levante",
+      make: "Maserati",
+      year: 2024,
+      category: "Luxury SUV",
+      rating: 4.92,
+      trips: 33,
+      description:
+        "Italian luxury in SUV form. A white Levante with the trident grille, a turbocharged engine, all-wheel drive and a leather cabin under a panoramic sunroof. Elegant enough for the evening, practical enough for the day.",
+      hour: 125,
+      day: 425,
+      deposit: 750,
+      photos: 5,
+      specs: { horsepower: 345, topSpeed: 156, zeroToSixty: 5.8, seats: 5, transmission: "8-speed automatic", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "porsche-macan",
+      name: "Porsche Macan",
+      make: "Porsche",
+      year: 2023,
+      category: "Luxury SUV",
+      rating: 4.93,
+      trips: 62,
+      description:
+        "The sports car of compact SUVs, in deep blue on black wheels. A turbocharged engine, a PDK gearbox and all-wheel drive give it Porsche handling with everyday practicality for Miami's roads.",
+      hour: 125,
+      day: 299,
+      deposit: 750,
+      photos: 5,
+      specs: { horsepower: 261, topSpeed: 144, zeroToSixty: 6.1, seats: 5, transmission: "7-speed PDK", drivetrain: "All-wheel drive" },
+    },
+    {
+      slug: "jeep-wrangler-unlimited",
+      name: "Jeep Wrangler Unlimited",
+      make: "Jeep",
+      year: 2024,
+      category: "SUV",
+      rating: 4.9,
+      trips: 108,
+      description:
+        "Lifted, blacked out and on off-road tyres. The doors and roof come off for open-air cruising, with a V6, four-wheel drive and CarPlay on the touchscreen. The beach day car, and the most fun per dollar in the fleet.",
+      hour: 75,
+      day: 175,
+      deposit: 500,
+      photos: 5,
+      specs: { horsepower: 285, topSpeed: 99, zeroToSixty: 7.0, seats: 5, transmission: "8-speed automatic", drivetrain: "Four-wheel drive" },
+    },
+  ];
+
+  return rows.map(({ hour, day, photos, ...car }) => ({
+    ...car,
+    id: `car-${car.slug}`,
+    kind: "car",
+    location: "South Beach, Miami",
+    status: "available",
+    rates: { hour, day },
+    photo: `/fleet/${car.slug}/cover.webp`,
+    gallery: fleetGallery(car.slug, photos),
+    video: null,
+    featured: false,
+    bookedRanges: [],
+  }));
+}
 
 export const HOMES: HomeListing[] = [
   {

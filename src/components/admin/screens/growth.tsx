@@ -440,7 +440,7 @@ const SITEMAP = [
   ["/", "1.0", "daily"],
   ["/cars", "0.9", "daily"],
   ["/homes", "0.9", "daily"],
-  ["/cars/[slug] · 4 cars", "0.8", "weekly"],
+  ["/cars/[slug] · 21 cars", "0.8", "weekly"],
   ["/homes/[slug] · 4 estates", "0.8", "weekly"],
   ["/subscriptions", "0.8", "weekly"],
   ["/loyalty", "0.7", "weekly"],

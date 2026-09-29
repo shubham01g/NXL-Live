@@ -301,7 +301,7 @@ export const PROMOS: Promo[] = [
 
 export const SEO_PAGES: SeoPage[] = [
   { path: "/", title: "Exotic Car & Luxury Home Rentals in Miami | NXL", description: "Rent a Rolls-Royce by the hour or a private estate by the night. Concierge delivery across South Beach, Miami. Transparent pricing, no surge.", keyword: "exotic car rental miami", indexed: true },
-  { path: "/cars", title: "Exotic Cars for Rent in Miami — Hourly, Daily & Weekly | NXL", description: "Rolls-Royce Cullinan, Bentley Bentayga, Range Rover and Escalade IQ, delivered to your door in South Beach.", keyword: "rolls royce rental miami", indexed: true },
+  { path: "/cars", title: "Exotic Cars for Rent in Miami — Hourly, Daily & Weekly | NXL", description: "Rolls-Royce, Lamborghini Urus, McLaren GT, Maybach and Corvette C8, delivered to your door in South Beach.", keyword: "rolls royce rental miami", indexed: true },
   { path: "/homes", title: "Luxury Villa & Penthouse Rentals Miami Beach | NXL", description: "Oceanfront estates and penthouses by the day, week or month, with the same concierge service as our fleet.", keyword: "luxury villa rental miami beach", indexed: true },
   { path: "/subscriptions", title: "Drive Wallet Plans | NXL", description: "Load drive credits once, earn bonus credit and an elevated loyalty tier.", keyword: "exotic car subscription", indexed: true },
   { path: "/partners", title: "Partner Program — Earn on Every Referral | NXL", description: "Hotels, concierges and charters earn commission on every rental they refer.", keyword: "", indexed: true },

@@ -8,6 +8,8 @@ import { Card, Eyebrow } from "@/components/ui/primitives";
 import { ListingCard } from "@/components/site/listing-card";
 import { Hero } from "@/components/site/hero";
 import { HomeSchema } from "@/components/site/site-schema";
+import { LoopVideo } from "@/components/ui/loop-video";
+import { FILMS } from "@/lib/data/films";
 
 export default async function HomePage() {
   const [cars, homes, plans, stats] = await Promise.all([
@@ -26,6 +28,7 @@ export default async function HomePage() {
     <>
       <HomeSchema carCount={stats.carCount} homeCount={stats.homeCount} />
       <Hero
+        video={FILMS.storefront}
         eyebrow="Certified exotic cars & private estates"
         title={
           <>
@@ -72,8 +75,8 @@ export default async function HomePage() {
                 href: "/cars",
                 index: "01",
                 title: "Cars",
-                windows: "Hourly · Daily · Weekly · Monthly",
-                body: "A sunset run in the Cullinan costs less than dinner for two. Go daily or weekly when you want more road under you.",
+                windows: "Hourly · Daily",
+                body: "A sunset run in the Cullinan costs less than dinner for two. Go daily when you want more road under you.",
               },
               {
                 href: "/homes",
@@ -135,6 +138,32 @@ export default async function HomePage() {
             {featuredCars.map((car, i) => (
               <ListingCard key={car.id} listing={car} priority={i === 0} />
             ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* ---------------------------------- on film --------------------------------- */}
+      <Section size="sm">
+        <Container>
+          <SectionHeading
+            eyebrow="On film"
+            title="See the fleet in motion."
+            description="Golden hour on Ocean Drive, doors up outside the storefront, the whole line-up on the street. This is what an NXL booking looks like."
+          />
+          <div className="mt-12 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+            <div className="relative aspect-video overflow-hidden rounded-xl border border-line bg-surface-2 lg:aspect-auto">
+              <LoopVideo {...FILMS.story} />
+            </div>
+            <div className="grid grid-cols-3 gap-3 lg:gap-4">
+              {[FILMS.arrival, FILMS.lineup, FILMS.street].map((film) => (
+                <div
+                  key={film.src}
+                  className="relative aspect-[9/16] overflow-hidden rounded-xl border border-line bg-surface-2"
+                >
+                  <LoopVideo {...film} controlClassName="bottom-2 right-2 h-8 w-8" />
+                </div>
+              ))}
+            </div>
           </div>
         </Container>
       </Section>

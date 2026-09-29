@@ -235,7 +235,7 @@ export function PartnerLinks() {
       <Panel title="Ready-made copy">
         <div className="grid gap-4 md:grid-cols-2">
           {[
-            `Our guests get the NXL fleet delivered to the door — Rolls-Royce, Bentley, Range Rover. Book here: ${referralLink(partner.code)}`,
+            `Our guests get the NXL fleet delivered to the door — Rolls-Royce, Lamborghini, McLaren, Maybach. Book here: ${referralLink(partner.code)}`,
             `Planning a stay in Miami? Private estates and exotic cars from NXL, with concierge delivery: ${referralLink(partner.code, "/homes")}`,
           ].map((t) => (
             <div key={t} className="rounded-lg border border-line bg-ink/40 p-4 text-sm text-cream/85">

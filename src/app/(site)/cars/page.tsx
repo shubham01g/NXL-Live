@@ -7,7 +7,7 @@ import { ListingBrowser } from "@/components/site/listing-browser";
 export const metadata: Metadata = {
   title: "Exotic Cars",
   description:
-    "Browse the NXL fleet — the Rolls-Royce Cullinan Black Badge, Cadillac Escalade IQ, Range Rover Autobiography and Bentley Bentayga, available by the hour, day, week or month with concierge delivery across South Beach, Miami.",
+    "Browse the NXL fleet — Rolls-Royce Cullinan and Wraith, Lamborghini Urus, McLaren GT, Mercedes-Maybach, Corvette C8 and more, available by the hour or the day with concierge delivery across South Beach, Miami.",
   alternates: { canonical: "/cars" },
 };
 
@@ -21,7 +21,7 @@ export default async function CarsPage() {
       <PageHero
         eyebrow="The fleet"
         title={<span className="text-metal block">Exotic Cars</span>}
-        lede={`Book by the hour — your dream car, no full-day commitment. Daily, weekly and monthly windows when you want more road. Rates start at ${money(entryRate)} an hour, and the price you see is the price you pay.`}
+        lede={`Book by the hour — your dream car, no full-day commitment. Daily rates when you want more road, and weekly rates on select cars. Rates start at ${money(entryRate)} an hour, and the price you see is the price you pay.`}
         aside={
           <p className="flex items-center gap-2.5 text-sm text-muted lg:justify-end">
             <span aria-hidden className="h-2 w-2 animate-live rounded-full bg-success" />

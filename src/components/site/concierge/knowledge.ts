@@ -87,7 +87,7 @@ const RULES: Rule[] = [
         "",
         ...CARS.map(bullet),
         "",
-        "Cars book by the hour, day, week or month — there is no 24-hour minimum.",
+        "Cars book by the hour or the day, with weekly and monthly rates on select cars — there is no 24-hour minimum.",
       ].join("\n"),
       suggestions: ["What are the subscription plans?", "Do you deliver?"],
     }),

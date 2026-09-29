@@ -3,15 +3,15 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { Container } from "@/components/ui/layout";
 import { Eyebrow } from "@/components/ui/primitives";
+import { LoopVideo } from "@/components/ui/loop-video";
+import type { MediaVideo } from "@/lib/domain/types";
 
 /**
  * Full-bleed homepage hero.
  *
- * Designed to stand on its own without photography — the client's fleet
- * images are still to come, so the backdrop is a built composition (layered
- * gradients, a gold horizon glow and film grain) rather than an empty frame.
- * Pass `image` once real art direction lands and it drops straight in behind
- * the same scrim.
+ * Without media the backdrop is a built composition (layered gradients, a gold
+ * horizon glow and film grain) rather than an empty frame. Pass `image` or a
+ * looping `video` and it drops in behind the same scrim.
  */
 export function Hero({
   eyebrow,
@@ -20,6 +20,7 @@ export function Hero({
   actions,
   children,
   image,
+  video,
 }: {
   eyebrow: string;
   title: ReactNode;
@@ -27,10 +28,23 @@ export function Hero({
   actions?: ReactNode;
   children?: ReactNode;
   image?: string | null;
+  video?: MediaVideo | null;
 }) {
   return (
     <section className="relative isolate flex min-h-[88svh] items-end overflow-hidden pb-16 pt-32">
-      <HeroBackdrop image={image} />
+      {video ? (
+        <div className="absolute inset-0 -z-10">
+          <LoopVideo
+            src={video.src}
+            poster={video.poster ?? ""}
+            label={video.label}
+            controlClassName="bottom-auto top-4 sm:top-28"
+            overlay={<HeroScrim film />}
+          />
+        </div>
+      ) : (
+        <HeroBackdrop image={image} />
+      )}
 
       <Container className="relative">
         <div className="max-w-3xl animate-rise">
@@ -66,6 +80,18 @@ function HeroBackdrop({ image }: { image?: string | null }) {
         </>
       )}
 
+      <HeroScrim />
+    </div>
+  );
+}
+
+/** `film` adds a side scrim: live footage is busier than the built backdrop. */
+function HeroScrim({ film = false }: { film?: boolean }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      {film ? (
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/10 max-md:bg-ink/55" />
+      ) : null}
       {/* Legibility scrim, kept light enough not to flatten the light above. */}
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/15" />
       {/* Soft vignette to settle the corners without crushing them. */}
