@@ -385,7 +385,7 @@ function ListingEditor({
                 </div>
               ))}
             </div>
-            <FileDrop label="Add a photo" hint="JPG or PNG. Stored in this browser until uploads go live." value={null} accept="image/*" onChange={(v) => v && setDraft((d) => ({ ...d, gallery: [...d.gallery, v], photo: d.photo ?? v }) as Listing)} />
+            <FileDrop label="Add a photo" hint="JPG or PNG. Stored in this browser until uploads go live." value={null} accept="image/*" scan="photo" onChange={(v) => v && setDraft((d) => ({ ...d, gallery: [...d.gallery, v], photo: d.photo ?? v }) as Listing)} />
           </div>
         ) : (
           <div className="space-y-5">

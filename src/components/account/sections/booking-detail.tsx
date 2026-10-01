@@ -6,7 +6,7 @@ import { ArrowLeft, Check, LocateFixed, MessageCircle, Phone, RotateCcw, Star, X
 import { cn } from "@/lib/utils/cn";
 import { money } from "@/lib/domain/format";
 import { unitLabel } from "@/lib/domain/pricing";
-import type { Driver, Reservation } from "@/lib/domain/operations";
+import { cashToCollect, depositTerms, paidWith, type Driver, type Reservation } from "@/lib/domain/operations";
 import type { Review } from "@/lib/domain/types";
 import { useMember } from "@/lib/auth/use-session";
 import { cancelBooking, canCancel, FREE_CANCEL_MS, listingFor, reportRenterPosition, useMemberBookings } from "@/lib/data/member-bookings";
@@ -200,11 +200,14 @@ export function BookingDetail({ id }: { id: string }) {
               </DetailRow>
             ) : null}
             <DetailRow label="Deposit">
-              {money(r.deposit)} · <span className="capitalize">{r.depositStatus}</span>
+              {money(r.deposit)} · <span className="capitalize">{r.depositStatus}</span> · {depositTerms(r)}
             </DetailRow>
-            <DetailRow label="Paid with">
-              {r.payment?.method === "wallet" ? "Drive Wallet" : r.payment?.method === "split" ? `Wallet + card ···· ${r.payment.last4}` : r.payment?.last4 ? `Card ···· ${r.payment.last4}` : "Card"}
-            </DetailRow>
+            <DetailRow label="Paid with">{paidWith(r)}</DetailRow>
+            {cashToCollect(r).total > 0 && r.status !== "cancelled" ? (
+              <DetailRow label="Bring to pickup">
+                <span className="text-gold">{money(cashToCollect(r).total)} cash</span>
+              </DetailRow>
+            ) : null}
             {r.promoCode ? <DetailRow label="Promo">{r.promoCode}</DetailRow> : null}
           </dl>
         </Panel>

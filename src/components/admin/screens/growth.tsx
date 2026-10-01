@@ -912,7 +912,7 @@ function BroadcastComposer({ customers, broadcasts, actor }: { customers: Custom
           <Field label="Title" htmlFor="bc-title"><Input id="bc-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Art Basel week — members first" /></Field>
           <Field label="Message" htmlFor="bc-body"><Textarea id="bc-body" rows={4} value={body} onChange={(e) => setBody(e.target.value)} /></Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FileDrop label="Image (optional)" value={media} onChange={setMedia} accept="image/*" aspect="aspect-[16/9]" />
+            <FileDrop label="Image (optional)" value={media} onChange={setMedia} accept="image/*" scan={false} aspect="aspect-[16/9]" />
             <Field label="…or image / video URL" htmlFor="bc-url"><Input id="bc-url" value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} placeholder="https://" /></Field>
           </div>
           <div className="flex flex-wrap gap-4 rounded-lg border border-line bg-ink/40 p-3 text-sm text-cream">

@@ -21,32 +21,8 @@ import { DetailRow, Panel } from "../panel";
 export function LicencePanel() {
   const member = useMember();
   const [editing, setEditing] = useState(false);
-  const [front, setFront] = useState<string | null>(null);
-  const [back, setBack] = useState<string | null>(null);
-  const [number, setNumber] = useState("");
-  const [state, setState] = useState("FL");
-  const [expiry, setExpiry] = useState("");
-  const [error, setError] = useState<string | null>(null);
   if (!member) return null;
   const licence = member.licence ?? null;
-
-  function submit() {
-    if (!front) return setError("Add a photo of the front of your licence.");
-    if (number.trim().length < 5) return setError("Enter your licence number.");
-    if (!/^[A-Za-z]{2}$/.test(state.trim())) return setError("Use the two-letter issuing state.");
-    const expiresAt = expiry ? new Date(`${expiry}T00:00:00`).getTime() : NaN;
-    if (!Number.isFinite(expiresAt)) return setError("Enter the expiry date.");
-    if (expiresAt < Date.now()) return setError("That licence has expired.");
-    updateMember((m) => ({
-      ...m,
-      licence: { number: number.trim().toUpperCase(), state: state.trim().toUpperCase(), expiresAt, front, back, status: "pending", submittedAt: Date.now() },
-    }));
-    raiseAlert("booking", "Licence to review", `${member?.name} uploaded a driver's licence.`);
-    logAudit(member!.name, "member.licence_uploaded", member!.email, `${state.toUpperCase()} licence`);
-    setEditing(false);
-    setError(null);
-    toast("Licence submitted — the team reviews it before your next delivery.");
-  }
 
   const statusTone = licence?.status === "verified" ? "success" : licence?.status === "rejected" ? "danger" : "warning";
 
@@ -87,38 +63,76 @@ export function LicencePanel() {
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-gold/40 text-gold">
             <IdCard aria-hidden width={20} height={20} />
           </span>
-          <p className="flex-1 text-sm text-muted">No licence on file yet. It takes a minute — snap the front and back with your phone.</p>
+          <p className="flex-1 text-sm text-muted">No licence on file yet. It takes a minute — scan the front and back with your camera, or upload photos.</p>
           <Button size="sm" onClick={() => setEditing(true)}>Add licence</Button>
         </div>
       ) : (
-        <div className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FileDrop label="Front" value={front} onChange={setFront} capture="environment" accept="image/*" hint="Photo or scan" />
-            <FileDrop label="Back" value={back} onChange={setBack} capture="environment" accept="image/*" hint="Optional" />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Licence number" htmlFor="lic-no" required>
-              <Input id="lic-no" value={number} onChange={(e) => setNumber(e.target.value)} className="font-mono uppercase" />
-            </Field>
-            <Field label="State" htmlFor="lic-state" required>
-              <Input id="lic-state" maxLength={2} value={state} onChange={(e) => setState(e.target.value.toUpperCase())} />
-            </Field>
-            <Field label="Expires" htmlFor="lic-exp" required>
-              <Input id="lic-exp" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} />
-            </Field>
-          </div>
-          {error ? <Alert tone="danger">{error}</Alert> : null}
-          <div className="flex gap-3">
-            <Button onClick={submit}>Submit for review</Button>
-            <Button variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
-          </div>
-        </div>
+        <LicenceForm onDone={() => setEditing(false)} onCancel={() => setEditing(false)} />
       )}
     </Panel>
   );
 }
 
-/** The declarations page for an own policy — speeds up verification. */
+/**
+ * Front, back and the details — saved to the member's account as "pending"
+ * for the team to review. Used on the Insurance tab and inside checkout.
+ */
+export function LicenceForm({ onDone, onCancel }: { onDone?: () => void; onCancel?: () => void }) {
+  const member = useMember();
+  const [front, setFront] = useState<string | null>(null);
+  const [back, setBack] = useState<string | null>(null);
+  const [number, setNumber] = useState("");
+  const [state, setState] = useState("FL");
+  const [expiry, setExpiry] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  if (!member) return null;
+
+  function submit() {
+    if (!front) return setError("Scan or upload the front of your licence.");
+    if (!back) return setError("Scan or upload the back of your licence.");
+    if (number.trim().length < 5) return setError("Enter your licence number.");
+    if (!/^[A-Za-z]{2}$/.test(state.trim())) return setError("Use the two-letter issuing state.");
+    const expiresAt = expiry ? new Date(`${expiry}T00:00:00`).getTime() : NaN;
+    if (!Number.isFinite(expiresAt)) return setError("Enter the expiry date.");
+    if (expiresAt < Date.now()) return setError("That licence has expired.");
+    updateMember((m) => ({
+      ...m,
+      licence: { number: number.trim().toUpperCase(), state: state.trim().toUpperCase(), expiresAt, front, back, status: "pending", submittedAt: Date.now() },
+    }));
+    raiseAlert("booking", "Licence to review", `${member?.name} uploaded a driver's licence.`);
+    logAudit(member!.name, "member.licence_uploaded", member!.email, `${state.toUpperCase()} licence · front and back`);
+    setError(null);
+    toast("Licence submitted — the team reviews it before your next delivery.");
+    onDone?.();
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FileDrop label="Licence front" value={front} onChange={setFront} scan="card" accept="image/*" />
+        <FileDrop label="Licence back" value={back} onChange={setBack} scan="card" accept="image/*" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Field label="Licence number" htmlFor="lic-no" required>
+          <Input id="lic-no" value={number} onChange={(e) => setNumber(e.target.value)} className="font-mono uppercase" />
+        </Field>
+        <Field label="State" htmlFor="lic-state" required>
+          <Input id="lic-state" maxLength={2} value={state} onChange={(e) => setState(e.target.value.toUpperCase())} />
+        </Field>
+        <Field label="Expires" htmlFor="lic-exp" required>
+          <Input id="lic-exp" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} />
+        </Field>
+      </div>
+      {error ? <Alert tone="danger">{error}</Alert> : null}
+      <div className="flex gap-3">
+        <Button type="button" onClick={submit}>Submit for review</Button>
+        {onCancel ? <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button> : null}
+      </div>
+    </div>
+  );
+}
+
+/** Insurance card or declarations page for an own policy — speeds up verification. */
 export function PolicyDocument() {
   const member = useMember();
   if (!member?.insurance || member.insurance.kind !== "own") return null;
@@ -126,8 +140,8 @@ export function PolicyDocument() {
   return (
     <div className="mt-5">
       <FileDrop
-        label="Declarations page"
-        hint="PDF or photo — verification is faster with it"
+        label="Insurance card or declarations page"
+        hint="Scan it, upload a photo, or drop a PDF — verification is faster with it"
         value={doc}
         aspect="aspect-[3/1]"
         onChange={(value) => {

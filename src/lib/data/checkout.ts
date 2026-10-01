@@ -1,7 +1,7 @@
 "use client";
 
 import type { InsuranceChoice, Listing, MemberAccount, PaymentCard, RateUnit } from "@/lib/domain/types";
-import type { Promo, Reservation } from "@/lib/domain/operations";
+import type { PayMethod, Promo, Reservation } from "@/lib/domain/operations";
 import type { Settlement } from "@/lib/domain/pricing";
 import { durationMs, overlaps } from "@/lib/domain/pricing";
 import { geocode } from "@/lib/domain/geo";
@@ -16,7 +16,9 @@ import { updateMember } from "@/lib/auth/use-session";
  * Placing a booking.
  *
  * At M2 "payment" is a card form whose last four digits are stored and whose
- * charge is simulated; the processor arrives at M5. Everything else a real
+ * charge is simulated; the processor arrives at M5. Guests can also pay the
+ * rental and/or the deposit in cash at pickup — those are recorded as due and
+ * marked received by staff or the delivering driver. Everything else a real
  * booking does happens for real in the demo store: the reservation row the
  * back office dispatches, the member's rental, wallet deduction, points,
  * reminders, the partner attribution and the audit line.
@@ -37,6 +39,9 @@ export interface BookingDraft {
   quoteDeposit: number;
   promoCode: string | null;
   card: { last4: string; brand: PaymentCard["brand"] } | null;
+  /** How the rental balance (after wallet credit) is paid. */
+  payMethod: PayMethod;
+  depositMethod: PayMethod;
   partnerCode: string | null;
   notes: string | null;
 }
@@ -86,10 +91,14 @@ export function placeBooking(draft: BookingDraft, member: MemberAccount): Reserv
     pickupPoint,
     driverJob: null,
     inspections: [],
-    payment: {
-      method: s.walletApplied > 0 ? (s.cardCharge > 0 ? "split" : "wallet") : "card",
-      last4: s.cardCharge > 0 ? (draft.card?.last4 ?? null) : null,
-    },
+    payment:
+      draft.payMethod === "cash" && s.cardCharge > 0
+        ? { method: "cash", last4: null, cashReceivedAt: null }
+        : {
+            method: s.walletApplied > 0 ? (s.cardCharge > 0 ? "split" : "wallet") : "card",
+            last4: s.cardCharge > 0 ? (draft.card?.last4 ?? null) : null,
+          },
+    depositMethod: draft.depositMethod,
     walletApplied: s.walletApplied,
     pointsRedeemed: s.pointsUsed,
     promoCode: draft.promoCode,
@@ -135,7 +144,7 @@ export function placeBooking(draft: BookingDraft, member: MemberAccount): Reserv
     "New online reservation",
     `${draft.guestName} booked the ${listing.name} (${unitLabel(draft.unit, draft.qty)})${draft.delivery ? ` — deliver to ${draft.delivery}` : ""}.`,
   );
-  logAudit(member.name, "reservation.created", reservation.reference, `${listing.name} · $${s.total.toLocaleString()} · ${reservation.channel}${draft.partnerCode ? ` (${draft.partnerCode})` : ""}`);
+  logAudit(member.name, "reservation.created", reservation.reference, `${listing.name} · ${s.total.toLocaleString()} · ${draft.payMethod === "cash" && s.cardCharge > 0 ? "cash at pickup" : "card"} · ${reservation.channel}${draft.partnerCode ? ` (${draft.partnerCode})` : ""}`);
 
   return reservation;
 }

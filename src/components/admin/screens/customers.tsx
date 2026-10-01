@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarPlus, KeyRound, MessageSquare, Pencil } from "lucide-react";
+import { CalendarPlus, IdCard, KeyRound, MessageSquare, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Avatar } from "@/components/account/avatar";
 import { TierChip } from "@/components/account/tier-chip";
@@ -14,6 +14,7 @@ import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { StatGrid } from "@/components/ui/layout";
 import { Drawer, Modal } from "@/components/ui/overlay";
 import { Badge } from "@/components/ui/primitives";
+import { FileDrop } from "@/components/ui/file-drop";
 import { Tabs } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
 import { count, money, relativeTime, shortDate } from "@/lib/domain/format";
@@ -176,6 +177,7 @@ function CustomerDrawer({
   const [tab, setTab] = useState<DrawerTab>("overview");
   const [editing, setEditing] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
   const [adjust, setAdjust] = useState<"credits" | "points" | null>(null);
   const member = readCollection<MemberAccount>(C.members, []).find((m) => m.email === c.email) ?? null;
   const licence = member?.licence ?? null;
@@ -256,7 +258,11 @@ function CustomerDrawer({
           <Block
             title="Driver's licence"
             action={
-              actor.isMaster && (c.license || licence) ? (
+              !c.license && !licence ? (
+                <Button size="sm" variant="outline" onClick={() => setScanOpen(true)}>
+                  <IdCard aria-hidden width={14} height={14} /> Scan licence
+                </Button>
+              ) : actor.isMaster && (c.license || licence) ? (
                 <span className="flex items-center gap-2 text-xs text-muted">
                   Verified
                   <Toggle
@@ -288,9 +294,22 @@ function CustomerDrawer({
                 <p className="text-sm text-cream">{licence.state} · {licence.number} · expires {shortDate(licence.expiresAt)} · <span className="capitalize">{licence.status}</span></p>
               </div>
             ) : c.license ? (
-              <p className="text-sm text-cream">{c.license.state} · {c.license.number} · expires {shortDate(c.license.expiresAt)} · {c.license.verified ? "verified" : "pending review"}</p>
+              <div className="space-y-3">
+                {c.license.front || c.license.back ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {[c.license.front, c.license.back].map((img, n) =>
+                      img ? (
+                        // Scanned at the desk, stored as a data URL at M2.
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={n} src={img} alt={`Licence ${n ? "back" : "front"}`} className="aspect-[16/10] w-full rounded-md border border-line object-cover" />
+                      ) : null,
+                    )}
+                  </div>
+                ) : null}
+                <p className="text-sm text-cream">{c.license.state} · {c.license.number} · expires {shortDate(c.license.expiresAt)} · {c.license.verified ? "verified" : "pending review"}</p>
+              </div>
             ) : (
-              <p className="text-sm text-muted">No licence uploaded yet.</p>
+              <p className="text-sm text-muted">No licence on file. Scan it at the desk, or the guest can upload it from their account.</p>
             )}
           </Block>
 
@@ -420,6 +439,15 @@ function CustomerDrawer({
       )}
 
       <EditModal open={editing} c={c} partners={partners} onClose={() => setEditing(false)} onSave={(change) => update(change, "member.updated", "Profile edited")} />
+      <LicenceScanModal
+        open={scanOpen}
+        c={c}
+        onClose={() => setScanOpen(false)}
+        onSave={(license) => {
+          update({ license }, "member.licence_scanned", `${license.state} licence scanned at the desk`);
+          syncMember(c.email, (m) => ({ ...m, licence: { number: license.number, state: license.state, expiresAt: license.expiresAt, front: license.front ?? null, back: license.back ?? null, status: "verified", submittedAt: timestamp() } }));
+        }}
+      />
       <CardModal open={cardOpen} c={c} onClose={() => setCardOpen(false)} onSave={(card) => { update({ card }, "member.card_updated", `Card ···· ${card.last4}`); syncMember(c.email, (m) => ({ ...m, card })); }} />
       <AdjustModal kind={adjust} c={c} onClose={() => setAdjust(null)} onSave={(delta, reason) => {
         if (adjust === "credits") {
@@ -494,6 +522,63 @@ function EditModal({ open, c, partners, onClose, onSave }: { open: boolean; c: C
           Level Rewards enrolled
           <Toggle label="Enrolled" checked={form.enrolled} onChange={(v) => setForm({ ...form, enrolled: v })} />
         </label>
+      </div>
+    </Modal>
+  );
+}
+
+/** Front and back scanned in person — staff have seen the original, so it is saved as verified. */
+function LicenceScanModal({ open, c, onClose, onSave }: { open: boolean; c: Customer; onClose: () => void; onSave: (license: NonNullable<Customer["license"]>) => void }) {
+  const [front, setFront] = useState<string | null>(null);
+  const [back, setBack] = useState<string | null>(null);
+  const [number, setNumber] = useState("");
+  const [state, setState] = useState("FL");
+  const [expiry, setExpiry] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  function save() {
+    if (!front || !back) return setError("Scan or upload both sides of the licence.");
+    if (number.trim().length < 5) return setError("Enter the licence number.");
+    if (!/^[A-Za-z]{2}$/.test(state.trim())) return setError("Use the two-letter issuing state.");
+    const expiresAt = expiry ? new Date(`${expiry}T00:00:00`).getTime() : NaN;
+    if (!Number.isFinite(expiresAt)) return setError("Enter the expiry date.");
+    if (expiresAt < timestamp()) return setError("That licence has expired.");
+    onSave({ number: number.trim().toUpperCase(), state: state.trim().toUpperCase(), expiresAt, verified: true, front, back });
+    toast("Licence saved and verified.");
+    onClose();
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      size="lg"
+      title={`Scan ${c.name}'s licence`}
+      description="Scan both sides with this device's camera, or upload photos."
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={save}>Save licence</Button>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FileDrop label="Licence front" value={front} onChange={setFront} scan="card" accept="image/*" />
+          <FileDrop label="Licence back" value={back} onChange={setBack} scan="card" accept="image/*" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Licence number" htmlFor="cl-no" required>
+            <Input id="cl-no" value={number} onChange={(e) => setNumber(e.target.value)} className="font-mono uppercase" />
+          </Field>
+          <Field label="State" htmlFor="cl-state" required>
+            <Input id="cl-state" maxLength={2} value={state} onChange={(e) => setState(e.target.value.toUpperCase())} />
+          </Field>
+          <Field label="Expires" htmlFor="cl-exp" required>
+            <Input id="cl-exp" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} />
+          </Field>
+        </div>
+        {error ? <Alert tone="danger">{error}</Alert> : null}
       </div>
     </Modal>
   );

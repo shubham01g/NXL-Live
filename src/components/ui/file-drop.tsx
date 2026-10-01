@@ -1,11 +1,17 @@
 "use client";
 
-import { useId, useState } from "react";
-import { Camera, FileText, Upload, X } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { Camera, FileText, RotateCcw, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { cameraSupported, ScannerModal, type ScanShape } from "./document-scanner";
 
 /**
- * Document and photo upload.
+ * Document and photo upload, with a camera scan beside it.
+ *
+ * Every document slot offers both: "Scan" opens the in-page scanner (rear
+ * camera, a guide frame, cropped to the card or page), "Upload" opens the
+ * file picker or takes a drop. Where the browser has no camera API, Scan
+ * falls back to the device's own camera app.
  *
  * At M2 files never leave the browser: images are downscaled to ~1200px JPEG
  * (so a licence photo fits in localStorage) and PDFs are kept only by name.
@@ -43,7 +49,7 @@ export function FileDrop({
   value,
   onChange,
   accept = "image/*,application/pdf",
-  capture,
+  scan = "document",
   aspect = "aspect-[16/10]",
   className,
 }: {
@@ -52,13 +58,15 @@ export function FileDrop({
   value: string | null;
   onChange: (value: string | null) => void;
   accept?: string;
-  /** "environment" opens the rear camera on phones — for licences and walk-arounds. */
-  capture?: "user" | "environment";
+  /** Shape of the scanner's guide frame — "card" for licences and insurance cards; `false` hides Scan. */
+  scan?: ScanShape | false;
   aspect?: string;
   className?: string;
 }) {
   const id = useId();
+  const cameraInput = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function take(file: File | undefined) {
@@ -67,6 +75,12 @@ export function FileDrop({
     const res = await readUpload(file);
     if (res.ok) onChange(res.value);
     else setError(res.error);
+  }
+
+  function startScan() {
+    setError(null);
+    if (cameraSupported()) setScanning(true);
+    else cameraInput.current?.click();
   }
 
   return (
@@ -84,18 +98,29 @@ export function FileDrop({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={value} alt={label} className="h-full w-full object-cover" />
           )}
-          <button
-            type="button"
-            onClick={() => onChange(null)}
-            aria-label={`Remove ${label}`}
-            className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-ink/80 text-cream backdrop-blur hover:text-danger"
-          >
-            <X width={14} height={14} />
-          </button>
+          <div className="absolute right-2 top-2 flex gap-1.5">
+            {scan ? (
+              <button
+                type="button"
+                onClick={startScan}
+                aria-label={`Re-scan ${label}`}
+                className="grid h-8 w-8 place-items-center rounded-full bg-ink/80 text-cream backdrop-blur hover:text-gold"
+              >
+                <RotateCcw width={14} height={14} />
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              aria-label={`Remove ${label}`}
+              className="grid h-8 w-8 place-items-center rounded-full bg-ink/80 text-cream backdrop-blur hover:text-danger"
+            >
+              <X width={14} height={14} />
+            </button>
+          </div>
         </div>
       ) : (
-        <label
-          htmlFor={id}
+        <div
           onDragOver={(e) => {
             e.preventDefault();
             setOver(true);
@@ -107,28 +132,55 @@ export function FileDrop({
             void take(e.dataTransfer.files[0]);
           }}
           className={cn(
-            "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 text-center transition-colors",
+            "flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-4 text-center transition-colors",
             aspect,
-            over ? "border-gold bg-gold/5" : "border-line-strong bg-ink/40 hover:border-gold/60",
+            over ? "border-gold bg-gold/5" : "border-line-strong bg-ink/40",
           )}
         >
-          {capture ? (
-            <Camera aria-hidden width={22} height={22} className="text-gold" />
-          ) : (
-            <Upload aria-hidden width={22} height={22} className="text-gold" />
-          )}
-          <span className="text-sm text-cream">{capture ? "Take a photo or upload" : "Drop a file or browse"}</span>
-          {hint ? <span className="text-xs text-muted-dim">{hint}</span> : null}
-          <input
-            id={id}
-            type="file"
-            accept={accept}
-            capture={capture}
-            className="sr-only"
-            onChange={(e) => void take(e.target.files?.[0])}
-          />
-        </label>
+          <div className="flex flex-wrap justify-center gap-2">
+            {scan ? (
+              <button
+                type="button"
+                onClick={startScan}
+                className="inline-flex items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-3.5 py-2 text-sm font-medium text-gold transition-colors hover:bg-gold/20"
+              >
+                <Camera aria-hidden width={15} height={15} /> Scan
+              </button>
+            ) : null}
+            <label
+              htmlFor={id}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line-strong px-3.5 py-2 text-sm text-cream transition-colors hover:border-gold/60"
+            >
+              <Upload aria-hidden width={15} height={15} /> Upload
+            </label>
+          </div>
+          <span className="text-xs text-muted-dim">{hint ?? (scan ? "Scan with your camera, upload, or drop a file" : "Upload or drop a file")}</span>
+        </div>
       )}
+      <input id={id} type="file" accept={accept} className="sr-only" onChange={(e) => { void take(e.target.files?.[0]); e.target.value = ""; }} />
+      {scan ? (
+        <>
+          {/* Fallback: the device's own camera app, for browsers without the camera API. */}
+          <input
+            ref={cameraInput}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            tabIndex={-1}
+            aria-hidden
+            className="sr-only"
+            onChange={(e) => { void take(e.target.files?.[0]); e.target.value = ""; }}
+          />
+          <ScannerModal
+            open={scanning}
+            label={label}
+            shape={scan}
+            onCapture={(file) => void take(file)}
+            onClose={() => setScanning(false)}
+            onFallback={() => cameraInput.current?.click()}
+          />
+        </>
+      ) : null}
       {error ? <p className="mt-2 text-xs text-danger">{error}</p> : null}
     </div>
   );

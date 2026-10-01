@@ -98,6 +98,40 @@ export interface Closeout {
   refunded: Money;
 }
 
+/** What a guest can pay with — for the rental and, separately, the deposit. */
+export type PayMethod = "card" | "cash";
+
+export interface ReservationPayment {
+  /** "split" is Drive Wallet + card; wallet + cash is "cash" with `walletApplied`. */
+  method: "card" | "wallet" | "cash" | "split";
+  last4: string | null;
+  /** Cash bookings are paid in person; set when staff or the driver take it. */
+  cashReceivedAt?: number | null;
+}
+
+/** Cash still to collect in person: the unpaid rental and a cash deposit. */
+export function cashToCollect(r: Pick<Reservation, "total" | "walletApplied" | "payment" | "deposit" | "depositMethod" | "depositStatus">) {
+  const rental = r.payment?.method === "cash" && !r.payment.cashReceivedAt ? r.total - (r.walletApplied ?? 0) : 0;
+  const deposit = r.depositMethod === "cash" && r.depositStatus === "held" ? r.deposit : 0;
+  return { rental, deposit, total: rental + deposit };
+}
+
+/** "Card ···· 4242", "Drive Wallet + cash at pickup", … */
+export function paidWith(r: Pick<Reservation, "payment" | "walletApplied">): string {
+  const p = r.payment;
+  const parts: string[] = [];
+  if (r.walletApplied || p?.method === "wallet" || p?.method === "split") parts.push("Drive Wallet");
+  if (p?.method === "cash") parts.push(p.cashReceivedAt ? "cash (received)" : "cash at pickup");
+  else if (p?.last4) parts.push(`card ···· ${p.last4}`);
+  const label = parts.join(" + ") || "card";
+  return label[0].toUpperCase() + label.slice(1);
+}
+
+/** How the deposit is taken, for receipts. */
+export function depositTerms(r: Pick<Reservation, "depositMethod">): string {
+  return r.depositMethod === "cash" ? "cash at pickup" : "card hold at pickup";
+}
+
 /** A booking as the back office sees it: who brought it and who delivers it. */
 export interface Reservation extends Booking {
   channel: BookingChannel;
@@ -112,7 +146,9 @@ export interface Reservation extends Booking {
   driverJob?: DriverJobStatus | null;
   inspections?: Inspection[];
   carPosition?: CarPosition | null;
-  payment?: { method: "card" | "wallet" | "cash" | "split"; last4: string | null } | null;
+  payment?: ReservationPayment | null;
+  /** How the security deposit is taken at pickup. Absent on older rows = card hold. */
+  depositMethod?: PayMethod;
   walletApplied?: Money;
   pointsRedeemed?: number;
   promoCode?: string | null;
@@ -172,7 +208,8 @@ export interface Customer {
   card?: PaymentCard | null;
   insurance?: InsurancePolicy | null;
   address?: BillingAddress | null;
-  license?: { number: string; state: string; expiresAt: number; verified: boolean } | null;
+  /** Images are set when staff scan the licence at the desk. */
+  license?: { number: string; state: string; expiresAt: number; verified: boolean; front?: string | null; back?: string | null } | null;
   suspended?: boolean;
 }
 

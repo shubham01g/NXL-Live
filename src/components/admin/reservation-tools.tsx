@@ -8,8 +8,8 @@ import { durationMs, PRICING, quote, unitAdverb, unitLabel, unitsFor } from "@/l
 import { geocode } from "@/lib/domain/geo";
 import { EMPTY_CARD, parseCard, type CardInput } from "@/lib/domain/account";
 import type { InsuranceChoice, Listing, RateUnit } from "@/lib/domain/types";
-import type { Customer, Driver, Inspection, Reservation, StaffMember } from "@/lib/domain/operations";
-import { STAFF_ROLE_LABEL, canAccess } from "@/lib/domain/operations";
+import type { Customer, Driver, Inspection, PayMethod, Reservation, StaffMember } from "@/lib/domain/operations";
+import { STAFF_ROLE_LABEL, canAccess, cashToCollect, depositTerms, paidWith } from "@/lib/domain/operations";
 import { useStaff } from "@/lib/auth/staff-session";
 import { C, logAudit, nextReference, notify, raiseAlert, scheduleReminders, updateReservation } from "@/lib/data/demo";
 import { create } from "@/lib/data/demo-store";
@@ -119,6 +119,18 @@ export function ReservationDrawer({
                 Cancel booking
               </Button>
             ) : null}
+            {r.payment?.method === "cash" && !r.payment.cashReceivedAt ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const due = cashToCollect(r).rental;
+                  updateReservation(r, { payment: { ...r.payment!, cashReceivedAt: timestamp() } }, actor.name, "payment.cash_received", `${money(due)} cash`);
+                  toast(`${money(due)} cash recorded for ${r.reference}.`);
+                }}
+              >
+                <Banknote aria-hidden width={15} height={15} /> Cash received
+              </Button>
+            ) : null}
             {r.depositStatus === "held" && actor.isMaster ? (
               <Button variant="outline" onClick={() => onDeposit(r)}>
                 <Banknote aria-hidden width={15} height={15} /> Collect deposit
@@ -141,8 +153,8 @@ export function ReservationDrawer({
         <section className="grid gap-3 sm:grid-cols-2">
           <Info label="Guest" value={r.guestName} sub={`${r.email} · ${r.phone}`} />
           <Info label="Rental" value={unitLabel(r.unit, r.qty)} sub={`${r.insurance === "nxl" ? "NXL coverage" : r.insurance === "own" ? "Own policy" : "Insurance —"}`} />
-          <Info label="Total" value={money(r.total)} sub={r.payment?.last4 ? `Card ···· ${r.payment.last4}${r.walletApplied ? ` + ${money(r.walletApplied)} wallet` : ""}` : r.payment?.method === "cash" ? "Cash" : r.payment?.method === "wallet" ? "Drive Wallet" : "—"} />
-          <Info label="Deposit" value={`${money(r.deposit)} · ${r.depositStatus}`} sub={r.closeout ? `Refunded ${money(r.closeout.refunded)} · by ${r.closeout.by}` : "Hold placed at pickup"} />
+          <Info label="Total" value={money(r.total)} sub={`${paidWith(r)}${r.walletApplied ? ` · ${money(r.walletApplied)} wallet` : ""}`} />
+          <Info label="Deposit" value={`${money(r.deposit)} · ${r.depositStatus}`} sub={r.closeout ? `Refunded ${money(r.closeout.refunded)} · by ${r.closeout.by}` : depositTerms(r)} />
           {r.listingKind === "car" ? <Info label="Delivery" value={r.deliveryAddress ?? "Depot pickup"} sub={r.pickupAddress ? `Collect from ${r.pickupAddress}` : "Return to depot"} /> : null}
           {r.notes ? <Info label="Guest notes" value={r.notes} /> : null}
         </section>
@@ -278,7 +290,7 @@ export function InspectionReport({ inspection: i }: { inspection: Inspection }) 
 
 export function DepositModal({ r, onClose }: { r: Reservation | null; onClose: () => void }) {
   const actor = useActor();
-  const [method, setMethod] = useState<"card" | "cash">("card");
+  const [method, setMethod] = useState<PayMethod>(r?.depositMethod ?? "card");
   const [busy, setBusy] = useState(false);
   if (!r) return null;
   return (
@@ -297,7 +309,7 @@ export function DepositModal({ r, onClose }: { r: Reservation | null; onClose: (
             onClick={async () => {
               setBusy(true);
               await new Promise((res) => setTimeout(res, 900));
-              updateReservation(r, { depositStatus: "charged" }, actor.name, "deposit.charged", `${money(r.deposit)} by ${method}`);
+              updateReservation(r, { depositStatus: "charged", depositMethod: method }, actor.name, "deposit.charged", `${money(r.deposit)} by ${method}`);
               toast(`${money(r.deposit)} deposit collected by ${method}.`);
               setBusy(false);
               onClose();
@@ -468,7 +480,8 @@ export function NewReservationModal({
   const [driverId, setDriverId] = useState("");
   const [notes, setNotes] = useState("");
   const [insurance, setInsurance] = useState<InsuranceChoice>("own");
-  const [method, setMethod] = useState<"card" | "cash">("card");
+  const [method, setMethod] = useState<PayMethod>("card");
+  const [depositMethod, setDepositMethod] = useState<PayMethod>("card");
   const [card, setCard] = useState<CardInput>(EMPTY_CARD);
   const [override, setOverride] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -524,7 +537,8 @@ export function NewReservationModal({
       driverJob: driverId ? "assigned" : null,
       deliveryAddress: delivery.trim() || null,
       deliveryPoint: delivery.trim() ? geocode(delivery).point : null,
-      payment: { method, last4 },
+      payment: method === "cash" ? { method, last4, cashReceivedAt: null } : { method, last4 },
+      depositMethod,
       notes: notes.trim() || null,
       inspections: [],
     };
@@ -548,7 +562,7 @@ export function NewReservationModal({
       footer={
         <>
           {step > 0 ? <Button variant="ghost" className="mr-auto" onClick={() => setStep((s) => s - 1)}>Back</Button> : null}
-          {step < 3 ? <Button onClick={next}>Continue</Button> : <Button onClick={book}><Check aria-hidden width={15} height={15} /> Book & charge {money(total)}</Button>}
+          {step < 3 ? <Button onClick={next}>Continue</Button> : <Button onClick={book}><Check aria-hidden width={15} height={15} /> {method === "cash" ? `Book · ${money(total)} cash at pickup` : `Book & charge ${money(total)}`}</Button>}
         </>
       }
     >
@@ -600,8 +614,20 @@ export function NewReservationModal({
         </div>
       ) : step === 2 ? (
         <div className="space-y-5">
-          <SegmentedControl<"card" | "cash"> label="Payment method" value={method} onChange={setMethod} options={[{ value: "card", label: "Card" }, { value: "cash", label: "Cash" }]} />
-          {method === "card" ? <CardFields value={card} onChange={setCard} /> : <Alert tone="info">Collect cash at handover and record it on the reservation.</Alert>}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="mb-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Rental</p>
+              <SegmentedControl<PayMethod> label="Rental payment" value={method} onChange={setMethod} options={[{ value: "card", label: "Card" }, { value: "cash", label: "Cash" }]} />
+            </div>
+            <div>
+              <p className="mb-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Deposit · {money(q.depositDue)}</p>
+              <SegmentedControl<PayMethod> label="Deposit" value={depositMethod} onChange={setDepositMethod} options={[{ value: "card", label: "Card hold" }, { value: "cash", label: "Cash" }]} />
+            </div>
+          </div>
+          {method === "card" ? <CardFields value={card} onChange={setCard} /> : null}
+          {method === "cash" || depositMethod === "cash" ? (
+            <Alert tone="info">Collect {[method === "cash" ? "the rental" : null, depositMethod === "cash" ? "the deposit" : null].filter(Boolean).join(" and ")} in cash at handover, then mark it received on the reservation.</Alert>
+          ) : null}
           <div className="flex items-center justify-between gap-4 rounded-lg border border-line bg-ink/40 p-4">
             <div>
               <p className="text-sm text-cream">Quoted {money(q.dueNow)}</p>
@@ -615,8 +641,8 @@ export function NewReservationModal({
           <Info label="Listing" value={listing.name} sub={unitLabel(unit, qty)} />
           <Info label="Guest" value={name} sub={email} />
           <Info label="Starts" value={start ? when(new Date(start).getTime()) : "—"} />
-          <Info label="Charge" value={money(total)} sub={method === "card" ? `Card ···· ${card.number.replace(/\D/g, "").slice(-4)}` : "Cash"} />
-          <Info label="Deposit" value={`${money(q.depositDue)} hold at pickup`} />
+          <Info label="Charge" value={money(total)} sub={method === "card" ? `Card ···· ${card.number.replace(/\D/g, "").slice(-4)}` : "Cash at pickup"} />
+          <Info label="Deposit" value={`${money(q.depositDue)} · ${depositTerms({ depositMethod })}`} />
           <Info label="Driver" value={drivers.find((d) => d.id === driverId)?.name ?? (delivery ? "Assign later" : "Depot pickup")} />
         </dl>
       )}

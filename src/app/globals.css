@@ -114,6 +114,7 @@
   --animate-live: live-pulse 1.6s ease-in-out infinite;
   --animate-halo: halo 2.4s var(--ease-editorial) infinite;
   --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-scan: scan-line 2.4s ease-in-out infinite;
 }
 
 /* ---------- Z-index scale (referenced as z-[var(--z-*)]) ---------- */
@@ -191,6 +192,11 @@
 @keyframes shimmer {
   from { background-position: -200% 0; }
   to   { background-position: 200% 0; }
+}
+/* The guide line that travels across the document scanner's frame. */
+@keyframes scan-line {
+  0%, 100% { top: 4%; }
+  50%      { top: 94%; }
 }
 /* Specular band that sweeps a metal surface on hover. */
 @keyframes sheen-sweep {

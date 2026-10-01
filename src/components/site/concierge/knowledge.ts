@@ -129,9 +129,24 @@ const RULES: Rule[] = [
       text: [
         `A refundable deposit of **${money(PRICING.defaultDeposit)}** applies to cars, and ${money(1500)} to estates.`,
         "",
-        "It is **not** charged when you book. We place it at pickup and release it after a clean return. If there is damage, the assessed amount comes out of the deposit and the balance is returned to the original payment method.",
+        "It is **not** charged when you book. At pickup it is either a **hold on your card** or paid **in cash** — your choice at checkout. It is released after a clean return. If there is damage, the assessed amount comes out of the deposit and the balance goes back the way you paid it.",
       ].join("\n"),
-      suggestions: ["How does insurance work?", "What are the loyalty tiers?"],
+      suggestions: ["Can I pay in cash?", "How does insurance work?"],
+    }),
+  },
+  {
+    id: "payment",
+    terms: ["cash", "payment", "pay with", "pay by", "pay in", "credit card", "debit"],
+    reply: () => ({
+      text: [
+        "You can pay **by card or in cash**, and choose separately for the rental and the deposit.",
+        "",
+        "• **Card** — the rental is charged when you book; the deposit is a hold at pickup.",
+        "• **Cash** — the rental and/or deposit are paid in person at handover, to your driver or at the depot, and you get a receipt.",
+        "",
+        "Drive Wallet credit and Level Rewards points still apply first either way.",
+      ].join("\n"),
+      suggestions: ["What is the deposit?", "How do I book?"],
     }),
   },
   {

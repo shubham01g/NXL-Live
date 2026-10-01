@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, ChevronRight, ClipboardCheck, IdCard, LocateFixed, LocateOff, LogOut, MapPin, Navigation, Phone, Truck } from "lucide-react";
+import { ArrowLeft, Banknote, Check, ChevronRight, ClipboardCheck, IdCard, LocateFixed, LocateOff, LogOut, MapPin, Navigation, Phone, Truck } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/site/logo";
 import { RouteMap } from "@/components/maps/route-map";
@@ -16,9 +16,10 @@ import { Badge, Eyebrow } from "@/components/ui/primitives";
 import { StepIndicator, Tabs } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
 import { initials } from "@/lib/domain/account";
-import { shortDate } from "@/lib/domain/format";
+import { money, shortDate } from "@/lib/domain/format";
 import { destinationFor } from "@/lib/domain/telemetry";
 import type { Condition, Driver, DriverJobStatus, FuelLevel, Inspection, Reservation } from "@/lib/domain/operations";
+import { cashToCollect } from "@/lib/domain/operations";
 import { LISTINGS } from "@/lib/data/fixtures/listings";
 import { DRIVERS, RESERVATIONS } from "@/lib/data/fixtures/operations";
 import { C, logAudit, notify, raiseAlert } from "@/lib/data/demo";
@@ -286,6 +287,8 @@ function JobDetail({ r, driver, onBack, position }: { r: Reservation; driver: Dr
         </div>
       </section>
 
+      <CashToCollect r={r} driver={driver} />
+
       <RouteMap job={r} driver={{ point: position ?? driver.position ?? null, initials: initials(driver.name), color: driver.color ?? "#c4a068" }} height={260} />
 
       {r.inspections?.length ? (
@@ -320,6 +323,40 @@ function JobDetail({ r, driver, onBack, position }: { r: Reservation; driver: Dr
         />
       ) : null}
     </div>
+  );
+}
+
+/* ------------------------------ cash handover ------------------------------ */
+
+/** Cash the guest chose to pay in person — the driver takes it at handover. */
+function CashToCollect({ r, driver }: { r: Reservation; driver: Driver }) {
+  const due = cashToCollect(r);
+  if (!due.total) return null;
+  return (
+    <section className="rounded-xl border border-gold/40 bg-gold/5 p-4">
+      <p className="flex items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-gold">
+        <Banknote aria-hidden width={13} height={13} /> Collect in cash at handover
+      </p>
+      <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-cream">{money(due.total)}</p>
+      <p className="mt-1 text-xs text-muted">
+        {[due.rental ? `${money(due.rental)} rental` : null, due.deposit ? `${money(due.deposit)} refundable deposit` : null].filter(Boolean).join(" + ")}
+      </p>
+      <Button
+        variant="outline"
+        className="mt-4 h-12 w-full"
+        onClick={() => {
+          patch<Reservation>(C.reservations, r, {
+            ...(due.rental && r.payment ? { payment: { ...r.payment, cashReceivedAt: timestamp() } } : {}),
+            ...(due.deposit ? { depositStatus: "charged" as const } : {}),
+          });
+          logAudit(driver.name, "payment.cash_received", r.reference, `${money(due.total)} cash at handover`);
+          raiseAlert("payment", "Cash collected", `${driver.name} collected ${money(due.total)} cash for ${r.reference}.`);
+          toast(`${money(due.total)} cash recorded.`);
+        }}
+      >
+        <Check aria-hidden width={16} height={16} /> Cash received
+      </Button>
+    </section>
   );
 }
 
@@ -416,7 +453,7 @@ function InspectionWizard({ stage, r, driver, onCancel, onDone }: { stage: Inspe
           ) : name === "Photos" ? (
             <div className="grid grid-cols-2 gap-3">
               {SHOTS.map((s, i) => (
-                <FileDrop key={s} label={s} capture="environment" accept="image/*" aspect="aspect-[4/3]" value={photos[i]} onChange={(v) => setPhotos(photos.map((p, n) => (n === i ? v : p)))} />
+                <FileDrop key={s} label={s} scan="photo" accept="image/*" aspect="aspect-[4/3]" value={photos[i]} onChange={(v) => setPhotos(photos.map((p, n) => (n === i ? v : p)))} />
               ))}
             </div>
           ) : (
@@ -490,8 +527,8 @@ function LicenceTab({ driver }: { driver: Driver }) {
       </div>
       {driver.licenseNote ? <Alert tone={tone === "success" ? "info" : "warning"} title="From dispatch">{driver.licenseNote}</Alert> : null}
       <div className="grid grid-cols-2 gap-3">
-        <FileDrop label="Front" capture="environment" accept="image/*" value={front} onChange={setFront} />
-        <FileDrop label="Back" capture="environment" accept="image/*" value={back} onChange={setBack} />
+        <FileDrop label="Licence front" scan="card" accept="image/*" value={front} onChange={setFront} />
+        <FileDrop label="Licence back" scan="card" accept="image/*" value={back} onChange={setBack} />
       </div>
       <Button
         size="lg"

@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
+  Banknote,
   CalendarDays,
   Check,
   CircleAlert,
   CreditCard,
+  IdCard,
   Lock,
   MapPin,
   ShieldCheck,
@@ -36,7 +38,7 @@ import {
 } from "@/lib/domain/pricing";
 import { PLACES, geocode, roadMilesFromBase } from "@/lib/domain/geo";
 import type { InsuranceChoice, Listing, RateUnit } from "@/lib/domain/types";
-import type { Promo, Reservation } from "@/lib/domain/operations";
+import { depositTerms, paidWith, type PayMethod, type Promo, type Reservation } from "@/lib/domain/operations";
 import { useSession, updateMember } from "@/lib/auth/use-session";
 import { useCollection } from "@/lib/data/demo-store";
 import { useClock } from "@/lib/hooks/use-clock";
@@ -52,6 +54,8 @@ import { Media } from "@/components/ui/media";
 import { Badge, Eyebrow } from "@/components/ui/primitives";
 import { StepIndicator } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
+import { FileDrop } from "@/components/ui/file-drop";
+import { LicenceForm } from "@/components/account/sections/licence-panel";
 import { CardFields } from "./card-fields";
 
 /**
@@ -62,7 +66,9 @@ import { CardFields } from "./card-fields";
  * listing page shows, so what the guest saw is what they pay, with promo,
  * points and drive credit applied in the order the Loyalty page promises.
  *
- * Payment is simulated until M5: only the brand and last four are kept.
+ * Payment is simulated until M5: only the brand and last four are kept. The
+ * rental and the deposit can each be paid by card or in cash at pickup.
+ * Cars need a driver's licence on file — scanned or uploaded, front and back.
  */
 
 const STEPS = ["Trip", "Insurance", "Payment", "Review"];
@@ -186,7 +192,11 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
   const [policyExpiry, setPolicyExpiry] = useState(
     member?.insurance?.expiresAt ? isoDate(member.insurance.expiresAt).slice(0, 7) : "",
   );
+  const [policyDoc, setPolicyDoc] = useState<string | null>(member?.insurance?.document ?? null);
   const [saveInsurance, setSaveInsurance] = useState(!member?.insurance);
+
+  const [payMethod, setPayMethod] = useState<PayMethod>("card");
+  const [depositMethod, setDepositMethod] = useState<PayMethod>("card");
 
   const [useSavedCard, setUseSavedCard] = useState(!!member?.card);
   const [card, setCard] = useState<CardInput>({ ...EMPTY_CARD, holder: member?.name ?? "" });
@@ -232,6 +242,12 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
     useWallet,
   });
 
+  // A rejected or expired licence has to be replaced before a car goes out.
+  const licence = member?.licence ?? null;
+  const licenceOk = !!licence && licence.status !== "rejected" && licence.expiresAt > window_.end;
+  const cashDue = payMethod === "cash" ? s.cardCharge : 0;
+  const cardDue = payMethod === "card" ? s.cardCharge : 0;
+
   if (!member) return null;
   const tier = tierFor(member.points);
   const pointsDollars = redeemableValue(member.points);
@@ -248,11 +264,12 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
       if (isCar && pickupOn && !pickupSame && !pickupAddress.trim()) return "Enter the collection address.";
       if (phone.replace(/\D/g, "").length < 7) return "Enter a phone number the concierge can reach you on.";
     }
+    if (i === 1 && isCar && !licenceOk) return "Add your driver's licence — scan or upload the front and back.";
     if (i === 1 && insurance === "own") {
       if (!carrier.trim() || !policy.trim() || !policyExpiry) return "Enter your carrier, policy number and expiry — or choose NXL coverage.";
       if (new Date(`${policyExpiry}-28`).getTime() < window_.end) return "Your policy expires before the rental ends.";
     }
-    if (i === 2 && s.cardCharge > 0 && !(useSavedCard && member?.card)) {
+    if (i === 2 && payMethod === "card" && s.cardCharge > 0 && !(useSavedCard && member?.card)) {
       const res = parseCard(card);
       if (!res.ok) return res.error;
     }
@@ -304,7 +321,7 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
     setPlacing(true);
     await new Promise((r) => setTimeout(r, 1200));
 
-    const parsed = !(useSavedCard && member.card) && s.cardCharge > 0 ? parseCard(card) : null;
+    const parsed = payMethod === "card" && !(useSavedCard && member.card) && s.cardCharge > 0 ? parseCard(card) : null;
     const newCard = parsed && parsed.ok ? parsed.card : null;
     const chargeCard = useSavedCard && member.card ? member.card : newCard;
 
@@ -317,8 +334,10 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
         saveInsurance || !m.insurance
           ? insurance === "nxl"
             ? { kind: "nxl", carrier: null, policyNumber: null, expiresAt: null, verified: true }
-            : { kind: "own", carrier: carrier.trim(), policyNumber: policy.trim(), expiresAt: new Date(`${policyExpiry}-28`).getTime(), verified: false }
-          : m.insurance,
+            : { kind: "own", carrier: carrier.trim(), policyNumber: policy.trim(), expiresAt: new Date(`${policyExpiry}-28`).getTime(), verified: false, document: policyDoc }
+          : m.insurance?.kind === "own" && policyDoc
+            ? { ...m.insurance, document: policyDoc }
+            : m.insurance,
     }));
 
     const reservation = placeBooking(
@@ -336,7 +355,9 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
         settlement: s,
         quoteDeposit: q.depositDue,
         promoCode: promo?.code ?? null,
-        card: chargeCard ? { last4: chargeCard.last4, brand: chargeCard.brand } : null,
+        card: payMethod === "card" && chargeCard ? { last4: chargeCard.last4, brand: chargeCard.brand } : null,
+        payMethod,
+        depositMethod,
         partnerCode: activeReferral?.code ?? null,
         notes: notes.trim() || null,
       },
@@ -530,6 +551,14 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                   <Field label="Expires" htmlFor="co-pexp" required>
                     <Input id="co-pexp" type="month" value={policyExpiry} onChange={(e) => setPolicyExpiry(e.target.value)} />
                   </Field>
+                  <FileDrop
+                    className="sm:col-span-3"
+                    label="Insurance card or declarations page"
+                    hint="Optional — scan it, upload a photo or drop a PDF. Verification is faster with it."
+                    value={policyDoc}
+                    onChange={setPolicyDoc}
+                    aspect="aspect-[3/1]"
+                  />
                 </div>
               ) : (
                 <ul className="mt-6 grid gap-2 text-sm text-cream/85 sm:grid-cols-2">
@@ -548,10 +577,54 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
             </Card>
           ) : null}
 
+          {step === 1 && isCar ? (
+            <Card
+              title="Driver's licence"
+              icon={IdCard}
+              description={licenceOk ? "On file — the team checks it before the car goes out." : "Required to rent a car. Scan or upload the front and back."}
+            >
+              {licenceOk && licence ? (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm text-cream">
+                    {licence.state} · <span className="font-mono">{licence.number}</span> · expires {new Date(licence.expiresAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                  </p>
+                  <Badge tone={licence.status === "verified" ? "success" : "warning"}>{licence.status === "verified" ? "Verified" : "In review"}</Badge>
+                </div>
+              ) : (
+                <>
+                  {licence ? (
+                    <Alert tone="warning" className="mb-5">
+                      {licence.status === "rejected" ? (licence.note ?? "The team asked for a new licence image.") : "Your licence on file expires before this rental ends."} Add a current one below.
+                    </Alert>
+                  ) : null}
+                  <LicenceForm />
+                </>
+              )}
+            </Card>
+          ) : null}
+
           {step === 2 ? (
             <>
-              {s.cardCharge > 0 || !useWallet ? (
-                <Card title="Card" icon={CreditCard} description="Charged for the rental today. The deposit is a hold at pickup, not a charge.">
+              <Card title="How you'll pay" icon={Banknote} description="Card or cash — for the rental and the security deposit.">
+                <p className="mb-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Rental</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Choice selected={payMethod === "card"} onClick={() => setPayMethod("card")} title="Credit / debit card" price={s.cardCharge > 0 ? `${money(s.cardCharge)} today` : ""} body="Charged now to secure the booking." />
+                  <Choice selected={payMethod === "cash"} onClick={() => setPayMethod("cash")} title="Cash" price={s.cardCharge > 0 ? `${money(s.cardCharge)} at pickup` : ""} body="Pay in full in person at handover. Exact or rounded-up amounts, please." />
+                </div>
+                <p className="mb-2 mt-6 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Security deposit · {money(q.depositDue)}</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Choice selected={depositMethod === "card"} onClick={() => setDepositMethod("card")} title="Card hold" price="" body="A hold on your card at pickup — not a charge. Released after a clean return." />
+                  <Choice selected={depositMethod === "cash"} onClick={() => setDepositMethod("cash")} title="Cash" price="" body="Handed over at pickup and returned in cash after a clean return inspection." />
+                </div>
+                {cashDue > 0 || depositMethod === "cash" ? (
+                  <Alert tone="info" className="mt-5" title={`Bring ${money(cashDue + (depositMethod === "cash" ? q.depositDue : 0))} in cash to pickup`}>
+                    {[cashDue > 0 ? `${money(cashDue)} rental` : null, depositMethod === "cash" ? `${money(q.depositDue)} deposit` : null].filter(Boolean).join(" + ")}. Your driver or the depot gives you a receipt.
+                  </Alert>
+                ) : null}
+              </Card>
+
+              {payMethod === "card" && (s.cardCharge > 0 || !useWallet) ? (
+                <Card title="Card" icon={CreditCard} description={depositMethod === "card" ? "Charged for the rental today. The deposit is a hold at pickup, not a charge." : "Charged for the rental today."}>
                   {member.card ? (
                     <div className="mb-5 grid gap-3 sm:grid-cols-2">
                       <Choice selected={useSavedCard} onClick={() => setUseSavedCard(true)} title={cardLabel(member.card)} price="On file" body={`Expires ${String(member.card.expMonth).padStart(2, "0")}/${String(member.card.expYear).slice(-2)}`} />
@@ -631,16 +704,21 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                   label="Paying with"
                   value={[
                     s.walletApplied > 0 ? `${money(s.walletApplied)} Drive Wallet` : null,
-                    s.cardCharge > 0 ? (useSavedCard && member.card ? cardLabel(member.card) : `Card ···· ${card.number.replace(/\D/g, "").slice(-4)}`) : null,
+                    s.cardCharge > 0
+                      ? payMethod === "cash"
+                        ? `${money(s.cardCharge)} cash at pickup`
+                        : useSavedCard && member.card ? cardLabel(member.card) : `Card ···· ${card.number.replace(/\D/g, "").slice(-4)}`
+                      : null,
                   ].filter(Boolean).join(" + ") || "—"}
                 />
-                <Review label="Deposit" value={`${money(q.depositDue)} hold at pickup`} />
+                <Review label="Deposit" value={`${money(q.depositDue)} · ${depositTerms({ depositMethod })}`} />
               </dl>
               <label className="mt-6 flex items-start gap-3 rounded-lg border border-line bg-ink/40 p-4 text-sm text-cream/85">
                 <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-1 accent-[#c4a068]" />
                 <span>
-                  I agree to the <Link href="/terms" className="text-gold hover:underline">rental terms</Link> and understand the {money(q.depositDue)} deposit is held at
-                  pickup and released after a clean return inspection.
+                  I agree to the <Link href="/terms" className="text-gold hover:underline">rental terms</Link> and understand the {money(q.depositDue)} deposit is
+                  {depositMethod === "cash" ? " paid in cash" : " held on my card"} at pickup and returned after a clean return inspection.
+                  {cashDue > 0 ? ` The ${money(cashDue)} rental balance is due in cash at pickup.` : ""}
                 </span>
               </label>
             </Card>
@@ -663,7 +741,7 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
               </Button>
             ) : (
               <Button size="lg" onClick={confirm} disabled={placing}>
-                {placing ? "Processing…" : s.cardCharge > 0 ? `Confirm & pay ${money(s.cardCharge)}` : "Confirm booking"}
+                {placing ? "Processing…" : cardDue > 0 ? `Confirm & pay ${money(cardDue)}` : "Confirm booking"}
                 {!placing ? <Lock aria-hidden width={15} height={15} /> : null}
               </Button>
             )}
@@ -705,10 +783,16 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                 ) : null}
                 <div className="flex items-baseline justify-between gap-4">
                   <dt className="font-semibold text-cream">Due today</dt>
-                  <dd className="text-metal-soft font-mono text-lg font-semibold tabular-nums">{money(s.cardCharge)}</dd>
+                  <dd className="text-metal-soft font-mono text-lg font-semibold tabular-nums">{money(cardDue)}</dd>
                 </div>
+                {cashDue > 0 ? (
+                  <div className="flex items-baseline justify-between gap-4">
+                    <dt className="text-muted">Cash at pickup</dt>
+                    <dd className="font-mono tabular-nums text-cream">{money(cashDue)}</dd>
+                  </div>
+                ) : null}
                 <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-muted">Deposit at pickup</dt>
+                  <dt className="text-muted">Deposit at pickup{depositMethod === "cash" ? " · cash" : ""}</dt>
                   <dd className="font-mono tabular-nums text-cream/70">{money(q.depositDue)}</dd>
                 </div>
                 <div className="flex items-baseline justify-between gap-4">
@@ -821,7 +905,8 @@ function Review({ label, value }: { label: string; value: string }) {
 
 function Confirmation({ reservation: r, listing }: { reservation: Reservation; listing: Listing }) {
   // From the booking itself — the member's balance has already moved on.
-  const settlementCard = r.total - (r.walletApplied ?? 0);
+  const balance = r.total - (r.walletApplied ?? 0);
+  const cash = r.payment?.method === "cash";
   return (
     <Container className="pb-28 pt-28">
       <div className="mx-auto max-w-2xl text-center">
@@ -836,8 +921,9 @@ function Confirmation({ reservation: r, listing }: { reservation: Reservation; l
 
         <dl className="mx-auto mt-10 grid max-w-xl gap-3 text-left sm:grid-cols-2">
           <Review label="Reference" value={r.reference} />
-          <Review label="Charged today" value={money(settlementCard)} />
-          <Review label="Deposit" value={`${money(r.deposit)} hold at pickup`} />
+          <Review label={cash ? "Cash at pickup" : "Charged today"} value={money(balance)} />
+          <Review label="Paid with" value={paidWith(r)} />
+          <Review label="Deposit" value={`${money(r.deposit)} · ${depositTerms(r)}`} />
           <Review label="Points earned" value={r.pointsEarned ? `+${r.pointsEarned.toLocaleString()}` : "—"} />
           {r.deliveryAddress ? <Review label="Delivering to" value={r.deliveryAddress} /> : null}
           {r.partnerCode ? <Review label="Referred by" value={r.partnerCode} /> : null}
