@@ -9,7 +9,8 @@ import { ListingCard } from "@/components/site/listing-card";
 import { Hero } from "@/components/site/hero";
 import { HomeSchema } from "@/components/site/site-schema";
 import { LoopVideo } from "@/components/ui/loop-video";
-import { FILMS } from "@/lib/data/films";
+import { CAR_REELS, FILMS } from "@/lib/data/films";
+import { ReelStrip } from "@/components/site/reel-strip";
 
 export default async function HomePage() {
   const [cars, homes, plans, stats] = await Promise.all([
@@ -165,6 +166,24 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
+        </Container>
+      </Section>
+
+      {/* ---------------------------------- reels ---------------------------------- */}
+      <Section size="sm">
+        <Container>
+          <SectionHeading
+            eyebrow="Straight from the lot"
+            title="Every car, on camera."
+            description="Walk-arounds the team shot of the real cars you book — doors up, roofs down, the interiors up close. Tap one to see the car."
+            action={
+              <ButtonLink href="/cars" variant="outline">
+                Browse the fleet
+                <ArrowRight aria-hidden width={16} height={16} />
+              </ButtonLink>
+            }
+          />
+          <ReelStrip reels={CAR_REELS} className="mt-10" />
         </Container>
       </Section>
 

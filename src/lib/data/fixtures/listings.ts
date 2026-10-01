@@ -1,4 +1,8 @@
-import type { CarListing, HomeListing } from "@/lib/domain/types";
+import type { CarListing, HomeListing, MediaVideo } from "@/lib/domain/types";
+import { LISTING_REELS } from "../films";
+
+/** The listing's own reel, when the client has shot one. */
+const reelFor = (slug: string): MediaVideo | null => (LISTING_REELS as Record<string, MediaVideo>)[slug] ?? null;
 
 /**
  * Fleet and estate fixtures.
@@ -44,7 +48,7 @@ export const CARS: CarListing[] = [
     deposit: 2500,
     photo: "/fleet/rolls-royce-cullinan-black-badge/cover.webp",
     gallery: fleetGallery("rolls-royce-cullinan-black-badge", 9),
-    video: null,
+    video: reelFor("rolls-royce-cullinan-black-badge"),
     featured: true,
     bookedRanges: [],
     specs: {
@@ -74,7 +78,7 @@ export const CARS: CarListing[] = [
     deposit: 750,
     photo: "/fleet/cadillac-escalade-iq/cover.webp",
     gallery: fleetGallery("cadillac-escalade-iq", 10),
-    video: null,
+    video: reelFor("cadillac-escalade-iq"),
     featured: true,
     bookedRanges: [],
     specs: {
@@ -104,7 +108,7 @@ export const CARS: CarListing[] = [
     deposit: 750,
     photo: "/fleet/range-rover-autobiography/cover.webp",
     gallery: fleetGallery("range-rover-autobiography", 11),
-    video: null,
+    video: reelFor("range-rover-autobiography"),
     featured: true,
     bookedRanges: [],
     specs: {
@@ -134,7 +138,7 @@ export const CARS: CarListing[] = [
     deposit: 750,
     photo: "/fleet/bentley-bentayga/cover.webp",
     gallery: fleetGallery("bentley-bentayga", 8),
-    video: null,
+    video: reelFor("bentley-bentayga"),
     featured: true,
     bookedRanges: [],
     specs: {
@@ -443,7 +447,7 @@ function importedCars(): CarListing[] {
     rates: { hour, day },
     photo: `/fleet/${car.slug}/cover.webp`,
     gallery: fleetGallery(car.slug, photos),
-    video: null,
+    video: reelFor(car.slug),
     featured: false,
     bookedRanges: [],
   }));
@@ -466,7 +470,7 @@ export const HOMES: HomeListing[] = [
     deposit: 1500,
     photo: "/estates/villa-serena-oceanfront-estate/cover.webp",
     gallery: estateGallery("villa-serena-oceanfront-estate"),
-    video: null,
+    video: reelFor("villa-serena-oceanfront-estate"),
     featured: true,
     bookedRanges: [],
     specs: { beds: 6, baths: 7, sleeps: 12 },
@@ -498,7 +502,7 @@ export const HOMES: HomeListing[] = [
     deposit: 1500,
     photo: "/estates/the-vantage-ocean-drive-penthouse/cover.webp",
     gallery: estateGallery("the-vantage-ocean-drive-penthouse"),
-    video: null,
+    video: reelFor("the-vantage-ocean-drive-penthouse"),
     featured: true,
     bookedRanges: [],
     specs: { beds: 4, baths: 5, sleeps: 8 },
@@ -529,7 +533,7 @@ export const HOMES: HomeListing[] = [
     deposit: 1500,
     photo: "/estates/mirage-house-waterfront-retreat/cover.webp",
     gallery: estateGallery("mirage-house-waterfront-retreat"),
-    video: null,
+    video: reelFor("mirage-house-waterfront-retreat"),
     featured: false,
     bookedRanges: [{ start: fromNow(2), end: fromNow(9) }],
     specs: { beds: 4, baths: 4, sleeps: 8 },
@@ -559,7 +563,7 @@ export const HOMES: HomeListing[] = [
     deposit: 1500,
     photo: "/estates/still-water-bayfront-modern/cover.webp",
     gallery: estateGallery("still-water-bayfront-modern"),
-    video: null,
+    video: reelFor("still-water-bayfront-modern"),
     featured: false,
     bookedRanges: [],
     specs: { beds: 5, baths: 6, sleeps: 10 },

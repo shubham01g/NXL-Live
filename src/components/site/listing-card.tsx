@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { money } from "@/lib/domain/format";
 import { leadUnit, rateFor, unitSuffix } from "@/lib/domain/pricing";
@@ -28,7 +28,7 @@ export function ListingCard({
 
   return (
     <article className={cn("group relative", className)}>
-      <div className="overflow-hidden rounded-lg">
+      <div className="relative overflow-hidden rounded-lg">
         <Media
           src={listing.photo}
           alt={listing.name}
@@ -41,6 +41,11 @@ export function ListingCard({
             unavailable && "opacity-70 grayscale-[0.35]",
           )}
         />
+        {listing.video ? (
+          <span className="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-line bg-ink/70 px-2.5 py-1 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-cream backdrop-blur">
+            <Play aria-hidden width={10} height={10} className="fill-current text-gold" /> Reel
+          </span>
+        ) : null}
       </div>
 
       <div className="pointer-events-none absolute left-3 top-3 flex items-start justify-between gap-2 pr-3 [width:calc(100%-0.75rem)]">

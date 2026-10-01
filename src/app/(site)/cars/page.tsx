@@ -3,6 +3,9 @@ import { repo } from "@/lib/data";
 import { money } from "@/lib/domain/format";
 import { PageHero } from "@/components/site/hero";
 import { ListingBrowser } from "@/components/site/listing-browser";
+import { ReelStrip } from "@/components/site/reel-strip";
+import { Container, Section, SectionHeading } from "@/components/ui/layout";
+import { CAR_REELS } from "@/lib/data/films";
 
 export const metadata: Metadata = {
   title: "Exotic Cars",
@@ -31,6 +34,12 @@ export default async function CarsPage() {
         className="pb-10"
       />
       <ListingBrowser listings={cars} />
+      <Section size="sm">
+        <Container>
+          <SectionHeading eyebrow="Reels" title="See them move." description="The team's own walk-arounds of the fleet. Tap a reel to open the car." />
+          <ReelStrip reels={CAR_REELS} className="mt-8" />
+        </Container>
+      </Section>
     </>
   );
 }
