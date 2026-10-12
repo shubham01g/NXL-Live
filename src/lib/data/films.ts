@@ -45,15 +45,10 @@ const reel = (path: string, label: string): MediaVideo => ({ src: `/${path}.mp4`
 
 /**
  * The client's own vertical reels, shot on the lot and around South Beach.
- * Unlike the brand films they carry sound: on a listing page they play with
- * controls; in the reel strips they loop muted. Each car's main reel is its
- * listing's `video`.
- *
- * The strips play silent copies under `media/reels/muted/` — the same video
- * stream, bit for bit, with the audio track dropped (~10% lighter). The
- * sources were already heavily compressed, so re-encoding any smaller
- * measurably cost picture quality (VMAF); the strips save load by how they
- * load instead (see ReelStrip).
+ * They live only on the listing they show — each car's gallery leads with
+ * its reels and plays them with controls (and sound, where the clip has it).
+ * The main reel is the listing's `video`; any extra clips of the same car
+ * follow it in the gallery.
  */
 export const LISTING_REELS = {
   "rolls-royce-cullinan-black-badge": reel("fleet/rolls-royce-cullinan-black-badge/reel", "Walk-around of the Cullinan Black Badge, coach doors open on the red interior"),
@@ -67,37 +62,9 @@ export const LISTING_REELS = {
   "the-vantage-ocean-drive-penthouse": reel("estates/the-vantage-ocean-drive-penthouse/reel", "Walk-through of the penthouse living space and ocean view"),
 } as const satisfies Record<string, MediaVideo>;
 
-export interface Reel {
-  /** The listing the reel links to. */
-  slug: string;
-  title: string;
-  video: MediaVideo;
-  /** Silent file the strip loops. */
-  loop: string;
-}
-
-/** A listing's reel in a strip, looping its silent copy. */
-const listingReel = (slug: keyof typeof LISTING_REELS, title: string): Reel => ({
-  slug,
-  title,
-  video: LISTING_REELS[slug],
-  loop: `/media/reels/muted/${slug}.mp4`,
-});
-
-/** A strip-only reel — already silent, so it loops its own file. */
-const stripReel = (slug: string, title: string, video: MediaVideo): Reel => ({ slug, title, video, loop: video.src });
-
-/** Car reels for the strips on the home and fleet pages, in running order. */
-export const CAR_REELS: Reel[] = [
-  stripReel("mclaren-gt", "Hourly exotics on Ocean Drive", reel("media/reels/mclaren-hourly", "NXL promo: the McLaren GT on Ocean Drive, rentable by the hour")),
-  listingReel("rolls-royce-cullinan-black-badge", "Rolls-Royce Cullinan Black Badge"),
-  listingReel("chevrolet-corvette-c8-white", "Corvette C8 White Edition"),
-  listingReel("bentley-bentayga", "Bentley Bentayga"),
-  listingReel("mercedes-benz-s-class", "Mercedes-Benz S-Class"),
-  listingReel("mclaren-gt", "McLaren GT"),
-  listingReel("lexus-lc-500-convertible", "Lexus LC 500 Convertible"),
-  listingReel("porsche-macan", "Porsche Macan"),
-  stripReel("rolls-royce-cullinan-black-badge", "Inside the Black Badge", reel("media/reels/cullinan-black-badge-cockpit", "The Cullinan Black Badge cockpit and starlight interior")),
-  stripReel("chevrolet-corvette-c8-white", "Corvette C8 · interior", reel("media/reels/corvette-white-interior", "The white Corvette C8's cockpit and seats")),
-  listingReel("mercedes-benz-s-580", "Mercedes-Benz S 580"),
-];
+/** Further clips of a car, shown after its main reel on the listing page. */
+export const EXTRA_REELS: Record<string, MediaVideo[]> = {
+  "mclaren-gt": [reel("media/reels/mclaren-hourly", "NXL promo: the McLaren GT on Ocean Drive, rentable by the hour")],
+  "rolls-royce-cullinan-black-badge": [reel("media/reels/cullinan-black-badge-cockpit", "The Cullinan Black Badge cockpit and starlight interior")],
+  "chevrolet-corvette-c8-white": [reel("media/reels/corvette-white-interior", "The white Corvette C8's cockpit and seats")],
+};

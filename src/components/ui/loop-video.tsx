@@ -20,8 +20,6 @@ export function LoopVideo({
   controlClassName,
   fit = "cover",
   overlay,
-  preload = "metadata",
-  threshold = 0.15,
 }: {
   src: string;
   poster: string;
@@ -32,10 +30,6 @@ export function LoopVideo({
   fit?: "cover" | "contain";
   /** Scrims or captions painted over the film but under the pause control. */
   overlay?: ReactNode;
-  /** "none" fetches nothing until the clip first scrolls into view — for rows of many clips. */
-  preload?: "none" | "metadata";
-  /** How much of the clip must be on screen before it plays. */
-  threshold?: number;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
@@ -61,11 +55,11 @@ export function LoopVideo({
         if (entry.isIntersecting) video.play().catch(() => {});
         else video.pause();
       },
-      { threshold },
+      { threshold: 0.15 },
     );
     io.observe(video);
     return () => io.disconnect();
-  }, [reduced, paused, threshold]);
+  }, [reduced, paused]);
 
   return (
     <>
@@ -76,7 +70,7 @@ export function LoopVideo({
         muted
         loop
         playsInline
-        preload={reduced ? "none" : preload}
+        preload={reduced ? "none" : "metadata"}
         aria-label={label}
         className={cn("absolute inset-0 h-full w-full", fit === "contain" ? "object-contain" : "object-cover", className)}
       />

@@ -7,6 +7,7 @@ import { Card, Eyebrow, RatingInline, Stars } from "@/components/ui/primitives";
 import { EmptyState, ProgressBar } from "@/components/ui/feedback";
 import { Gallery } from "./gallery";
 import { BookingPanel } from "./booking-panel";
+import { EXTRA_REELS } from "@/lib/data/films";
 import { MemberReviews } from "./member-reviews";
 
 export function ListingDetail({
@@ -56,7 +57,7 @@ export function ListingDetail({
             alt={listing.name}
             kind={listing.kind}
             status={listing.status}
-            video={listing.video}
+            videos={[...(listing.video ? [listing.video] : []), ...(EXTRA_REELS[listing.slug] ?? [])]}
           />
 
           <div className="mt-10">
