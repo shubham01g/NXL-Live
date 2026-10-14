@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Check, Copy, Download, Landmark } from "lucide-react";
+import { Check, Copy, Download, Landmark, Mail } from "lucide-react";
 import { Panel } from "@/components/account/panel";
 import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/controls";
@@ -21,8 +21,8 @@ import type { PartnerReferral, Payout, Reservation } from "@/lib/domain/operatio
 import { LISTINGS } from "@/lib/data/fixtures/listings";
 import { PAYOUTS, RESERVATIONS } from "@/lib/data/fixtures/operations";
 import { C, logAudit } from "@/lib/data/demo";
-import { patch, setValue, useCollection, useDemoValue } from "@/lib/data/demo-store";
-import { balanceOf, partnerLedger, requestPayout } from "@/lib/data/partners";
+import { patch, setValue, useCollection } from "@/lib/data/demo-store";
+import { balanceOf, partnerLedger, payoutMethodKey, requestPayout, usePayoutMethod, type PayoutMethod } from "@/lib/data/partners";
 import { useClock } from "@/lib/hooks/use-clock";
 import { usePartner } from "./partner-shell";
 
@@ -251,18 +251,124 @@ export function PartnerLinks() {
 
 /* --------------------------------- payouts -------------------------------- */
 
-interface PayoutMethod {
-  kind: "ACH" | "Wire";
-  bank: string;
-  last4: string;
+const EMPTY_ACH = { accountName: "", bankName: "", accountType: "checking" as "checking" | "savings", routing: "", account: "" };
+
+/**
+ * How the partner is paid: ACH direct deposit or a mailed check. The account
+ * number is typed in full and only its last four digits are stored.
+ */
+function PayoutPreferences({ partner }: { partner: Partner }) {
+  const method = usePayoutMethod(partner.id);
+  const [editing, setEditing] = useState(false);
+  const [kind, setKind] = useState<PayoutMethod["kind"]>("ach");
+  const [ach, setAch] = useState(EMPTY_ACH);
+  const [check, setCheck] = useState({ payableTo: partner.business, address: "", city: "", state: "", zip: "" });
+
+  function startEditing() {
+    setKind(method?.kind ?? "ach");
+    setAch(method?.kind === "ach" ? { accountName: method.accountName, bankName: method.bankName, accountType: method.accountType, routing: method.routing, account: "" } : EMPTY_ACH);
+    setCheck(method?.kind === "check" ? { payableTo: method.payableTo, address: method.address, city: method.city, state: method.state, zip: method.zip } : { payableTo: partner.business, address: "", city: "", state: "", zip: "" });
+    setEditing(true);
+  }
+
+  const keptLast4 = method?.kind === "ach" ? method.last4 : "";
+  const valid =
+    kind === "ach"
+      ? Boolean(ach.accountName.trim() && ach.routing.length === 9 && (ach.account.length >= 4 || keptLast4))
+      : Boolean(check.payableTo.trim() && check.address.trim() && check.city.trim() && check.state.length === 2 && check.zip.length === 5);
+
+  function save() {
+    const next: PayoutMethod =
+      kind === "ach"
+        ? { kind: "ach", accountName: ach.accountName.trim(), bankName: ach.bankName.trim(), accountType: ach.accountType, routing: ach.routing, last4: ach.account ? ach.account.slice(-4) : keptLast4 }
+        : { kind: "check", payableTo: check.payableTo.trim(), address: check.address.trim(), city: check.city.trim(), state: check.state, zip: check.zip };
+    setValue(payoutMethodKey(partner.id), next);
+    logAudit(partner.contact, "partner.payout_method", partner.business, next.kind === "ach" ? `ACH · ${next.bankName} ····${next.last4}` : `Check by mail · ${next.city}, ${next.state}`);
+    setEditing(false);
+    toast("Payout preferences saved.");
+  }
+
+  return (
+    <Panel
+      title="Payout preferences"
+      description="How you'd like NXL to send your commission."
+      action={method && !editing ? <Button size="sm" variant="ghost" onClick={startEditing}>Edit</Button> : undefined}
+    >
+      {editing ? (
+        <div className="space-y-4">
+          <SegmentedControl<PayoutMethod["kind"]>
+            label="Payment method"
+            size="sm"
+            value={kind}
+            onChange={setKind}
+            options={[{ value: "ach", label: "ACH direct deposit" }, { value: "check", label: "Check by mail" }]}
+          />
+          {kind === "ach" ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Name on bank account" htmlFor="pm-name" className="sm:col-span-2"><Input id="pm-name" value={ach.accountName} placeholder={partner.business} onChange={(e) => setAch({ ...ach, accountName: e.target.value })} /></Field>
+              <Field label="Bank name" htmlFor="pm-bank"><Input id="pm-bank" value={ach.bankName} placeholder="Chase, Bank of America…" onChange={(e) => setAch({ ...ach, bankName: e.target.value })} /></Field>
+              <Field label="Account type" htmlFor="pm-type">
+                <Select id="pm-type" value={ach.accountType} onChange={(e) => setAch({ ...ach, accountType: e.target.value as "checking" | "savings" })}>
+                  <option value="checking">Checking</option>
+                  <option value="savings">Savings</option>
+                </Select>
+              </Field>
+              <Field label="Routing number" htmlFor="pm-routing" hint="9 digits"><Input id="pm-routing" inputMode="numeric" maxLength={9} value={ach.routing} placeholder="021000021" onChange={(e) => setAch({ ...ach, routing: e.target.value.replace(/\D/g, "").slice(0, 9) })} /></Field>
+              <Field label="Account number" htmlFor="pm-acct" hint="Only the last four are kept"><Input id="pm-acct" inputMode="numeric" value={ach.account} placeholder={keptLast4 ? `•••• ${keptLast4}` : "000123456789"} onChange={(e) => setAch({ ...ach, account: e.target.value.replace(/\D/g, "").slice(0, 17) })} /></Field>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Make check payable to" htmlFor="pm-payee" className="sm:col-span-2"><Input id="pm-payee" value={check.payableTo} placeholder={partner.business} onChange={(e) => setCheck({ ...check, payableTo: e.target.value })} /></Field>
+              <Field label="Mailing address" htmlFor="pm-addr" className="sm:col-span-2"><Input id="pm-addr" value={check.address} placeholder="123 Main St, Suite 400" onChange={(e) => setCheck({ ...check, address: e.target.value })} /></Field>
+              <Field label="City" htmlFor="pm-city"><Input id="pm-city" value={check.city} placeholder="Miami" onChange={(e) => setCheck({ ...check, city: e.target.value })} /></Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="State" htmlFor="pm-state"><Input id="pm-state" maxLength={2} value={check.state} placeholder="FL" onChange={(e) => setCheck({ ...check, state: e.target.value.replace(/[^a-z]/gi, "").toUpperCase().slice(0, 2) })} /></Field>
+                <Field label="ZIP" htmlFor="pm-zip"><Input id="pm-zip" inputMode="numeric" value={check.zip} placeholder="33139" onChange={(e) => setCheck({ ...check, zip: e.target.value.replace(/\D/g, "").slice(0, 5) })} /></Field>
+              </div>
+            </div>
+          )}
+          <p className="text-xs leading-relaxed text-muted">
+            {kind === "ach"
+              ? "Your banking details are used only to send your commission. We keep the last four digits of the account number for display."
+              : "Checks are mailed on the payout date. Allow 5–7 business days for delivery."}
+          </p>
+          <div className="flex gap-2">
+            <Button size="sm" disabled={!valid} onClick={save}>Save payout info</Button>
+            {method ? <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button> : null}
+          </div>
+        </div>
+      ) : method ? (
+        <div className="flex items-start gap-4">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-gold/40 text-gold">
+            {method.kind === "ach" ? <Landmark aria-hidden width={18} height={18} /> : <Mail aria-hidden width={18} height={18} />}
+          </span>
+          {method.kind === "ach" ? (
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-cream">ACH direct deposit</p>
+              <p className="text-sm text-muted">{[method.bankName, method.accountType === "savings" ? "Savings" : "Checking", `···· ${method.last4 || "—"}`].filter(Boolean).join(" · ")}</p>
+              {method.accountName ? <p className="text-xs text-muted-dim">Account holder: {method.accountName}</p> : null}
+            </div>
+          ) : (
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-cream">Check by mail</p>
+              <p className="text-sm text-muted">Payable to: {method.payableTo}</p>
+              <p className="text-xs text-muted-dim">{method.address}, {method.city}, {method.state} {method.zip}</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-center">
+          <p className="text-sm text-muted">No payout method on file.</p>
+          <Button size="sm" className="mt-3" onClick={startEditing}>Set up payout method</Button>
+        </div>
+      )}
+    </Panel>
+  );
 }
 
 export function PartnerPayouts() {
   const partner = usePartner();
   const payouts = useCollection<Payout>(C.payouts, PAYOUTS);
-  const method = useDemoValue<PayoutMethod>(`payout-method:${partner?.id ?? "-"}`, { kind: "ACH", bank: "Chase", last4: "6721" });
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(method);
   if (!partner) return null;
   const mine = payouts.filter((p) => p.partnerId === partner.id).sort((a, b) => b.scheduledFor - a.scheduledFor);
   const requested = mine.some((p) => p.status === "scheduled" || p.status === "processing");
@@ -285,29 +391,7 @@ export function PartnerPayouts() {
             {requested ? "Payout already on its way" : "Request payout"}
           </Button>
         </Panel>
-        <Panel title="Payout method" action={!editing ? <Button size="sm" variant="ghost" onClick={() => { setDraft(method); setEditing(true); }}>Change</Button> : undefined}>
-          {editing ? (
-            <div className="space-y-4">
-              <SegmentedControl<PayoutMethod["kind"]> label="Method" size="sm" value={draft.kind} onChange={(kind) => setDraft({ ...draft, kind })} options={[{ value: "ACH", label: "ACH" }, { value: "Wire", label: "Wire" }]} />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Bank" htmlFor="pm-bank"><Input id="pm-bank" value={draft.bank} onChange={(e) => setDraft({ ...draft, bank: e.target.value })} /></Field>
-                <Field label="Account number" htmlFor="pm-acct" hint="Only the last four are kept"><Input id="pm-acct" inputMode="numeric" placeholder={`•••• ${draft.last4}`} onChange={(e) => setDraft({ ...draft, last4: e.target.value.replace(/\D/g, "").slice(-4) || draft.last4 })} /></Field>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => { setValue(`payout-method:${partner.id}`, draft); logAudit(partner.contact, "partner.payout_method", partner.business, `${draft.kind} · ${draft.bank} ····${draft.last4}`); setEditing(false); toast("Payout method saved."); }}>Save</Button>
-                <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <span className="grid h-11 w-11 place-items-center rounded-lg border border-gold/40 text-gold"><Landmark aria-hidden width={18} height={18} /></span>
-              <div>
-                <p className="text-sm text-cream">{method.kind} · {method.bank} ···· {method.last4}</p>
-                <p className="text-xs text-muted">Payouts go live with the payment processor at launch.</p>
-              </div>
-            </div>
-          )}
-        </Panel>
+        <PayoutPreferences partner={partner} />
       </div>
       <Panel title="History">
         {mine.length ? (

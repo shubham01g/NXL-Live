@@ -32,6 +32,7 @@ import {
   type SeoPage,
 } from "@/lib/domain/operations";
 import { C, logAudit, notify, queueMessage } from "@/lib/data/demo";
+import { REFERRAL_PROGRAM_KEY, useReferralProgram } from "@/lib/data/referrals";
 import { create, newId, patch, remove, setValue, useCollection, useDemoValue } from "@/lib/data/demo-store";
 import { useClock } from "@/lib/hooks/use-clock";
 import { DataTable, DemoNote, PageHeader, Primary } from "../ui";
@@ -71,14 +72,6 @@ const seedCampaigns = (now: number): Campaign[] => [
   { id: "cp-4", name: "Welcome series", channel: "sms", audience: "New members (30 days)", promoCode: "WELCOME10", status: "sent", sendAt: now - 45 * DAY, sent: 138, opens: 121, bookings: 17 },
 ];
 
-interface ReferralProgram {
-  referrerCredit: number;
-  refereeDiscount: number;
-  minBooking: number;
-  enabled: boolean;
-}
-const DEFAULT_PROGRAM: ReferralProgram = { referrerCredit: 250, refereeDiscount: 10, minBooking: 500, enabled: true };
-
 type MarketingTab = "promos" | "campaigns" | "referrals";
 
 export function MarketingScreen({ initial, partners: basePartners }: { initial: Promo[]; partners: Partner[] }) {
@@ -87,7 +80,7 @@ export function MarketingScreen({ initial, partners: basePartners }: { initial: 
   const [seed] = useState(() => seedCampaigns(now));
   const campaigns = useCollection<Campaign>("campaigns", seed);
   const partners = useCollection<Partner>(C.partners, basePartners);
-  const program = useDemoValue<ReferralProgram>("referral-program", DEFAULT_PROGRAM);
+  const program = useReferralProgram();
   const actor = useActor();
   const [tab, setTab] = useState<MarketingTab>("promos");
   const [editing, setEditing] = useState<Promo | "new" | null>(null);
@@ -210,16 +203,16 @@ export function MarketingScreen({ initial, partners: basePartners }: { initial: 
         <div className="grid gap-6 lg:grid-cols-2">
           <Panel
             title="Member referral programme"
-            description="Members share a link; the friend gets a discount on their first booking and the member earns drive credit once it completes."
-            action={<Toggle label="Programme enabled" checked={program.enabled} onChange={(enabled) => setValue("referral-program", { ...program, enabled })} />}
+            description="Members share a link or code; the friend gets a discount on their first booking and the member earns referral credit when the friend joins."
+            action={<Toggle label="Programme enabled" checked={program.enabled} onChange={(enabled) => setValue(REFERRAL_PROGRAM_KEY, { ...program, enabled })} />}
           >
             <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Referrer credit ($)" htmlFor="rp-credit"><Input id="rp-credit" type="number" value={program.referrerCredit} onChange={(e) => setValue("referral-program", { ...program, referrerCredit: Number(e.target.value) })} /></Field>
-              <Field label="Friend discount (%)" htmlFor="rp-disc"><Input id="rp-disc" type="number" value={program.refereeDiscount} onChange={(e) => setValue("referral-program", { ...program, refereeDiscount: Number(e.target.value) })} /></Field>
-              <Field label="Min. booking ($)" htmlFor="rp-min"><Input id="rp-min" type="number" value={program.minBooking} onChange={(e) => setValue("referral-program", { ...program, minBooking: Number(e.target.value) })} /></Field>
+              <Field label="Referrer credit ($)" htmlFor="rp-credit"><Input id="rp-credit" type="number" value={program.referrerCredit} onChange={(e) => setValue(REFERRAL_PROGRAM_KEY, { ...program, referrerCredit: Number(e.target.value) })} /></Field>
+              <Field label="Friend discount (%)" htmlFor="rp-disc"><Input id="rp-disc" type="number" value={program.refereeDiscount} onChange={(e) => setValue(REFERRAL_PROGRAM_KEY, { ...program, refereeDiscount: Number(e.target.value) })} /></Field>
+              <Field label="Min. booking ($)" htmlFor="rp-min"><Input id="rp-min" type="number" value={program.minBooking} onChange={(e) => setValue(REFERRAL_PROGRAM_KEY, { ...program, minBooking: Number(e.target.value) })} /></Field>
             </div>
             <ul className="mt-5 space-y-1.5 text-sm text-muted">
-              <li>• Credit is issued after the friend&apos;s first rental completes.</li>
+              <li>• Credit is issued when the friend creates their account, and is redeemed into the Drive Wallet.</li>
               <li>• One reward per new member; self-referrals are ignored.</li>
               <li>• Stacks with Level Rewards points, not with other promo codes.</li>
             </ul>

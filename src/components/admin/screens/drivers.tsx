@@ -21,7 +21,7 @@ import { DeliveryMap } from "@/components/maps/delivery-map";
 import { PIN_COLORS } from "@/components/maps/leaflet";
 import { DemoNote, PageHeader } from "../ui";
 import { Status } from "../status";
-import { assignDriver, useActor } from "../reservation-tools";
+import { assignDriver, NotifyGuest, useActor } from "../reservation-tools";
 
 /**
  * Drivers — roster, live dispatch map, licence review and the delivery
@@ -131,12 +131,15 @@ export function DriversScreen({ initial, reservations: baseReservations }: { ini
                 <div className="min-h-10 space-y-1.5 rounded-lg bg-ink/40 px-3 py-2.5 text-xs text-cream/75">
                   {jobs.length ? (
                     jobs.map((job) => (
-                      <p key={job.id} className="flex items-center justify-between gap-2">
-                        <span className="truncate">
-                          <span className="text-gold">{job.reference}</span> · {job.listingName} → {job.deliveryAddress ?? "depot"}
-                        </span>
-                        <span className="shrink-0 text-muted">{JOB_LABEL[job.driverJob ?? "assigned"]}</span>
-                      </p>
+                      <div key={job.id} className="space-y-2">
+                        <p className="flex items-center justify-between gap-2">
+                          <span className="truncate">
+                            <span className="text-gold">{job.reference}</span> · {job.listingName} → {job.deliveryAddress ?? "depot"}
+                          </span>
+                          <span className="shrink-0 text-muted">{JOB_LABEL[job.driverJob ?? "assigned"]}</span>
+                        </p>
+                        <NotifyGuest r={job} actor={actor.name} className="border-0 bg-transparent p-0" />
+                      </div>
                     ))
                   ) : (
                     "No active assignment"

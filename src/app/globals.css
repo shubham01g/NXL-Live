@@ -253,6 +253,18 @@ body {
 ::-webkit-scrollbar-thumb { background: transparent; border-radius: 999px; }
 *:hover::-webkit-scrollbar-thumb { background: rgba(196, 160, 104, 0.35); }
 
+/**
+ * A grid with no column utility gets one implicit `auto` column, which grows
+ * to its widest nowrap child — a truncated name pushed whole cards off a
+ * phone screen. One shrinkable column is the default instead. In the base
+ * layer so any `grid-cols-*` utility still wins.
+ */
+@layer base {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {

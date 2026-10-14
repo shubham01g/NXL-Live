@@ -75,6 +75,7 @@ export function AuthPanel({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [enrolled, setEnrolled] = useState(true);
+  const [refCode, setRefCode] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +100,7 @@ export function AuthPanel({
     const result =
       mode === "signin"
         ? await signIn(email, password)
-        : await signUp({ name, email, phone: phone || null, enrolled }, password, activeReferral?.code ?? null);
+        : await signUp({ name, email, phone: phone || null, enrolled }, password, refCode.trim() || activeReferral?.code || null);
 
     setPending(false);
     if (result.ok === true) {
@@ -284,6 +285,13 @@ export function AuthPanel({
           <>
             <Field label="Mobile" htmlFor="auth-phone" hint="For delivery coordination and one-time codes. Optional.">
               <Input id="auth-phone" name="phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(305) 555-0142" />
+            </Field>
+            <Field
+              label="Referral code"
+              htmlFor="auth-ref"
+              hint={activeReferral ? `Using ${activeReferral.code} from your link. Enter another to replace it.` : "Optional. A friend's code earns them referral credit when you join."}
+            >
+              <Input id="auth-ref" name="referral" autoComplete="off" value={refCode} onChange={(e) => setRefCode(e.target.value.toUpperCase())} placeholder="e.g. ALEX-4721" className="font-mono tracking-wider" />
             </Field>
             <div className="flex items-start justify-between gap-4 rounded-md border border-line bg-ink/40 p-4">
               <div className="min-w-0">

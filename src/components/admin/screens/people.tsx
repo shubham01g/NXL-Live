@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ExternalLink, Pencil, Plus, Trash2, Wand2, X } from "lucide-react";
+import { Check, ExternalLink, Landmark, Mail, Pencil, Plus, Trash2, Wand2, X } from "lucide-react";
 import { Avatar } from "@/components/account/avatar";
 import { Panel } from "@/components/account/panel";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -18,8 +18,8 @@ import { PARTNER_TYPES } from "@/lib/data/fixtures/catalog";
 import { STAFF_ROLE_LABEL, type Partner, type Reservation, type StaffMember, type StaffRole } from "@/lib/domain/operations";
 import { useStaff } from "@/lib/auth/staff-session";
 import { C, logAudit } from "@/lib/data/demo";
-import { create, newId, patch, remove, useCollection } from "@/lib/data/demo-store";
-import { balanceOf, codeFor, DEFAULT_COMMISSION, partnerLedger, payPartner } from "@/lib/data/partners";
+import { create, newId, patch, remove, setValue, useCollection, useDemoValue } from "@/lib/data/demo-store";
+import { balanceOf, codeFor, DEFAULT_COMMISSION, partnerLedger, payoutNotesKey, payPartner, usePayoutMethod } from "@/lib/data/partners";
 import { DataTable, DemoNote, InlineSelect, PageHeader, Primary, SearchInput } from "../ui";
 import { useActor } from "../reservation-tools";
 
@@ -166,6 +166,8 @@ function PartnerDrawer({
 }) {
   const ledger = partnerLedger(p, reservations);
   const balance = balanceOf(p);
+  const method = usePayoutMethod(p.id);
+  const notes = useDemoValue(payoutNotesKey(p.id), "");
   return (
     <Drawer
       open
@@ -226,6 +228,35 @@ function PartnerDrawer({
           Open their portal <ExternalLink aria-hidden width={12} height={12} />
         </ButtonLink>
       </p>
+      <p className="mb-2 mt-6 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Payout on file</p>
+      {method ? (
+        <div className="rounded-lg border border-line bg-ink/40">
+          <div className="flex items-start gap-3 px-4 py-3">
+            <span className="mt-0.5 text-gold">{method.kind === "ach" ? <Landmark aria-hidden width={16} height={16} /> : <Mail aria-hidden width={16} height={16} />}</span>
+            {method.kind === "ach" ? (
+              <div className="min-w-0 text-sm">
+                <p className="font-semibold text-cream">ACH direct deposit</p>
+                <p className="text-muted">{[method.bankName, method.accountType].filter(Boolean).join(" · ")}</p>
+                {method.accountName ? <p className="text-muted">Account holder: {method.accountName}</p> : null}
+                <p className="font-mono text-xs text-muted-dim">{method.routing ? `Routing ${method.routing} · ` : ""}Account ···· {method.last4 || "—"}</p>
+              </div>
+            ) : (
+              <div className="min-w-0 text-sm">
+                <p className="font-semibold text-cream">Check by mail</p>
+                <p className="text-muted">Payable to: {method.payableTo}</p>
+                <p className="text-xs text-muted-dim">{method.address}, {method.city}, {method.state} {method.zip}</p>
+              </div>
+            )}
+          </div>
+          <div className="border-t border-line px-4 py-3">
+            <Field label="Payout notes (internal)" htmlFor="pd-notes">
+              <Input id="pd-notes" value={notes} placeholder="e.g. Confirm routing # before first ACH" onChange={(e) => setValue(payoutNotesKey(p.id), e.target.value)} />
+            </Field>
+          </div>
+        </div>
+      ) : (
+        <Alert tone="warning">No payout method on file. The partner sets this up in their portal, under Payouts.</Alert>
+      )}
       <p className="mb-2 mt-6 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Referral ledger · last {ledger.length}</p>
       <div className="overflow-x-auto rounded-lg border border-line">
         <table className="w-full min-w-[32rem] text-sm">

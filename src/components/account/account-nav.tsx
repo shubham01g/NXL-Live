@@ -7,6 +7,7 @@ import {
   CalendarCheck,
   Car,
   CreditCard,
+  Gift,
   Home,
   KeyRound,
   LayoutDashboard,
@@ -66,6 +67,13 @@ function items(member: MemberAccount): NavItem[] {
       icon: Wallet,
       subtitle: `${money(member.credits)} remaining`,
       flag: isLowBalance(member) ? "required" : null,
+    },
+    {
+      href: "/account/referrals",
+      label: "Referrals",
+      icon: Gift,
+      subtitle: "Credit for every friend who joins",
+      flag: null,
     },
     {
       href: "/account/payment",

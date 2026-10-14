@@ -4,14 +4,16 @@ import { useEffect } from "react";
 import { PARTNERS } from "@/lib/data/fixtures/operations";
 import { C } from "@/lib/data/demo";
 import { readCollection, setValue, useDemoValue } from "@/lib/data/demo-store";
+import { findReferrer } from "@/lib/data/referrals";
 import { useClock } from "@/lib/hooks/use-clock";
 import type { Partner } from "@/lib/domain/types";
 import { toast } from "@/components/ui/toast";
 
 /**
- * Partner attribution. A partner's link is any page with `?ref=CODE`; the
+ * Referral attribution. A partner's link is any page with `?ref=CODE`; the
  * code is remembered for 30 days and attached to the next booking, which is
- * what credits the partner's commission. Read from `window.location` in an
+ * what credits the partner's commission. A member's own code travels the same
+ * way and credits them when the friend joins. Read from `window.location` in an
  * effect rather than useSearchParams, so no page has to opt out of static
  * rendering to support it.
  */
@@ -30,9 +32,10 @@ export function ReferralCapture() {
     const code = new URLSearchParams(window.location.search).get("ref")?.trim().toUpperCase();
     if (!code) return;
     const partner = readCollection<Partner>(C.partners, PARTNERS).find((p) => p.code === code && p.status === "active");
-    if (!partner) return;
-    setValue<StoredReferral>(REFERRAL_KEY, { code, business: partner.business, at: Date.now() });
-    toast(`Welcome — referred by ${partner.business}. We'll look after you.`, "info");
+    const business = partner?.business ?? findReferrer(code)?.name;
+    if (!business) return;
+    setValue<StoredReferral>(REFERRAL_KEY, { code, business, at: Date.now() });
+    toast(`Welcome — referred by ${business}. We'll look after you.`, "info");
   }, []);
   return null;
 }

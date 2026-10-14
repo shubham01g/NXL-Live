@@ -32,7 +32,7 @@ import type {
 } from "@/lib/domain/operations";
 import { AUDIT_LOG, C, logAudit, notify } from "@/lib/data/demo";
 import { create, newId, patch, readCollection, useCollection } from "@/lib/data/demo-store";
-import { balanceOf, payPartner } from "@/lib/data/partners";
+import { balanceOf, payoutMethodLabel, payPartner, usePayoutMethod } from "@/lib/data/partners";
 import { timestamp, useClock } from "@/lib/hooks/use-clock";
 import { DataTable, DemoNote, PageHeader, Primary, SearchInput, Toolbar } from "../ui";
 import { Status } from "../status";
@@ -377,6 +377,11 @@ function OnboardModal({ open, onClose, plans, customers, actor }: { open: boolea
 
 type PayoutView = "due" | "history";
 
+function PayoutMethodLine({ partnerId }: { partnerId: string }) {
+  const method = usePayoutMethod(partnerId);
+  return <p className={cn("mt-1 text-xs", method ? "text-muted-dim" : "text-warning")}>{payoutMethodLabel(method)}</p>;
+}
+
 export function PayoutsScreen({ initial, partners: basePartners }: { initial: Payout[]; partners: Partner[] }) {
   const payouts = useCollection<Payout>(C.payouts, initial);
   const partners = useCollection<Partner>(C.partners, basePartners);
@@ -435,6 +440,7 @@ export function PayoutsScreen({ initial, partners: basePartners }: { initial: Pa
                 <div>
                   <p className="font-medium text-cream">{p.business}</p>
                   <p className="text-xs text-muted">{p.type} · {p.code} · {p.commission}%</p>
+                  <PayoutMethodLine partnerId={p.id} />
                 </div>
                 <dl className="grid grid-cols-3 gap-2 text-sm">
                   <div><dt className="text-xs text-muted">Referrals</dt><dd className="text-cream">{p.referrals}</dd></div>

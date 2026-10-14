@@ -6,7 +6,7 @@ import { ArrowLeft, Banknote, Check, ChevronRight, ClipboardCheck, IdCard, Locat
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/site/logo";
 import { RouteMap } from "@/components/maps/route-map";
-import { InspectionReport } from "@/components/admin/reservation-tools";
+import { InspectionReport, NotifyGuest } from "@/components/admin/reservation-tools";
 import { Button } from "@/components/ui/button";
 import { Alert, EmptyState } from "@/components/ui/feedback";
 import { Field, Input, Textarea } from "@/components/ui/field";
@@ -123,7 +123,7 @@ function Signed({ driver }: { driver: Driver }) {
   const licenceIssue = driver.license !== "verified" || !driver.licenseFront;
 
   return (
-    <div className="mx-auto min-h-dvh max-w-2xl pb-28">
+    <div className="mx-auto min-h-dvh w-full max-w-2xl pb-28">
       <header className="sticky top-0 z-[var(--z-header)] border-b border-line bg-ink/90 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold text-ink" style={{ background: driver.color ?? "#c4a068" }}>{initials(driver.name)}</span>
@@ -288,6 +288,8 @@ function JobDetail({ r, driver, onBack, position }: { r: Reservation; driver: Dr
       </section>
 
       <CashToCollect r={r} driver={driver} />
+
+      <NotifyGuest r={r} actor={driver.name} heading="Notify customer" className="rounded-xl bg-surface-1/60 p-4" />
 
       <RouteMap job={r} driver={{ point: position ?? driver.position ?? null, initials: initials(driver.name), color: driver.color ?? "#c4a068" }} height={260} />
 

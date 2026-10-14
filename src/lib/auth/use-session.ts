@@ -2,9 +2,11 @@
 
 import { useSyncExternalStore } from "react";
 import { repo } from "@/lib/data";
-import { findMember, registerCustomer, rememberMember } from "@/lib/data/demo";
-import { readValue, setValue } from "@/lib/data/demo-store";
-import type { MemberAccount, NewMemberInput } from "@/lib/domain/types";
+import { C, findMember, registerCustomer, rememberMember } from "@/lib/data/demo";
+import { readCollection, readValue, setValue } from "@/lib/data/demo-store";
+import { PARTNERS } from "@/lib/data/fixtures/operations";
+import { findReferrer, normaliseCode, recordReferral } from "@/lib/data/referrals";
+import type { MemberAccount, NewMemberInput, Partner } from "@/lib/domain/types";
 import {
   endSession,
   getServerSnapshot,
@@ -106,8 +108,11 @@ export function completeMfa(member: MemberAccount, code: string): AuthResult {
   return { ok: true, member };
 }
 
-/** Create an account and sign straight into it. */
-export async function signUp(input: NewMemberInput, password: string, referredBy: string | null = null): Promise<AuthResult> {
+/**
+ * Create an account and sign straight into it. `referralCode` is a partner's
+ * code or another member's — a member's earns them referral credit.
+ */
+export async function signUp(input: NewMemberInput, password: string, referralCode: string | null = null): Promise<AuthResult> {
   const name = input.name.trim();
   const email = input.email.trim().toLowerCase();
   const phone = input.phone?.trim() || null;
@@ -118,6 +123,13 @@ export async function signUp(input: NewMemberInput, password: string, referredBy
     return { ok: false, error: `Choose a password of at least ${MIN_PASSWORD} characters.` };
   }
   if (findMember(email)) return { ok: false, error: "An account already exists for that email. Sign in instead." };
+
+  const referredBy = referralCode ? normaliseCode(referralCode) : null;
+  const referrer = referredBy ? findReferrer(referredBy) : null;
+  if (referredBy && !referrer && !readCollection<Partner>(C.partners, PARTNERS).some((p) => p.code === referredBy && p.status === "active")) {
+    return { ok: false, error: "That referral code isn't recognised. Check it, or leave it blank." };
+  }
+  if (referrer && referrer.email === email) return { ok: false, error: "You can't use your own referral code." };
 
   try {
     const created = await repo.createMember({ ...input, name, email, phone });
@@ -133,6 +145,7 @@ export async function signUp(input: NewMemberInput, password: string, referredBy
     startSession(member);
     rememberMember(member);
     registerCustomer(member, referredBy ? "referral" : "web", referredBy);
+    if (referrer) recordReferral(referrer, member);
     return { ok: true, member };
   } catch (error) {
     return {

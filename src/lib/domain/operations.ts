@@ -61,6 +61,9 @@ export type BookingChannel = "web" | "concierge" | "partner" | "walk-in";
 /** Where a delivery job stands, from the driver's side. */
 export type DriverJobStatus = "assigned" | "en_route" | "picked_up" | "delivered";
 
+/** The four "we're coming / we're here" messages staff and drivers can send a guest. */
+export type GuestNotice = "delivery_en_route" | "delivery_arrived" | "pickup_en_route" | "pickup_arrived";
+
 export const DRIVER_JOB_STEPS: DriverJobStatus[] = ["assigned", "en_route", "picked_up", "delivered"];
 
 export type FuelLevel = "E" | "1/4" | "1/2" | "3/4" | "F";
@@ -137,6 +140,10 @@ export interface Reservation extends Booking {
   channel: BookingChannel;
   partnerCode: string | null;
   driverId: string | null;
+  /** The team member looking after this booking. Optional: older rows have none. */
+  staffId?: string | null;
+  /** When each arrival message was sent to the guest, so it is not sent twice. */
+  guestNotified?: Partial<Record<GuestNotice, number>>;
   deliveryAddress: string | null;
   /* The fields below arrive with checkout and dispatch at M2; older fixture
      rows simply do not carry them. */
@@ -242,7 +249,7 @@ export interface Payout {
   period: DateRange;
   status: PayoutStatus;
   scheduledFor: number;
-  method: "ACH" | "Wire" | "Wallet credit";
+  method: "ACH" | "Wire" | "Check" | "Wallet credit";
 }
 
 export type { Partner };

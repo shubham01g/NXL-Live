@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Banknote, Camera, Check, CreditCard, Phone } from "lucide-react";
+import { Banknote, BellRing, Camera, Check, CreditCard, Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { money } from "@/lib/domain/format";
 import { durationMs, PRICING, quote, unitAdverb, unitLabel, unitsFor } from "@/lib/domain/pricing";
 import { geocode } from "@/lib/domain/geo";
 import { EMPTY_CARD, parseCard, type CardInput } from "@/lib/domain/account";
 import type { InsuranceChoice, Listing, RateUnit } from "@/lib/domain/types";
-import type { Customer, Driver, Inspection, PayMethod, Reservation, StaffMember } from "@/lib/domain/operations";
+import type { Customer, Driver, GuestNotice, Inspection, PayMethod, Reservation, StaffMember } from "@/lib/domain/operations";
 import { STAFF_ROLE_LABEL, canAccess, cashToCollect, depositTerms, paidWith } from "@/lib/domain/operations";
 import { useStaff } from "@/lib/auth/staff-session";
-import { C, logAudit, nextReference, notify, raiseAlert, scheduleReminders, updateReservation } from "@/lib/data/demo";
-import { create } from "@/lib/data/demo-store";
+import { C, logAudit, nextReference, notify, queueMessage, raiseAlert, scheduleReminders, updateReservation } from "@/lib/data/demo";
+import { create, useCollection } from "@/lib/data/demo-store";
+import { STAFF } from "@/lib/data/fixtures/operations";
 import { timestamp } from "@/lib/hooks/use-clock";
 import { LiveRentalMap } from "@/components/maps/live-rental-map";
 import { CardFields } from "@/components/checkout/card-fields";
@@ -45,7 +46,71 @@ export function useActor(): { name: string; role: StaffMember["role"]; isMaster:
 const when = (ms: number) =>
   new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(ms));
 
+/** Active team members a booking can be handed to. */
+function useTeam(): StaffMember[] {
+  return useCollection<StaffMember>(C.staff, STAFF).filter((m) => m.active);
+}
+
 /* --------------------------------- actions -------------------------------- */
+
+const GUEST_NOTICES: Record<GuestNotice, { group: "Delivery" | "Pickup"; label: string; title: string; body: (r: Reservation) => string }> = {
+  delivery_en_route: { group: "Delivery", label: "En route", title: "Your car is on its way", body: (r) => `The ${r.listingName} is heading to ${r.deliveryAddress ?? "you"} now.` },
+  delivery_arrived: { group: "Delivery", label: "Car arrived", title: "Your car has arrived", body: (r) => `The ${r.listingName} is outside — come and meet your driver.` },
+  pickup_en_route: { group: "Pickup", label: "On our way", title: "We're heading to pick up your car", body: (r) => `A driver is on the way to collect the ${r.listingName}.` },
+  pickup_arrived: { group: "Pickup", label: "Here for pickup", title: "We're here to pick up", body: (r) => `Your driver is outside to collect the ${r.listingName} — please meet us there.` },
+};
+
+/** Tell the guest where their car is: in-app notice, email, ops alert and audit line. */
+export function notifyGuest(r: Reservation, kind: GuestNotice, actor: string) {
+  const n = GUEST_NOTICES[kind];
+  updateReservation(r, { guestNotified: { ...r.guestNotified, [kind]: timestamp() } }, actor, `guest.${kind}`, `Guest notified: ${n.title}`);
+  notify({ email: r.email, kind: "update", at: timestamp(), title: n.title, body: n.body(r), href: `/account/bookings/${r.id}` });
+  queueMessage({ to: r.email, channel: "email", subject: n.title, template: "Arrival notification" });
+  raiseAlert("booking", n.title, `${r.guestName} · ${r.reference} · sent by ${actor}`);
+}
+
+/**
+ * The "notify guest" tray. Delivery messages show until the car is handed
+ * over, pickup messages once it is out. A sent message stays visible, ticked
+ * and disabled, so nobody sends it twice.
+ */
+export function NotifyGuest({ r, actor, heading = "Notify guest", className }: { r: Reservation; actor: string; heading?: string; className?: string }) {
+  if (r.listingKind !== "car" || r.status === "cancelled" || r.status === "completed") return null;
+  const out = r.status === "checked_out" || r.status === "active" || r.driverJob === "delivered";
+  const kinds: GuestNotice[] = out ? ["pickup_en_route", "pickup_arrived"] : ["delivery_en_route", "delivery_arrived"];
+  return (
+    <div className={cn("rounded-lg border border-line bg-ink/40 p-3", className)}>
+      <p className="flex items-center gap-1.5 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">
+        <BellRing aria-hidden width={12} height={12} /> {heading} · {GUEST_NOTICES[kinds[0]].group}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {kinds.map((kind) => {
+          const sent = r.guestNotified?.[kind];
+          return (
+            <Button
+              key={kind}
+              size="sm"
+              variant={sent ? "subtle" : "outline"}
+              disabled={Boolean(sent)}
+              onClick={() => {
+                notifyGuest(r, kind, actor);
+                toast(`Sent to ${r.guestName.split(" ")[0]}: “${GUEST_NOTICES[kind].title}”.`);
+              }}
+            >
+              {sent ? <Check aria-hidden width={13} height={13} /> : null}
+              {GUEST_NOTICES[kind].label}
+              {sent ? <span className="font-normal text-muted">· {when(sent)}</span> : null}
+            </Button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function assignStaff(r: Reservation, member: StaffMember | null, actor: string) {
+  updateReservation(r, { staffId: member?.id ?? null }, actor, "reservation.staff_assigned", member ? `Handled by ${member.name}` : "Team member unassigned");
+}
 
 export function confirmReservation(r: Reservation, actor: string) {
   updateReservation(r, { status: "confirmed" }, actor, "reservation.confirmed", "Confirmed by staff");
@@ -92,6 +157,7 @@ export function ReservationDrawer({
   onReturn: (r: Reservation) => void;
 }) {
   const actor = useActor();
+  const team = useTeam();
   if (!r) return null;
   const driver = drivers.find((d) => d.id === r.driverId) ?? null;
   const dispatchable = drivers.filter((d) => d.license === "verified");
@@ -159,6 +225,28 @@ export function ReservationDrawer({
           {r.notes ? <Info label="Guest notes" value={r.notes} /> : null}
         </section>
 
+        <section>
+          <p className="mb-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Handled by</p>
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-ink/40 p-3">
+            <Select
+              aria-label="Assign team member"
+              value={r.staffId ?? ""}
+              disabled={!open}
+              onChange={(e) => {
+                const m = team.find((x) => x.id === e.target.value) ?? null;
+                assignStaff(r, m, actor.name);
+                toast(m ? `${m.name} is handling this booking.` : "Team member unassigned.");
+              }}
+              className="h-10 max-w-xs py-2"
+            >
+              <option value="">Unassigned</option>
+              {team.map((m) => (
+                <option key={m.id} value={m.id}>{m.name} · {m.title}</option>
+              ))}
+            </Select>
+          </div>
+        </section>
+
         {r.listingKind === "car" && open ? (
           <section>
             <p className="mb-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">Driver</p>
@@ -187,6 +275,7 @@ export function ReservationDrawer({
                 </>
               ) : null}
             </div>
+            <NotifyGuest r={r} actor={actor.name} className="mt-3" />
           </section>
         ) : null}
 
@@ -478,6 +567,8 @@ export function NewReservationModal({
   const [phone, setPhone] = useState(guest?.phone ?? "");
   const [delivery, setDelivery] = useState("");
   const [driverId, setDriverId] = useState("");
+  const [staffId, setStaffId] = useState("");
+  const team = useTeam();
   const [notes, setNotes] = useState("");
   const [insurance, setInsurance] = useState<InsuranceChoice>("own");
   const [method, setMethod] = useState<PayMethod>("card");
@@ -534,6 +625,7 @@ export function NewReservationModal({
       channel: "concierge",
       partnerCode: null,
       driverId: driverId || null,
+      staffId: staffId || null,
       driverJob: driverId ? "assigned" : null,
       deliveryAddress: delivery.trim() || null,
       deliveryPoint: delivery.trim() ? geocode(delivery).point : null,
@@ -601,6 +693,14 @@ export function NewReservationModal({
               </Field>
             </>
           ) : null}
+          <Field label="Handled by" htmlFor="nr-staff">
+            <Select id="nr-staff" value={staffId} onChange={(e) => setStaffId(e.target.value)}>
+              <option value="">Unassigned</option>
+              {team.map((m) => (
+                <option key={m.id} value={m.id}>{m.name} · {m.title}</option>
+              ))}
+            </Select>
+          </Field>
           <Field label="Internal notes" htmlFor="nr-notes" className="sm:col-span-2"><Textarea id="nr-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
         </div>
       ) : step === 1 ? (
@@ -644,6 +744,7 @@ export function NewReservationModal({
           <Info label="Charge" value={money(total)} sub={method === "card" ? `Card ···· ${card.number.replace(/\D/g, "").slice(-4)}` : "Cash at pickup"} />
           <Info label="Deposit" value={`${money(q.depositDue)} · ${depositTerms({ depositMethod })}`} />
           <Info label="Driver" value={drivers.find((d) => d.id === driverId)?.name ?? (delivery ? "Assign later" : "Depot pickup")} />
+          <Info label="Handled by" value={team.find((m) => m.id === staffId)?.name ?? "Unassigned"} />
         </dl>
       )}
       {error ? <Alert tone="danger" className="mt-5">{error}</Alert> : null}
