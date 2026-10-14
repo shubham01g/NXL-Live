@@ -1,12 +1,12 @@
 "use client";
 
 import type { InsuranceChoice, Listing, MemberAccount, PaymentCard, RateUnit } from "@/lib/domain/types";
-import type { PayMethod, Promo, Reservation } from "@/lib/domain/operations";
+import type { Customer, PayMethod, Promo, Reservation } from "@/lib/domain/operations";
 import type { Settlement } from "@/lib/domain/pricing";
 import { durationMs, overlaps } from "@/lib/domain/pricing";
 import { geocode } from "@/lib/domain/geo";
 import { unitLabel } from "@/lib/domain/pricing";
-import { PROMOS, RESERVATIONS } from "./fixtures/operations";
+import { CUSTOMERS, PROMOS, RESERVATIONS } from "./fixtures/operations";
 import { LISTINGS } from "./fixtures/listings";
 import { create, patch, readCollection } from "./demo-store";
 import { C, logAudit, nextReference, raiseAlert, scheduleReminders, toRental } from "./demo";
@@ -56,7 +56,37 @@ export function clashes(listing: Listing, window: { start: number; end: number }
   return [...current.bookedRanges, ...booked].filter((w) => overlaps(w, window));
 }
 
-export function placeBooking(draft: BookingDraft, member: MemberAccount): Reservation {
+/**
+ * A guest has no account, so the back office is the only place their licence
+ * and insurance can live: file them as a customer the desk can open.
+ */
+function fileGuest(guest: MemberAccount, phone: string, spend: number) {
+  if (readCollection<Customer>(C.customers, CUSTOMERS).some((c) => c.email === guest.email)) return;
+  create<Customer>(C.customers, {
+    id: `cus-guest-${Date.now().toString(36)}`,
+    name: guest.name,
+    email: guest.email,
+    phone,
+    tier: "Bronze",
+    points: 0,
+    credits: 0,
+    rentals: 1,
+    lifetimeSpend: spend,
+    joinedAt: Date.now(),
+    enrolled: false,
+    flagged: false,
+    channel: "web",
+    referredBy: null,
+    notes: "Booked as a guest — no NXL account.",
+    insurance: guest.insurance,
+    license: guest.licence
+      ? { number: guest.licence.number, state: guest.licence.state, expiresAt: guest.licence.expiresAt, verified: false, front: guest.licence.front, back: guest.licence.back }
+      : null,
+  });
+}
+
+/** `member` is the signed-in account, or the details a guest typed at checkout. */
+export function placeBooking(draft: BookingDraft, member: MemberAccount, isGuest = false): Reservation {
   const { listing, settlement: s } = draft;
   const window = { start: draft.start, end: draft.start + durationMs(draft.unit, draft.qty) };
   const deliveryPoint = draft.delivery ? geocode(draft.delivery).point : null;
@@ -106,8 +136,9 @@ export function placeBooking(draft: BookingDraft, member: MemberAccount): Reserv
   };
 
   create(C.reservations, reservation);
+  if (isGuest) fileGuest(member, draft.phone, s.total);
 
-  // The member's side: rental history, wallet, points.
+  // The member's side: rental history, wallet, points. A no-op for guests.
   updateMember((m) => {
     const credits = m.credits - s.walletApplied;
     return {
@@ -142,7 +173,7 @@ export function placeBooking(draft: BookingDraft, member: MemberAccount): Reserv
   raiseAlert(
     "booking",
     "New online reservation",
-    `${draft.guestName} booked the ${listing.name} (${unitLabel(draft.unit, draft.qty)})${draft.delivery ? ` — deliver to ${draft.delivery}` : ""}.`,
+    `${draft.guestName}${isGuest ? " (guest)" : ""} booked the ${listing.name} (${unitLabel(draft.unit, draft.qty)})${draft.delivery ? ` — deliver to ${draft.delivery}` : ""}.`,
   );
   logAudit(member.name, "reservation.created", reservation.reference, `${listing.name} · ${s.total.toLocaleString()} · ${draft.payMethod === "cash" && s.cardCharge > 0 ? "cash at pickup" : "card"} · ${reservation.channel}${draft.partnerCode ? ` (${draft.partnerCode})` : ""}`);
 

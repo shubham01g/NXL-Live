@@ -19,9 +19,10 @@ export const SITE = {
   serviceArea: "South Beach, Miami, FL",
 
   contact: {
-    // TODO(client): confirm real concierge line, inbox and HQ address.
-    phone: "+1 (305) 555-0192",
-    phoneHref: "tel:+13055550192",
+    // The line shown in the client's own promo film. TODO(client): confirm
+    // the inbox and HQ address.
+    phone: "1-877-387-0233",
+    phoneHref: "tel:+18773870233",
     email: "drive@nxlexoticrentals.com",
     supportEmail: "support@nxlexoticrentals.com",
     hours: "Daily · 7am – midnight ET",

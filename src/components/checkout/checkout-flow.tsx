@@ -37,7 +37,7 @@ import {
   type PromoRule,
 } from "@/lib/domain/pricing";
 import { PLACES, geocode, roadMilesFromBase } from "@/lib/domain/geo";
-import type { InsuranceChoice, Listing, RateUnit } from "@/lib/domain/types";
+import type { InsuranceChoice, Listing, MemberAccount, RateUnit } from "@/lib/domain/types";
 import { depositTerms, paidWith, type PayMethod, type Promo, type Reservation } from "@/lib/domain/operations";
 import { useSession, updateMember } from "@/lib/auth/use-session";
 import { useCollection } from "@/lib/data/demo-store";
@@ -69,7 +69,36 @@ import { CardFields } from "./card-fields";
  * Payment is simulated until M5: only the brand and last four are kept. The
  * rental and the deposit can each be paid by card or in cash at pickup.
  * Cars need a driver's licence on file — scanned or uploaded, front and back.
+ *
+ * No account is needed. A guest types their name and email, and the licence,
+ * insurance and card stay with that one booking; signing in adds the saved
+ * details, Drive Wallet credit and Level Rewards.
  */
+
+/** A guest, shaped like an account so the flow reads one thing either way. */
+const GUEST: MemberAccount = {
+  id: "guest",
+  name: "",
+  email: "",
+  phone: null,
+  photo: null,
+  joinedAt: 0,
+  enrolled: false,
+  points: 0,
+  credits: 0,
+  creditsLoaded: 0,
+  activePlanId: null,
+  lifetimeRentals: 0,
+  card: null,
+  insurance: null,
+  address: null,
+  security: { mfaEnabled: false, otpPhoneLast4: null, passwordUpdatedAt: null, recoveryCodesRemaining: 0 },
+  licence: null,
+  rentals: [],
+  wallet: [],
+};
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const STEPS = ["Trip", "Insurance", "Payment", "Review"];
 
@@ -103,7 +132,6 @@ export function CheckoutFlow({
   initial: CheckoutInitial;
 }) {
   const session = useSession();
-  const pathname = usePathname();
 
   if (session.status === "loading") {
     return (
@@ -116,39 +144,16 @@ export function CheckoutFlow({
     );
   }
 
-  if (session.status === "signed-out") {
-    const back = typeof window === "undefined" ? pathname : `${pathname}${window.location.search}`;
-    const next = encodeURIComponent(back);
-    return (
-      <Container className="pb-24 pt-28">
-        <div className="mx-auto max-w-lg text-center">
-          <span className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-gold/40 text-gold">
-            <Lock aria-hidden width={22} height={22} />
-          </span>
-          <h1 className="mt-6 font-display text-3xl font-semibold text-cream">An NXL account is required</h1>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            Your account holds your licence, insurance and card, so every booking after this one is two taps.
-            It&apos;s free, and your selections will be waiting when you come back.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <ButtonLink href={`/membership?mode=signup&next=${next}`} size="lg">
-              Create free account
-            </ButtonLink>
-            <ButtonLink href={`/membership?next=${next}`} variant="outline" size="lg">
-              Sign in
-            </ButtonLink>
-          </div>
-        </div>
-      </Container>
-    );
-  }
-
   return <Flow listings={listings} basePromos={basePromos} initial={initial} />;
 }
 
 function Flow({ listings, basePromos, initial }: { listings: Listing[]; basePromos: Promo[]; initial: CheckoutInitial }) {
   const session = useSession();
-  const member = session.status === "signed-in" ? session.member : null;
+  const pathname = usePathname();
+  const account = session.status === "signed-in" ? session.member : null;
+  const [guest, setGuest] = useState<MemberAccount>(GUEST);
+  const member = account ?? guest;
+  const isGuest = !account;
   const promos = useCollection(C.promos, basePromos);
   const activeReferral = useActiveReferral();
 
@@ -248,11 +253,10 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
   const cashDue = payMethod === "cash" ? s.cardCharge : 0;
   const cardDue = payMethod === "card" ? s.cardCharge : 0;
 
-  if (!member) return null;
   const tier = tierFor(member.points);
   const pointsDollars = redeemableValue(member.points);
 
-  if (done) return <Confirmation reservation={done} listing={listing} />;
+  if (done) return <Confirmation reservation={done} listing={listing} isGuest={isGuest} />;
 
   /* -------------------------------- guards -------------------------------- */
 
@@ -262,6 +266,8 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
       if (conflict.length) return "Those dates overlap an existing booking. Pick another window.";
       if (isCar && deliveryOn && !deliveryAddress.trim()) return "Enter the delivery address.";
       if (isCar && pickupOn && !pickupSame && !pickupAddress.trim()) return "Enter the collection address.";
+      if (isGuest && member.name.trim().length < 2) return "Enter your full name.";
+      if (isGuest && !EMAIL.test(member.email.trim())) return "Enter a valid email — your confirmation goes there.";
       if (phone.replace(/\D/g, "").length < 7) return "Enter a phone number the concierge can reach you on.";
     }
     if (i === 1 && isCar && !licenceOk) return "Add your driver's licence — scan or upload the front and back.";
@@ -304,7 +310,6 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
   }
 
   async function confirm() {
-    if (!member) return;
     if (!terms) {
       setError("Please accept the rental terms and deposit policy.");
       return;
@@ -325,8 +330,8 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
     const newCard = parsed && parsed.ok ? parsed.card : null;
     const chargeCard = useSavedCard && member.card ? member.card : newCard;
 
-    // Keep what the member chose to save on their account.
-    updateMember((m) => ({
+    // Keep what the member chose to save on their account. Guests have none.
+    if (!isGuest) updateMember((m) => ({
       ...m,
       phone: m.phone ?? phone,
       card: saveCard && newCard ? newCard : m.card,
@@ -346,8 +351,8 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
         unit,
         qty,
         start,
-        guestName: member.name,
-        email: member.email,
+        guestName: member.name.trim(),
+        email: member.email.trim().toLowerCase(),
         phone,
         insurance,
         delivery: isCar && deliveryOn ? deliveryAddress.trim() : null,
@@ -361,7 +366,18 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
         partnerCode: activeReferral?.code ?? null,
         notes: notes.trim() || null,
       },
-      member,
+      isGuest
+        ? {
+            ...member,
+            name: member.name.trim(),
+            email: member.email.trim().toLowerCase(),
+            insurance:
+              insurance === "nxl"
+                ? { kind: "nxl", carrier: null, policyNumber: null, expiresAt: null, verified: true }
+                : { kind: "own", carrier: carrier.trim(), policyNumber: policy.trim(), expiresAt: new Date(`${policyExpiry}-28`).getTime(), verified: false, document: policyDoc },
+          }
+        : member,
+      isGuest,
     );
     setPlacing(false);
     setDone(reservation);
@@ -385,6 +401,15 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
         </div>
         {activeReferral ? <Badge tone="gold">Referred by {activeReferral.business}</Badge> : null}
       </div>
+
+      {isGuest ? (
+        <Alert tone="info" className="mt-6" title="Booking as a guest">
+          No account needed.{" "}
+          <Link href={`/membership?next=${encodeURIComponent(pathname)}`} className="text-gold hover:underline">Sign in</Link> or{" "}
+          <Link href={`/membership?mode=signup&next=${encodeURIComponent(pathname)}`} className="text-gold hover:underline">create a free account</Link>{" "}
+          to earn Level Rewards points, spend Drive Wallet credit and save your details for next time.
+        </Alert>
+      ) : null}
 
       <StepIndicator className="mt-8" steps={STEPS} current={step} onSelect={go} />
 
@@ -505,11 +530,11 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
 
               <Card title="Contact" icon={Sparkles}>
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <Field label="Name" htmlFor="co-name">
-                    <Input id="co-name" value={member.name} readOnly />
+                  <Field label="Name" htmlFor="co-name" required={isGuest}>
+                    <Input id="co-name" autoComplete="name" value={member.name} readOnly={!isGuest} placeholder="Full name" onChange={(e) => setGuest((g) => ({ ...g, name: e.target.value }))} />
                   </Field>
-                  <Field label="Email" htmlFor="co-email">
-                    <Input id="co-email" value={member.email} readOnly />
+                  <Field label="Email" htmlFor="co-email" required={isGuest}>
+                    <Input id="co-email" type="email" autoComplete="email" value={member.email} readOnly={!isGuest} placeholder="you@email.com" onChange={(e) => setGuest((g) => ({ ...g, email: e.target.value }))} />
                   </Field>
                   <Field label="Mobile" htmlFor="co-phone" required hint="Your concierge texts you before handover.">
                     <Input id="co-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -570,10 +595,12 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                   ))}
                 </ul>
               )}
-              <label className="mt-6 flex items-center gap-2 text-sm text-cream/85">
-                <input type="checkbox" checked={saveInsurance} onChange={(e) => setSaveInsurance(e.target.checked)} className="accent-[#c4a068]" />
-                Save this to my account for next time
-              </label>
+              {!isGuest ? (
+                <label className="mt-6 flex items-center gap-2 text-sm text-cream/85">
+                  <input type="checkbox" checked={saveInsurance} onChange={(e) => setSaveInsurance(e.target.checked)} className="accent-[#c4a068]" />
+                  Save this to my account for next time
+                </label>
+              ) : null}
             </Card>
           ) : null}
 
@@ -597,7 +624,7 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                       {licence.status === "rejected" ? (licence.note ?? "The team asked for a new licence image.") : "Your licence on file expires before this rental ends."} Add a current one below.
                     </Alert>
                   ) : null}
-                  <LicenceForm />
+                  <LicenceForm onSubmit={isGuest ? (next) => setGuest((g) => ({ ...g, licence: next })) : undefined} />
                 </>
               )}
             </Card>
@@ -634,17 +661,19 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                   {!useSavedCard || !member.card ? (
                     <>
                       <CardFields value={card} onChange={setCard} />
-                      <label className="mt-5 flex items-center gap-2 text-sm text-cream/85">
-                        <input type="checkbox" checked={saveCard} onChange={(e) => setSaveCard(e.target.checked)} className="accent-[#c4a068]" />
-                        Save this card to my account
-                      </label>
+                      {!isGuest ? (
+                        <label className="mt-5 flex items-center gap-2 text-sm text-cream/85">
+                          <input type="checkbox" checked={saveCard} onChange={(e) => setSaveCard(e.target.checked)} className="accent-[#c4a068]" />
+                          Save this card to my account
+                        </label>
+                      ) : null}
                     </>
                   ) : null}
                 </Card>
               ) : null}
 
-              <Card title="Credits & rewards" icon={Wallet}>
-                <div className="space-y-4">
+              <Card title={isGuest ? "Promo code" : "Credits & rewards"} icon={isGuest ? Tag : Wallet}>
+                <div className={cn("space-y-4", isGuest && "hidden")}>
                   <ToggleRow
                     label={`Use Drive Wallet credit · ${money(member.credits)} available`}
                     hint={member.credits > 0 ? "Applied after any promo and points." : "No credit loaded — see Drive Wallet plans."}
@@ -660,8 +689,8 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                     onChange={setRedeemPoints}
                   />
                 </div>
-                <div className="mt-6">
-                  <p className="mb-2 flex items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">
+                <div className={isGuest ? undefined : "mt-6"}>
+                  <p className={cn("mb-2 flex items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted", isGuest && "hidden")}>
                     <Tag aria-hidden width={12} height={12} /> Promo code
                   </p>
                   <div className="flex gap-2">
@@ -797,7 +826,7 @@ function Flow({ listings, basePromos, initial }: { listings: Listing[]; baseProm
                 </div>
                 <div className="flex items-baseline justify-between gap-4">
                   <dt className="text-muted">Points you&apos;ll earn</dt>
-                  <dd className="font-mono tabular-nums text-gold">{member.enrolled ? `+${s.pointsEarned.toLocaleString()}` : "Join Level Rewards"}</dd>
+                  <dd className="font-mono tabular-nums text-gold">{member.enrolled ? `+${s.pointsEarned.toLocaleString()}` : isGuest ? "With a free account" : "Join Level Rewards"}</dd>
                 </div>
               </dl>
             </div>
@@ -903,7 +932,7 @@ function Review({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Confirmation({ reservation: r, listing }: { reservation: Reservation; listing: Listing }) {
+function Confirmation({ reservation: r, listing, isGuest }: { reservation: Reservation; listing: Listing; isGuest: boolean }) {
   // From the booking itself — the member's balance has already moved on.
   const balance = r.total - (r.walletApplied ?? 0);
   const cash = r.payment?.method === "cash";
@@ -924,19 +953,34 @@ function Confirmation({ reservation: r, listing }: { reservation: Reservation; l
           <Review label={cash ? "Cash at pickup" : "Charged today"} value={money(balance)} />
           <Review label="Paid with" value={paidWith(r)} />
           <Review label="Deposit" value={`${money(r.deposit)} · ${depositTerms(r)}`} />
-          <Review label="Points earned" value={r.pointsEarned ? `+${r.pointsEarned.toLocaleString()}` : "—"} />
+          {!isGuest ? <Review label="Points earned" value={r.pointsEarned ? `+${r.pointsEarned.toLocaleString()}` : "—"} /> : null}
           {r.deliveryAddress ? <Review label="Delivering to" value={r.deliveryAddress} /> : null}
           {r.partnerCode ? <Review label="Referred by" value={r.partnerCode} /> : null}
         </dl>
 
+        {isGuest ? (
+          <p className="mx-auto mt-6 max-w-md text-sm text-muted">
+            Keep your reference handy — it is how the concierge finds your booking. Create an account with the same email to track it and earn points next time.
+          </p>
+        ) : null}
+
         <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-          <ButtonLink href={`/account/bookings/${r.id}`} size="lg">
-            View booking
-            <ArrowRight aria-hidden width={16} height={16} />
-          </ButtonLink>
-          <ButtonLink href="/account/rewards" variant="outline" size="lg">
-            My rewards
-          </ButtonLink>
+          {isGuest ? (
+            <ButtonLink href="/membership?mode=signup" size="lg">
+              Create free account
+              <ArrowRight aria-hidden width={16} height={16} />
+            </ButtonLink>
+          ) : (
+            <>
+              <ButtonLink href={`/account/bookings/${r.id}`} size="lg">
+                View booking
+                <ArrowRight aria-hidden width={16} height={16} />
+              </ButtonLink>
+              <ButtonLink href="/account/rewards" variant="outline" size="lg">
+                My rewards
+              </ButtonLink>
+            </>
+          )}
           <ButtonLink href={listing.kind === "car" ? "/cars" : "/homes"} variant="ghost" size="lg">
             Keep browsing
           </ButtonLink>

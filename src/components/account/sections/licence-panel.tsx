@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { IdCard } from "lucide-react";
 import { shortDate } from "@/lib/domain/format";
+import type { DriverLicence } from "@/lib/domain/types";
 import { useMember, updateMember } from "@/lib/auth/use-session";
 import { logAudit, raiseAlert } from "@/lib/data/demo";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,16 @@ export function LicencePanel() {
  * Front, back and the details — saved to the member's account as "pending"
  * for the team to review. Used on the Insurance tab and inside checkout.
  */
-export function LicenceForm({ onDone, onCancel }: { onDone?: () => void; onCancel?: () => void }) {
+export function LicenceForm({
+  onDone,
+  onCancel,
+  onSubmit,
+}: {
+  onDone?: () => void;
+  onCancel?: () => void;
+  /** Guest checkout: hand the licence back instead of saving it to an account. */
+  onSubmit?: (licence: DriverLicence) => void;
+}) {
   const member = useMember();
   const [front, setFront] = useState<string | null>(null);
   const [back, setBack] = useState<string | null>(null);
@@ -85,7 +95,7 @@ export function LicenceForm({ onDone, onCancel }: { onDone?: () => void; onCance
   const [state, setState] = useState("FL");
   const [expiry, setExpiry] = useState("");
   const [error, setError] = useState<string | null>(null);
-  if (!member) return null;
+  if (!member && !onSubmit) return null;
 
   function submit() {
     if (!front) return setError("Scan or upload the front of your licence.");
@@ -95,13 +105,17 @@ export function LicenceForm({ onDone, onCancel }: { onDone?: () => void; onCance
     const expiresAt = expiry ? new Date(`${expiry}T00:00:00`).getTime() : NaN;
     if (!Number.isFinite(expiresAt)) return setError("Enter the expiry date.");
     if (expiresAt < Date.now()) return setError("That licence has expired.");
-    updateMember((m) => ({
-      ...m,
-      licence: { number: number.trim().toUpperCase(), state: state.trim().toUpperCase(), expiresAt, front, back, status: "pending", submittedAt: Date.now() },
-    }));
+    const licence: DriverLicence = { number: number.trim().toUpperCase(), state: state.trim().toUpperCase(), expiresAt, front, back, status: "pending", submittedAt: Date.now() };
+    setError(null);
+    if (onSubmit) {
+      onSubmit(licence);
+      toast("Licence added to this booking.");
+      onDone?.();
+      return;
+    }
+    updateMember((m) => ({ ...m, licence }));
     raiseAlert("booking", "Licence to review", `${member?.name} uploaded a driver's licence.`);
     logAudit(member!.name, "member.licence_uploaded", member!.email, `${state.toUpperCase()} licence · front and back`);
-    setError(null);
     toast("Licence submitted — the team reviews it before your next delivery.");
     onDone?.();
   }
