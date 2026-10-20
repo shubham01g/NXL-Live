@@ -30,7 +30,7 @@ export default async function HomePage() {
     <>
       <HomeSchema carCount={stats.carCount} homeCount={stats.homeCount} />
       <Hero
-        video={FILMS.storefront}
+        video={FILMS.aerial}
         eyebrow="Certified exotic cars & private estates"
         title={
           <>
