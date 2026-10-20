@@ -38,7 +38,10 @@ export function Hero({
             src={video.src}
             poster={video.poster ?? ""}
             label={video.label}
-            controlClassName="bottom-auto top-4 sm:top-28"
+            controls={false}
+            // Anchor the zoom on the left edge so the shoreline and the city
+            // move toward the centre and the open ocean falls off the right.
+            className="origin-[0%_70%] scale-125 object-[30%_75%]"
             overlay={<HeroScrim film />}
           />
         </div>
@@ -90,10 +93,15 @@ function HeroScrim({ film = false }: { film?: boolean }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
       {film ? (
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/10 max-md:bg-ink/55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/30 to-transparent max-md:bg-ink/45" />
       ) : null}
       {/* Legibility scrim, kept light enough not to flatten the light above. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/15" />
+      <div
+        className={cn(
+          "absolute inset-0 bg-gradient-to-t from-ink",
+          film ? "via-ink/25 to-transparent" : "via-ink/55 to-ink/15",
+        )}
+      />
       {/* Soft vignette to settle the corners without crushing them. */}
       <div className="absolute inset-0 bg-[radial-gradient(125%_100%_at_50%_45%,transparent_58%,rgba(8,8,10,0.7)_100%)]" />
       <div className="grain absolute inset-0 opacity-40" />

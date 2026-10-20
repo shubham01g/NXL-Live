@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils/cn";
  * The client's clips carry no audio, so they autoplay inline like a moving
  * photograph. Playback stops while the clip is off screen, never starts for
  * visitors who ask for reduced motion (they get the poster), and a pause
- * control is always present because the loops run longer than five seconds.
+ * control is shown because the loops run longer than five seconds, unless the
+ * caller opts out.
  */
 export function LoopVideo({
   src,
@@ -20,6 +21,7 @@ export function LoopVideo({
   controlClassName,
   fit = "cover",
   overlay,
+  controls = true,
 }: {
   src: string;
   poster: string;
@@ -30,6 +32,8 @@ export function LoopVideo({
   fit?: "cover" | "contain";
   /** Scrims or captions painted over the film but under the pause control. */
   overlay?: ReactNode;
+  /** Hides the pause control, for a pure backdrop loop such as the home hero. */
+  controls?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
@@ -75,7 +79,7 @@ export function LoopVideo({
         className={cn("absolute inset-0 h-full w-full", fit === "contain" ? "object-contain" : "object-cover", className)}
       />
       {overlay}
-      {reduced ? null : (
+      {reduced || !controls ? null : (
         <button
           type="button"
           onClick={() => setPaused((p) => !p)}
