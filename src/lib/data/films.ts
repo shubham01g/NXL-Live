@@ -13,8 +13,8 @@ export const FILMS = {
     label: "The fleet rolling past the NXL storefront in South Beach",
   },
   aerial: {
-    src: "/media/nxl-fleet-02.mp4",
-    poster: "/media/nxl-fleet-02.webp",
+    src: "/media/nxl-miami-aerial.mp4",
+    poster: "/media/nxl-miami-aerial.webp",
     label: "Aerial view of Ocean Drive and South Beach at dusk",
   },
   story: {
@@ -44,7 +44,8 @@ export const FILMS = {
 const reel = (path: string, label: string) => ({ src: `/${path}.mp4`, poster: `/${path}.webp`, label }) satisfies MediaVideo;
 
 /**
- * The client's own vertical reels, shot on the lot and around South Beach.
+ * Each car's own footage: the client's vertical reels, shot on the lot and
+ * around South Beach, and landscape films for the rest of the fleet.
  * They live only on the listing they show — each car's gallery leads with
  * its reels and plays them with controls (and sound, where the clip has it).
  * The main reel is the listing's `video`; any extra clips of the same car
@@ -60,6 +61,22 @@ export const LISTING_REELS = {
   "mercedes-benz-s-class": reel("fleet/mercedes-benz-s-class/reel", "The black S-Class on Ocean Drive, rear door open on the tan interior"),
   "lexus-lc-500-convertible": reel("fleet/lexus-lc-500-convertible/reel", "Walk-around of the Lexus LC 500 Convertible, roof down"),
   "the-vantage-ocean-drive-penthouse": reel("estates/the-vantage-ocean-drive-penthouse/reel", "Walk-through of the penthouse living space and ocean view"),
+
+  // Landscape films for the cars the client had no footage of, cut from
+  // generated clips started on each car's own photos.
+  "bmw-i8-roadster": reel("fleet/bmw-i8-roadster/film", "The BMW i8 Roadster on Ocean Drive at dusk: doors up, the cockpit, then a night drive"),
+  "cadillac-escalade-iq": reel("fleet/cadillac-escalade-iq/film", "The red Escalade IQ in Brickell, its tan cabin, then a sunset drive on the causeway"),
+  "cadillac-escalade-sport-platinum": reel("fleet/cadillac-escalade-sport-platinum/film", "The white Escalade Sport Platinum outside a South Beach hotel, its cabin, then a sunset drive"),
+  "chevrolet-corvette-c8-stingray": reel("fleet/chevrolet-corvette-c8-stingray/film", "The silver Corvette C8 Stingray on Ocean Drive, its tan cockpit, then a drive along the ocean"),
+  "dodge-challenger-srt-hellcat": reel("fleet/dodge-challenger-srt-hellcat/film", "The white Challenger Hellcat on Ocean Drive at night, its cockpit, then a launch on the causeway"),
+  "jeep-wrangler-unlimited": reel("fleet/jeep-wrangler-unlimited/film", "The black Wrangler on the beach by a lifeguard tower, its open cabin, then a drive down Collins Avenue"),
+  "lamborghini-urus": reel("fleet/lamborghini-urus/film", "The grey Lamborghini Urus in Miami Beach, its sport seats, then a run across the causeway"),
+  "maserati-levante": reel("fleet/maserati-levante/film", "The white Maserati Levante under the palms, its trident grille, then a drive through Miami"),
+  "mercedes-amg-gt-43": reel("fleet/mercedes-amg-gt-43/film", "The silver AMG GT 4-Door on the waterfront, its cockpit, then a drive along the bay"),
+  "mercedes-maybach-gls": reel("fleet/mercedes-maybach-gls/film", "The black Maybach GLS at a Miami Beach hotel, its rear lounge, then Ocean Drive at night"),
+  "range-rover-autobiography": reel("fleet/range-rover-autobiography/film", "The white Range Rover Autobiography at a waterfront home, its saddle-tan cabin, then a sunset drive"),
+  "rolls-royce-cullinan-white": reel("fleet/rolls-royce-cullinan-white/film", "The white Rolls-Royce Cullinan on Ocean Drive, then cruising Collins Avenue"),
+  "rolls-royce-wraith": reel("fleet/rolls-royce-wraith/film", "The black Rolls-Royce Wraith on Ocean Drive, its starlight headliner, then a drive past the neon"),
 } as const satisfies Record<string, MediaVideo>;
 
 /**
