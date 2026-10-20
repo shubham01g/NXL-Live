@@ -41,7 +41,7 @@ export const FILMS = {
 
 /* ---------------------------------- reels ---------------------------------- */
 
-const reel = (path: string, label: string): MediaVideo => ({ src: `/${path}.mp4`, poster: `/${path}.webp`, label });
+const reel = (path: string, label: string) => ({ src: `/${path}.mp4`, poster: `/${path}.webp`, label }) satisfies MediaVideo;
 
 /**
  * The client's own vertical reels, shot on the lot and around South Beach.
@@ -51,7 +51,7 @@ const reel = (path: string, label: string): MediaVideo => ({ src: `/${path}.mp4`
  * follow it in the gallery.
  */
 export const LISTING_REELS = {
-  "rolls-royce-cullinan-black-badge": reel("fleet/rolls-royce-cullinan-black-badge/reel", "Walk-around of the Cullinan Black Badge, coach doors open on the red interior"),
+  "rolls-royce-cullinan-black-badge": reel("fleet/rolls-royce-cullinan-black-badge/reel", "Walk-around of the Cullinan Black Badge: coach doors open on the red interior, the cockpit and the starlight headliner"),
   "bentley-bentayga": reel("fleet/bentley-bentayga/reel", "Close-up walk-around of the Bentley Bentayga's grille, lights and cabin"),
   "mclaren-gt": reel("fleet/mclaren-gt/reel", "The McLaren GT with its dihedral doors up"),
   "porsche-macan": reel("fleet/porsche-macan/reel", "Walk-around of the blue Porsche Macan"),
@@ -62,9 +62,14 @@ export const LISTING_REELS = {
   "the-vantage-ocean-drive-penthouse": reel("estates/the-vantage-ocean-drive-penthouse/reel", "Walk-through of the penthouse living space and ocean view"),
 } as const satisfies Record<string, MediaVideo>;
 
+/**
+ * The client's "200 hourly" ad for the McLaren GT. It fills the home page's
+ * hourly banner and follows the McLaren's own reel on its listing.
+ */
+export const MCLAREN_PROMO = reel("media/reels/mclaren-hourly", "NXL promo: the McLaren GT on Ocean Drive, rentable by the hour");
+
 /** Further clips of a car, shown after its main reel on the listing page. */
 export const EXTRA_REELS: Record<string, MediaVideo[]> = {
-  "mclaren-gt": [reel("media/reels/mclaren-hourly", "NXL promo: the McLaren GT on Ocean Drive, rentable by the hour")],
-  "rolls-royce-cullinan-black-badge": [reel("media/reels/cullinan-black-badge-cockpit", "The Cullinan Black Badge cockpit and starlight interior")],
+  "mclaren-gt": [MCLAREN_PROMO],
   "chevrolet-corvette-c8-white": [reel("media/reels/corvette-white-interior", "The white Corvette C8's cockpit and seats")],
 };

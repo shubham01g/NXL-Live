@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { repo } from "@/lib/data";
 import { money } from "@/lib/domain/format";
@@ -9,7 +10,7 @@ import { ListingCard } from "@/components/site/listing-card";
 import { Hero } from "@/components/site/hero";
 import { HomeSchema } from "@/components/site/site-schema";
 import { LoopVideo } from "@/components/ui/loop-video";
-import { FILMS } from "@/lib/data/films";
+import { FILMS, MCLAREN_PROMO } from "@/lib/data/films";
 
 export default async function HomePage() {
   const [cars, homes, plans, stats] = await Promise.all([
@@ -21,6 +22,7 @@ export default async function HomePage() {
 
   const featuredCars = cars.filter((c) => c.featured).slice(0, 3);
   const featuredHomes = homes.filter((h) => h.featured).slice(0, 2);
+  const mclaren = cars.find((c) => c.slug === "mclaren-gt");
   const entryRate = Math.min(...cars.map((c) => c.rates.hour ?? Infinity));
   const collector = plans.find((p) => p.featured) ?? plans[1];
 
@@ -142,29 +144,84 @@ export default async function HomePage() {
         </Container>
       </Section>
 
+      {/* ------------------------------ hourly McLaren ----------------------------- */}
+      {mclaren?.rates.hour ? (
+        <section className="relative isolate overflow-hidden border-y border-line bg-ink py-16 sm:py-24">
+          <div aria-hidden className="absolute inset-0 -z-10">
+            <Image
+              src={MCLAREN_PROMO.poster}
+              alt=""
+              fill
+              sizes="100vw"
+              className="scale-110 object-cover opacity-30 blur-2xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/80 to-ink/40" />
+          </div>
+          <Container>
+            <div className="grid items-center gap-12 lg:grid-cols-[1fr_auto] lg:gap-20">
+              <div>
+                <Eyebrow>Hourly exotics</Eyebrow>
+                <h2 className="mt-5 font-display text-display-2 text-balance text-cream">
+                  A McLaren GT for
+                  <span className="text-metal block">{money(mclaren.rates.hour)} an hour.</span>
+                </h2>
+                <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream/80">
+                  The only place in Miami renting supercars by the hour. Dihedral doors, 612
+                  horsepower and Ocean Drive under the wheels, without paying for a whole
+                  day.
+                </p>
+                <div className="mt-9 flex flex-wrap gap-4">
+                  <ButtonLink href={`/cars/${mclaren.slug}`} size="lg">
+                    Book the McLaren
+                    <ArrowRight aria-hidden width={16} height={16} />
+                  </ButtonLink>
+                  <ButtonLink href="/cars" variant="outline" size="lg">
+                    All hourly cars
+                  </ButtonLink>
+                </div>
+              </div>
+              <div className="relative mx-auto aspect-[9/16] w-full max-w-[420px] overflow-hidden rounded-2xl border border-gold/25 bg-surface-2 shadow-2xl lg:h-[min(82svh,780px)] lg:w-auto lg:max-w-none">
+                <LoopVideo {...MCLAREN_PROMO} />
+              </div>
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
       {/* ---------------------------------- on film --------------------------------- */}
+      <section className="relative isolate mt-12 h-[85svh] min-h-[480px] overflow-hidden sm:mt-16">
+        <LoopVideo
+          {...FILMS.story}
+          overlay={
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-ink/10" />
+          }
+        />
+        <Container className="relative flex h-full items-end pb-14">
+          <div className="max-w-2xl">
+            <Eyebrow>On film</Eyebrow>
+            <h2 className="mt-5 font-display text-display-2 text-balance text-cream">
+              See the fleet in motion.
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-cream/80">
+              Golden hour on Ocean Drive, doors up outside the storefront, the whole line-up
+              on the street. This is what an NXL booking looks like.
+            </p>
+          </div>
+        </Container>
+      </section>
+
       <Section size="sm">
         <Container>
-          <SectionHeading
-            eyebrow="On film"
-            title="See the fleet in motion."
-            description="Golden hour on Ocean Drive, doors up outside the storefront, the whole line-up on the street. This is what an NXL booking looks like."
-          />
-          <div className="mt-12 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-            <div className="relative aspect-video overflow-hidden rounded-xl border border-line bg-surface-2 lg:aspect-auto">
-              <LoopVideo {...FILMS.story} />
-            </div>
-            <div className="grid grid-cols-3 gap-3 lg:gap-4">
-              {[FILMS.arrival, FILMS.lineup, FILMS.street].map((film) => (
-                <div
-                  key={film.src}
-                  className="relative aspect-[9/16] overflow-hidden rounded-xl border border-line bg-surface-2"
-                >
-                  <LoopVideo {...film} controlClassName="bottom-2 right-2 h-8 w-8" />
-                </div>
-              ))}
-            </div>
-          </div>
+          <ul className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0 lg:gap-6">
+            {[FILMS.arrival, FILMS.lineup, FILMS.street].map((film) => (
+              <li
+                key={film.src}
+                className="relative aspect-[9/16] w-[78%] shrink-0 snap-center overflow-hidden rounded-xl border border-line bg-surface-2 sm:w-auto"
+              >
+                <LoopVideo {...film} />
+              </li>
+            ))}
+          </ul>
         </Container>
       </Section>
 

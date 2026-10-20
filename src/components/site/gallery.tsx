@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Media } from "@/components/ui/media";
@@ -49,6 +50,9 @@ export function Gallery({
   const photos = images.length > 0 ? images : Array.from({ length: shots.length }, () => "");
   const lead = videos.length;
   const [active, setActive] = useState(0);
+  // Reels are shot upright, so the stage grows tall for them; a landscape
+  // clip drops back to the photo frame once its metadata says so.
+  const [wide, setWide] = useState<Record<string, boolean>>({});
   const hasPhotos = images.length > 0;
   const video = active < lead ? videos[active] : null;
   const photoAt = active - lead;
@@ -59,7 +63,23 @@ export function Gallery({
     <div>
       <div className="relative">
         {video ? (
-          <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-ink">
+          <div
+            className={cn(
+              "relative isolate overflow-hidden rounded-lg bg-ink",
+              wide[video.src]
+                ? "aspect-[3/2]"
+                : "aspect-[4/5] max-h-[min(82svh,820px)] w-full lg:aspect-auto lg:h-[min(82svh,820px)]",
+            )}
+          >
+            {video.poster ? (
+              <Image
+                src={video.poster}
+                alt=""
+                fill
+                sizes="60vw"
+                className="-z-10 scale-110 object-cover opacity-40 blur-2xl"
+              />
+            ) : null}
             <video
               key={video.src}
               src={video.src}
@@ -68,6 +88,10 @@ export function Gallery({
               playsInline
               preload="metadata"
               aria-label={`${alt} — ${video.label}`}
+              onLoadedMetadata={(e) => {
+                const { videoWidth: w, videoHeight: h } = e.currentTarget;
+                setWide((prev) => ({ ...prev, [video.src]: w > h }));
+              }}
               className="h-full w-full object-contain"
             />
           </div>
