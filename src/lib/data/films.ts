@@ -44,26 +44,24 @@ export const FILMS = {
 const reel = (path: string, label: string) => ({ src: `/${path}.mp4`, poster: `/${path}.webp`, label }) satisfies MediaVideo;
 
 /**
- * Each car's own footage: the client's vertical reels, shot on the lot and
- * around South Beach, and landscape films for the rest of the fleet.
- * They live only on the listing they show — each car's gallery leads with
- * its reels and plays them with controls (and sound, where the clip has it).
- * The main reel is the listing's `video`; any extra clips of the same car
- * follow it in the gallery.
+ * Each listing's own footage. Every car leads with a landscape film, cut
+ * from generated clips started on that car's own photos; the client's
+ * vertical reels, shot on the lot and around South Beach, follow it as
+ * extra clips. Footage lives only on the listing it shows and plays with
+ * controls (and sound, where the clip has it). The main film is the
+ * listing's `video`; the extras follow it in the gallery.
  */
 export const LISTING_REELS = {
-  "rolls-royce-cullinan-black-badge": reel("fleet/rolls-royce-cullinan-black-badge/reel", "Walk-around of the Cullinan Black Badge: coach doors open on the red interior, the cockpit and the starlight headliner"),
-  "bentley-bentayga": reel("fleet/bentley-bentayga/reel", "Close-up walk-around of the Bentley Bentayga's grille, lights and cabin"),
-  "mclaren-gt": reel("fleet/mclaren-gt/reel", "The McLaren GT with its dihedral doors up"),
-  "porsche-macan": reel("fleet/porsche-macan/reel", "Walk-around of the blue Porsche Macan"),
-  "chevrolet-corvette-c8-white": reel("fleet/chevrolet-corvette-c8-white/reel", "The white Corvette C8 convertible, doors open, roof down"),
-  "mercedes-benz-s-580": reel("fleet/mercedes-benz-s-580/reel", "The black S 580 on the showroom floor"),
-  "mercedes-benz-s-class": reel("fleet/mercedes-benz-s-class/reel", "The black S-Class on Ocean Drive, rear door open on the tan interior"),
-  "lexus-lc-500-convertible": reel("fleet/lexus-lc-500-convertible/reel", "Walk-around of the Lexus LC 500 Convertible, roof down"),
   "the-vantage-ocean-drive-penthouse": reel("estates/the-vantage-ocean-drive-penthouse/reel", "Walk-through of the penthouse living space and ocean view"),
 
-  // Landscape films for the cars the client had no footage of, cut from
-  // generated clips started on each car's own photos.
+  "rolls-royce-cullinan-black-badge": reel("fleet/rolls-royce-cullinan-black-badge/film", "The gunmetal Cullinan Black Badge under the palms, its red cockpit, then a sunset drive by the bay"),
+  "bentley-bentayga": reel("fleet/bentley-bentayga/film", "The Bentley Bentayga at a Miami marina, its quilted rear cabin, then a drive under the palms"),
+  "mclaren-gt": reel("fleet/mclaren-gt/film", "The black McLaren GT under the palms at golden hour, then its dihedral doors rising"),
+  "porsche-macan": reel("fleet/porsche-macan/film", "The blue Porsche Macan in Miami Beach, its cockpit, then a drive through the palms"),
+  "chevrolet-corvette-c8-white": reel("fleet/chevrolet-corvette-c8-white/film", "The white Corvette C8 convertible on Ocean Drive, then a push into its open cockpit"),
+  "mercedes-benz-s-580": reel("fleet/mercedes-benz-s-580/film", "The black S 580 outside a Miami Beach hotel at dusk, its details, then a night drive through Brickell"),
+  "mercedes-benz-s-class": reel("fleet/mercedes-benz-s-class/film", "The black S-Class on a palm-lined street, its cream quilted cabin, then a drive by the beach"),
+  "lexus-lc-500-convertible": reel("fleet/lexus-lc-500-convertible/film", "The blue Lexus LC 500 Convertible under the palms, then top-down drives by the ocean"),
   "bmw-i8-roadster": reel("fleet/bmw-i8-roadster/film", "The BMW i8 Roadster on Ocean Drive at dusk: doors up, the cockpit, then a night drive"),
   "cadillac-escalade-iq": reel("fleet/cadillac-escalade-iq/film", "The red Escalade IQ in Brickell, its tan cabin, then a sunset drive on the causeway"),
   "cadillac-escalade-sport-platinum": reel("fleet/cadillac-escalade-sport-platinum/film", "The white Escalade Sport Platinum outside a South Beach hotel, its cabin, then a sunset drive"),
@@ -81,12 +79,21 @@ export const LISTING_REELS = {
 
 /**
  * The client's "200 hourly" ad for the McLaren GT. It fills the home page's
- * hourly banner and follows the McLaren's own reel on its listing.
+ * hourly banner and follows the McLaren's own film and reel on its listing.
  */
 export const MCLAREN_PROMO = reel("media/reels/mclaren-hourly", "NXL promo: the McLaren GT on Ocean Drive, rentable by the hour");
 
-/** Further clips of a car, shown after its main reel on the listing page. */
+/** Further clips of a car, shown after its main film on the listing page. */
 export const EXTRA_REELS: Record<string, MediaVideo[]> = {
-  "mclaren-gt": [MCLAREN_PROMO],
-  "chevrolet-corvette-c8-white": [reel("media/reels/corvette-white-interior", "The white Corvette C8's cockpit and seats")],
+  "rolls-royce-cullinan-black-badge": [reel("fleet/rolls-royce-cullinan-black-badge/reel", "Walk-around of the Cullinan Black Badge: coach doors open on the red interior, the cockpit and the starlight headliner")],
+  "bentley-bentayga": [reel("fleet/bentley-bentayga/reel", "Close-up walk-around of the Bentley Bentayga's grille, lights and cabin")],
+  "mclaren-gt": [reel("fleet/mclaren-gt/reel", "The McLaren GT with its dihedral doors up"), MCLAREN_PROMO],
+  "porsche-macan": [reel("fleet/porsche-macan/reel", "Walk-around of the blue Porsche Macan")],
+  "chevrolet-corvette-c8-white": [
+    reel("fleet/chevrolet-corvette-c8-white/reel", "The white Corvette C8 convertible, doors open, roof down"),
+    reel("media/reels/corvette-white-interior", "The white Corvette C8's cockpit and seats"),
+  ],
+  "mercedes-benz-s-580": [reel("fleet/mercedes-benz-s-580/reel", "The black S 580 on the showroom floor")],
+  "mercedes-benz-s-class": [reel("fleet/mercedes-benz-s-class/reel", "The black S-Class on Ocean Drive, rear door open on the tan interior")],
+  "lexus-lc-500-convertible": [reel("fleet/lexus-lc-500-convertible/reel", "Walk-around of the Lexus LC 500 Convertible, roof down")],
 };

@@ -53,6 +53,10 @@ export function Gallery({
   // Reels are shot upright, so the stage grows tall for them; a landscape
   // clip drops back to the photo frame once its metadata says so.
   const [wide, setWide] = useState<Record<string, boolean>>({});
+  const measure = (src: string, el: HTMLVideoElement) => {
+    const isWide = el.videoWidth > el.videoHeight;
+    setWide((prev) => (prev[src] === isWide ? prev : { ...prev, [src]: isWide }));
+  };
   const hasPhotos = images.length > 0;
   const video = active < lead ? videos[active] : null;
   const photoAt = active - lead;
@@ -88,10 +92,13 @@ export function Gallery({
               playsInline
               preload="metadata"
               aria-label={`${alt} — ${video.label}`}
-              onLoadedMetadata={(e) => {
-                const { videoWidth: w, videoHeight: h } = e.currentTarget;
-                setWide((prev) => ({ ...prev, [video.src]: w > h }));
+              // The server-rendered element can load its metadata before
+              // hydration, so the event may already have fired: read the
+              // size on mount as well.
+              ref={(el) => {
+                if (el && el.readyState >= 1) measure(video.src, el);
               }}
+              onLoadedMetadata={(e) => measure(video.src, e.currentTarget)}
               className="h-full w-full object-contain"
             />
           </div>
