@@ -3,11 +3,13 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { repo } from "@/lib/data";
 import { count, ratingText } from "@/lib/domain/format";
+import type { MediaVideo } from "@/lib/domain/types";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Section, SectionHeading, StatGrid } from "@/components/ui/layout";
 import { Card, Eyebrow } from "@/components/ui/primitives";
 import { LoopVideo } from "@/components/ui/loop-video";
-import { FILMS } from "@/lib/data/films";
+import { Media } from "@/components/ui/media";
+import { ABOUT_FILMS, ABOUT_STILLS, FILMS, PARTNERSHIP_BANNER } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 
 export const metadata: Metadata = {
@@ -17,36 +19,49 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
-const OFFERS = [
+/** A still (path + alt text) or a muted loop. */
+type OfferMedia = { image: string; alt: string } | { video: MediaVideo };
+
+/**
+ * Every card opens on a picture (client, 2026-10-28). The media is made for
+ * this page alone and appears nowhere else on the site.
+ */
+const OFFERS: { href: string; title: string; body: string; media: OfferMedia }[] = [
   {
     href: "/cars",
     title: "Exotic Cars",
     body: "Rolls-Royce, Lamborghini, McLaren, Maybach and more, by the hour or the day.",
+    media: { video: ABOUT_FILMS.exotic },
   },
   {
     href: "/homes",
     title: "Luxury Homes",
     body: "Oceanfront villas and penthouses by the day, week or month.",
+    media: { video: ABOUT_FILMS.luxury },
   },
   {
     href: "/subscriptions",
     title: "Drive Credit Wallet",
     body: "Buy credit once and spend it across the whole fleet.",
+    media: { image: ABOUT_STILLS.wallet.src, alt: ABOUT_STILLS.wallet.alt },
   },
   {
     href: "/loyalty",
     title: "Level Rewards",
     body: "Earn 5–18% back in points on every booking, free to join.",
+    media: { video: ABOUT_FILMS.rewards },
   },
   {
     href: "/partners",
     title: "Partnership Program",
     body: "Refer guests and earn up to 12% of every rental, Net-15.",
+    media: { video: ABOUT_FILMS.partners },
   },
   {
     href: "/contact",
     title: "Concierge",
     body: "A real team on the phone, seven days a week.",
+    media: { video: ABOUT_FILMS.concierge },
   },
 ];
 
@@ -64,16 +79,12 @@ export default async function AboutPage() {
           </>
         }
         lede="We built NXL because renting something extraordinary should not feel like a negotiation. Transparent rates, hourly windows, certified inventory, and a concierge who picks up the phone."
+        backdrop={{ video: FILMS.aerial }}
       />
 
       <Section size="sm">
         <Container>
-          <div className="relative aspect-[21/9] overflow-hidden rounded-lg bg-surface-2 max-sm:aspect-video">
-            <LoopVideo {...FILMS.aerial} />
-          </div>
-
           <StatGrid
-            className="mt-8"
             stats={[
               { label: "Cars in fleet", value: stats.carCount },
               { label: "Private estates", value: stats.homeCount },
@@ -97,21 +108,42 @@ export default async function AboutPage() {
               <Card
                 key={offer.href}
                 as="article"
-                className="group relative p-6 transition-all duration-300 ease-editorial hover:border-gold/40 hover:bg-surface-2/60"
+                className="group relative overflow-hidden transition-all duration-300 ease-editorial hover:border-gold/40 hover:bg-surface-2/60"
               >
-                <h3 className="font-display text-xl font-semibold text-cream">
-                  <Link href={offer.href} className="after:absolute after:inset-0">
-                    {offer.title}
-                  </Link>
-                </h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-muted">{offer.body}</p>
-                <span
-                  aria-hidden
-                  className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-gold opacity-0 transition-opacity group-hover:opacity-100"
-                >
-                  Explore
-                  <ArrowRight width={14} height={14} />
-                </span>
+                <div className="relative aspect-[3/2] overflow-hidden bg-surface-2">
+                  {"video" in offer.media ? (
+                    <LoopVideo
+                      {...offer.media.video}
+                      poster={offer.media.video.poster ?? ""}
+                      controls={false}
+                      className="transition-transform duration-700 ease-editorial group-hover:scale-105"
+                    />
+                  ) : (
+                    <Media
+                      src={offer.media.image}
+                      alt={offer.media.alt}
+                      fill
+                      rounded={false}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="transition-transform duration-700 ease-editorial group-hover:scale-105"
+                    />
+                  )}
+                </div>
+                <div className="p-6">
+                  <h3 className="font-display text-xl font-semibold text-cream">
+                    <Link href={offer.href} className="after:absolute after:inset-0">
+                      {offer.title}
+                    </Link>
+                  </h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-muted">{offer.body}</p>
+                  <span
+                    aria-hidden
+                    className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-gold opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    Explore
+                    <ArrowRight width={14} height={14} />
+                  </span>
+                </div>
               </Card>
             ))}
           </div>
@@ -120,8 +152,18 @@ export default async function AboutPage() {
 
       <Section size="sm">
         <Container>
-          <div className="overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-surface-2 via-surface-1 to-ink p-8 md:p-14">
-            <div className="max-w-2xl">
+          <div className="overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-surface-2 via-surface-1 to-ink">
+            {PARTNERSHIP_BANNER ? (
+              <Media
+                src={PARTNERSHIP_BANNER.src}
+                alt={PARTNERSHIP_BANNER.alt}
+                aspect="21/9"
+                rounded={false}
+                sizes="(max-width: 1280px) 100vw, 1200px"
+                className="max-sm:aspect-video"
+              />
+            ) : null}
+            <div className="max-w-2xl p-8 md:p-14">
               <Eyebrow>Partnership program</Eyebrow>
               <h2 className="mt-5 font-display text-display-3 text-balance text-cream">
                 Refer your guests. Earn on every rental.

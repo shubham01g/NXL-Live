@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { repo } from "@/lib/data";
 import { money } from "@/lib/domain/format";
@@ -30,7 +29,7 @@ export default async function HomePage() {
     <>
       <HomeSchema carCount={stats.carCount} homeCount={stats.homeCount} />
       <Hero
-        video={FILMS.aerial}
+        video={FILMS.storefront}
         eyebrow="Certified exotic cars & private estates"
         title={
           <>
@@ -147,15 +146,12 @@ export default async function HomePage() {
       {/* ------------------------------ hourly McLaren ----------------------------- */}
       {mclaren?.rates.hour ? (
         <section className="relative isolate overflow-hidden border-y border-line bg-ink py-16 sm:py-24">
+          {/* A built backdrop, not a blurred copy of the promo: no picture
+              appears twice on the site. */}
           <div aria-hidden className="absolute inset-0 -z-10">
-            <Image
-              src={MCLAREN_PROMO.poster}
-              alt=""
-              fill
-              sizes="100vw"
-              className="scale-110 object-cover opacity-30 blur-2xl"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/80 to-ink/40" />
+            <div className="absolute inset-0 bg-[radial-gradient(60%_80%_at_85%_50%,rgba(196,160,104,0.18),transparent_65%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(55%_70%_at_10%_20%,rgba(122,92,54,0.22),transparent_68%)]" />
+            <div className="grain absolute inset-0 opacity-40" />
           </div>
           <Container>
             <div className="grid items-center gap-12 lg:grid-cols-[1fr_auto] lg:gap-20">

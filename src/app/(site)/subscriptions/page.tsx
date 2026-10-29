@@ -10,6 +10,7 @@ import { Container, Section, SectionHeading } from "@/components/ui/layout";
 import { Alert } from "@/components/ui/feedback";
 import { Card, Eyebrow } from "@/components/ui/primitives";
 import { Accordion } from "@/components/ui/disclosure";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 import { WalletJourney } from "@/components/site/wallet-journey";
 
@@ -63,6 +64,7 @@ export default async function SubscriptionsPage() {
   return (
     <>
       <PageHero
+        backdrop={PAGE_BACKDROPS.subscriptions}
         eyebrow="Drive Credit Wallet"
         title={
           <>

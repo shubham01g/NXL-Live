@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { LegalPage } from "@/components/site/legal-page";
 import { SITE } from "@/lib/domain/site";
 
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <LegalPage
+      backdrop={PAGE_BACKDROPS.privacy}
       eyebrow="Legal"
       title="Privacy Policy"
       lede="What we collect, why we collect it, how long we keep it, and the choices you have."

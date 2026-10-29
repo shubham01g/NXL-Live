@@ -4,6 +4,7 @@ import { count } from "@/lib/domain/format";
 import { PARTNER_TYPES } from "@/lib/data/fixtures/catalog";
 import { Container, Section, SectionHeading, StatGrid } from "@/components/ui/layout";
 import { Card } from "@/components/ui/primitives";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 import { PartnerForm } from "@/components/site/partner-form";
 
@@ -43,6 +44,7 @@ export default async function PartnersPage() {
   return (
     <>
       <PageHero
+        backdrop={PAGE_BACKDROPS.partners}
         eyebrow="Partnership program"
         title={
           <>

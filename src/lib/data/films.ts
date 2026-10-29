@@ -39,6 +39,75 @@ export const FILMS = {
   },
 } satisfies Record<string, MediaVideo>;
 
+/**
+ * The client's own video, introducing NXL in person (asked for 2026-10-28).
+ * It plays on Who We Are, with sound and controls. The page skips the section
+ * while this is null, so no empty frame ships before the file arrives; encode
+ * it to `public/media/nxl-founder.{mp4,webp}` and fill this in.
+ */
+export const FOUNDER_FILM: MediaVideo | null = null;
+
+/**
+ * Generated for the About and Who We Are pages only (2026-10-28), so nothing
+ * there repeats media from a listing. Clips are cropped to remove the
+ * generator's corner mark and re-encoded silent.
+ */
+export const ABOUT_FILMS = {
+  exotic: { src: "/media/about/exotic.mp4", poster: "/media/about/exotic.webp", label: "A black supercar gliding along a palm-lined Miami Beach boulevard at golden hour" },
+  luxury: { src: "/media/about/luxury.mp4", poster: "/media/about/luxury.webp", label: "Moving through an oceanfront penthouse at dusk toward the terrace and the Atlantic" },
+  rewards: { src: "/media/about/rewards.mp4", poster: "/media/about/rewards.webp", label: "A starlit rear cabin with quilted cream seats and a champagne flute on the console" },
+  partners: { src: "/media/about/partners.mp4", poster: "/media/about/partners.webp", label: "A black SUV arriving at a Miami Beach hotel entrance, a valet opening its door" },
+  concierge: { src: "/media/about/concierge.mp4", poster: "/media/about/concierge.webp", label: "A gloved hand placing a car key into a guest's palm at sunset" },
+} satisfies Record<string, MediaVideo>;
+
+export const ABOUT_STILLS = {
+  wallet: { src: "/media/about/wallet.webp", alt: "A black metal card beside a car key on gold-stitched black leather" },
+  handover: { src: "/media/who-we-are/handover.webp", alt: "A chauffeur holding open the rear door of a white SUV on a South Beach street" },
+};
+
+/** Wide still over the About page's partnership banner. */
+export const PARTNERSHIP_BANNER: { src: string; alt: string } | null = {
+  src: "/media/about/partnership-banner.webp",
+  alt: "A superyacht and a black SUV on a Miami marina dock at sunset",
+};
+
+/** What fills a page hero: a muted loop or a still. */
+export type PageBackdrop = { video: MediaVideo } | { image: string; alt: string };
+
+/**
+ * Each inner page opens on its own film or still, full width under the
+ * header, like the home page (client, 2026-10-29). Every entry is made for
+ * that page alone. Clips are cropped to remove the generator mark; the Who
+ * We Are clip starts 3.2s in, past a carmaker badge on the hood. A null
+ * entry falls back to the plain hero.
+ */
+export const PAGE_BACKDROPS: Record<
+  | "cars"
+  | "homes"
+  | "subscriptions"
+  | "loyalty"
+  | "partners"
+  | "contact"
+  | "whoWeAre"
+  | "membership"
+  | "insurance"
+  | "privacy"
+  | "terms",
+  PageBackdrop | null
+> = {
+  cars: { video: { src: "/media/pages/cars.mp4", poster: "/media/pages/cars.webp", label: "Three exotic supercars driving a causeway into Miami at sunset" } },
+  homes: { video: { src: "/media/pages/homes.mp4", poster: "/media/pages/homes.webp", label: "Aerial orbit of a white oceanfront villa and its glowing pool at golden hour" } },
+  subscriptions: { video: { src: "/media/pages/subscriptions.mp4", poster: "/media/pages/subscriptions.webp", label: "A row of luxury cars under spotlights in a private collector garage" } },
+  loyalty: { video: { src: "/media/pages/loyalty.mp4", poster: "/media/pages/loyalty.webp", label: "Champagne flutes clinking on a rooftop over the Miami skyline at dusk" } },
+  partners: { video: { src: "/media/pages/partners.mp4", poster: "/media/pages/partners.webp", label: "Gliding over a luxury hotel pool deck toward the ocean at blue hour" } },
+  contact: { video: { src: "/media/pages/contact.mp4", poster: "/media/pages/contact.webp", label: "A marble concierge desk with a phone, a service bell and orchids at night" } },
+  whoWeAre: { video: { src: "/media/pages/who-we-are.mp4", poster: "/media/pages/who-we-are.webp", label: "A gloved hand polishing the glossy black paint of a car under strip lights" } },
+  membership: { image: "/media/pages/membership.webp", alt: "A hand holding a car key as an exotic car glows in the Miami night" },
+  insurance: { image: "/media/pages/insurance.webp", alt: "A black luxury SUV parked in a secure private garage at night" },
+  privacy: { image: "/media/pages/privacy.webp", alt: "A tinted car window reflecting Miami neon at night" },
+  terms: { image: "/media/pages/terms.webp", alt: "Blank paper, a fountain pen and a car key on a walnut desk" },
+};
+
 /* ---------------------------------- reels ---------------------------------- */
 
 const reel = (path: string, label: string) => ({ src: `/${path}.mp4`, poster: `/${path}.webp`, label }) satisfies MediaVideo;
@@ -78,8 +147,8 @@ export const LISTING_REELS = {
 } as const satisfies Record<string, MediaVideo>;
 
 /**
- * The client's "200 hourly" ad for the McLaren GT. It fills the home page's
- * hourly banner and follows the McLaren's own film and reel on its listing.
+ * The client's "200 hourly" ad for the McLaren GT. It plays only in the home
+ * page's hourly banner: no clip appears in two places on the site.
  */
 export const MCLAREN_PROMO = reel("media/reels/mclaren-hourly", "NXL promo: the McLaren GT on Ocean Drive, rentable by the hour");
 
@@ -87,7 +156,7 @@ export const MCLAREN_PROMO = reel("media/reels/mclaren-hourly", "NXL promo: the 
 export const EXTRA_REELS: Record<string, MediaVideo[]> = {
   "rolls-royce-cullinan-black-badge": [reel("fleet/rolls-royce-cullinan-black-badge/reel", "Walk-around of the Cullinan Black Badge: coach doors open on the red interior, the cockpit and the starlight headliner")],
   "bentley-bentayga": [reel("fleet/bentley-bentayga/reel", "Close-up walk-around of the Bentley Bentayga's grille, lights and cabin")],
-  "mclaren-gt": [reel("fleet/mclaren-gt/reel", "The McLaren GT with its dihedral doors up"), MCLAREN_PROMO],
+  "mclaren-gt": [reel("fleet/mclaren-gt/reel", "The McLaren GT with its dihedral doors up")],
   "porsche-macan": [reel("fleet/porsche-macan/reel", "Walk-around of the blue Porsche Macan")],
   "chevrolet-corvette-c8-white": [
     reel("fleet/chevrolet-corvette-c8-white/reel", "The white Corvette C8 convertible, doors open, roof down"),

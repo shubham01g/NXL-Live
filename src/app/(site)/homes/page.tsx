@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { repo } from "@/lib/data";
 import { money } from "@/lib/domain/format";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 import { ListingBrowser } from "@/components/site/listing-browser";
 
@@ -19,6 +20,7 @@ export default async function HomesPage() {
   return (
     <>
       <PageHero
+        backdrop={PAGE_BACKDROPS.homes}
         eyebrow="Private estates"
         title={<span className="text-metal block">Luxury Homes</span>}
         lede={`Book by the day, week or month. Oceanfront villas and Ocean Drive penthouses with room for every key — from ${money(entryRate)} a night. Bring the fleet home.`}

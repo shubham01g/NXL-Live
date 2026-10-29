@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { LegalPage } from "@/components/site/legal-page";
 import { PRICING } from "@/lib/domain/pricing";
 import { money } from "@/lib/domain/format";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export default function InsurancePage() {
   return (
     <LegalPage
+      backdrop={PAGE_BACKDROPS.insurance}
       eyebrow="Coverage"
       title="Insurance & Coverage"
       lede="Every rental must be insured. You can bring your own qualifying policy, or add ours at checkout."

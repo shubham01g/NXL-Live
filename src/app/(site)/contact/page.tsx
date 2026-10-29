@@ -4,6 +4,7 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { SITE } from "@/lib/domain/site";
 import { Container, Section } from "@/components/ui/layout";
 import { Card } from "@/components/ui/primitives";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 import { ContactForm } from "@/components/site/contact-form";
 import { ConciergeTrigger } from "@/components/site/concierge/concierge-trigger";
@@ -49,6 +50,7 @@ export default function ContactPage() {
   return (
     <>
       <PageHero
+        backdrop={PAGE_BACKDROPS.contact}
         eyebrow="Contact us"
         title={
           <>

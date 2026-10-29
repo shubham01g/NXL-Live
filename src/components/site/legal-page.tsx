@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Container, Section } from "@/components/ui/layout";
 import { Alert } from "@/components/ui/feedback";
+import type { PageBackdrop } from "@/lib/data/films";
 import { PageHero } from "./hero";
 
 export interface LegalSection {
@@ -21,12 +22,14 @@ export function LegalPage({
   lede,
   updated,
   sections,
+  backdrop,
 }: {
   eyebrow: string;
   title: string;
   lede: string;
   updated: string;
   sections: LegalSection[];
+  backdrop?: PageBackdrop | null;
 }) {
   return (
     <>
@@ -36,6 +39,7 @@ export function LegalPage({
         eyebrow={eyebrow}
         title={<span className="text-metal block">{title}</span>}
         lede={lede}
+        backdrop={backdrop}
       />
 
       <Section size="sm">

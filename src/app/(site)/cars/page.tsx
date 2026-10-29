@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { repo } from "@/lib/data";
 import { money } from "@/lib/domain/format";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 import { ListingBrowser } from "@/components/site/listing-browser";
 
@@ -19,6 +20,7 @@ export default async function CarsPage() {
   return (
     <>
       <PageHero
+        backdrop={PAGE_BACKDROPS.cars}
         eyebrow="The fleet"
         title={<span className="text-metal block">Exotic Cars</span>}
         lede={`Book by the hour — your dream car, no full-day commitment. Daily rates when you want more road, and weekly rates on select cars. Rates start at ${money(entryRate)} an hour, and the price you see is the price you pay.`}

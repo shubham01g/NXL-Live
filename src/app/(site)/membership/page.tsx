@@ -6,6 +6,8 @@ import { DEMO_EMAIL } from "@/lib/data/fixtures/member";
 import { Container, Section } from "@/components/ui/layout";
 import { Eyebrow } from "@/components/ui/primitives";
 import { AuthPanel } from "@/components/account/auth-panel";
+import { BackdropBand } from "@/components/site/hero";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 
 export const metadata: Metadata = {
   title: "Join NXL",
@@ -35,7 +37,8 @@ export default async function MembershipPage({ searchParams }: PageProps<"/membe
   const stats = await repo.getStats();
 
   return (
-    <Section className="pt-28 sm:pt-32">
+    <Section className="relative isolate overflow-hidden pt-28 sm:pt-32">
+      {PAGE_BACKDROPS.membership ? <BackdropBand backdrop={PAGE_BACKDROPS.membership} /> : null}
       <Container>
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
           {/* ------------------------------ the pitch ------------------------------ */}

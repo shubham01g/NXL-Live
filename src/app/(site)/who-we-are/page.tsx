@@ -6,6 +6,8 @@ import { ButtonLink } from "@/components/ui/button";
 import { Container, Section, SectionHeading, StatGrid } from "@/components/ui/layout";
 import { Card, Eyebrow } from "@/components/ui/primitives";
 import { Media } from "@/components/ui/media";
+import { ABOUT_STILLS, FOUNDER_FILM, PAGE_BACKDROPS } from "@/lib/data/films";
+import { PageHero } from "@/components/site/hero";
 
 export const metadata: Metadata = {
   title: "Who We Are",
@@ -34,16 +36,24 @@ export default async function WhoWeArePage() {
 
   return (
     <>
-      <Section className="pt-28 sm:pt-32">
+      <PageHero
+        backdrop={PAGE_BACKDROPS.whoWeAre}
+        eyebrow="Who we are"
+        title={
+          <>
+            We rent the cars
+            <span className="text-metal block">we grew up dreaming about.</span>
+          </>
+        }
+        lede="Certified cars, a rate card that never moves, and a concierge who hands you the keys. Run out of South Beach, Miami."
+      />
+
+      <Section size="sm">
         <Container>
           <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
             <div>
-              <Eyebrow>Who we are</Eyebrow>
-              <h1 className="mt-6 font-display text-display-2 text-balance text-cream max-sm:text-[2.75rem]">
-                We rent the cars
-                <span className="text-metal block">we grew up dreaming about.</span>
-              </h1>
-              <div className="mt-7 space-y-5 text-lg leading-relaxed text-muted">
+              <Eyebrow>Our story</Eyebrow>
+              <div className="mt-6 space-y-5 text-lg leading-relaxed text-muted">
                 <p>
                   NXL started with a simple frustration: getting behind the wheel of
                   something extraordinary in Miami meant a full-day minimum, a deposit
@@ -72,9 +82,9 @@ export default async function WhoWeArePage() {
             </div>
 
             <Media
-              src="/fleet/range-rover-autobiography/05.webp"
-              alt="Range Rover Autobiography with its doors open, ready for handover"
-              aspect="4/5"
+              src={ABOUT_STILLS.handover.src}
+              alt={ABOUT_STILLS.handover.alt}
+              aspect="4/3"
               label="Concierge handover"
               sizes="(max-width: 1024px) 100vw, 40vw"
             />
@@ -102,6 +112,25 @@ export default async function WhoWeArePage() {
           />
         </Container>
       </Section>
+
+      {FOUNDER_FILM ? (
+        <Section size="sm">
+          <Container>
+            <SectionHeading eyebrow="From the founder" title="Why we built NXL." />
+            <div className="relative mt-12 aspect-video overflow-hidden rounded-xl border border-gold/20 bg-surface-2">
+              <video
+                src={FOUNDER_FILM.src}
+                poster={FOUNDER_FILM.poster ?? undefined}
+                controls
+                playsInline
+                preload="metadata"
+                aria-label={FOUNDER_FILM.label}
+                className="absolute inset-0 h-full w-full object-contain"
+              />
+            </div>
+          </Container>
+        </Section>
+      ) : null}
 
       <Section size="sm">
         <Container>

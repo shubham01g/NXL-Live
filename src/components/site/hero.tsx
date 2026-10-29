@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/layout";
 import { Eyebrow } from "@/components/ui/primitives";
 import { LoopVideo } from "@/components/ui/loop-video";
 import type { MediaVideo } from "@/lib/domain/types";
+import type { PageBackdrop } from "@/lib/data/films";
 
 /**
  * Full-bleed homepage hero.
@@ -39,9 +40,6 @@ export function Hero({
             poster={video.poster ?? ""}
             label={video.label}
             controls={false}
-            // Anchor the zoom on the left edge so the shoreline and the city
-            // move toward the centre and the open ocean falls off the right.
-            className="origin-[0%_70%] scale-125 object-[30%_75%]"
             overlay={<HeroScrim film />}
           />
         </div>
@@ -93,7 +91,7 @@ function HeroScrim({ film = false }: { film?: boolean }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
       {film ? (
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/30 to-transparent max-md:bg-ink/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/10 max-md:bg-ink/55" />
       ) : null}
       {/* Legibility scrim, kept light enough not to flatten the light above. */}
       <div
@@ -111,13 +109,18 @@ function HeroScrim({ film = false }: { film?: boolean }) {
 
 /* -------------------------------- page hero ------------------------------- */
 
-/** Compact header for inner pages. */
+/**
+ * Compact header for inner pages. With a `backdrop` the page opens on its
+ * own film or still: it runs edge to edge straight under the header, the
+ * copy sits centred over it, and the bottom fades into the page.
+ */
 export function PageHero({
   eyebrow,
   title,
   lede,
   actions,
   aside,
+  backdrop,
   className,
 }: {
   eyebrow: string;
@@ -125,8 +128,52 @@ export function PageHero({
   lede?: string;
   actions?: ReactNode;
   aside?: ReactNode;
+  backdrop?: PageBackdrop | null;
   className?: string;
 }) {
+  if (backdrop) {
+    return (
+      <section
+        className={cn(
+          "relative isolate flex min-h-[72svh] items-center overflow-hidden py-24 sm:min-h-[78svh]",
+          className,
+        )}
+      >
+        <div className="absolute inset-0 -z-10">
+          {"video" in backdrop ? (
+            <LoopVideo
+              src={backdrop.video.src}
+              poster={backdrop.video.poster ?? ""}
+              label={backdrop.video.label}
+              controls={false}
+              overlay={<BackdropScrim />}
+            />
+          ) : (
+            <>
+              <Image src={backdrop.image} alt={backdrop.alt} fill priority sizes="100vw" className="object-cover" />
+              <BackdropScrim />
+            </>
+          )}
+        </div>
+        <Container className="relative">
+          <div className="mx-auto max-w-4xl text-center">
+            <Eyebrow className="justify-center">{eyebrow}</Eyebrow>
+            <h1 className="mt-6 font-display text-display-2 text-balance text-cream max-sm:text-[2.75rem]">
+              {title}
+            </h1>
+            {lede ? (
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-cream/80">{lede}</p>
+            ) : null}
+            {actions ? (
+              <div className="mt-9 flex flex-wrap justify-center gap-4">{actions}</div>
+            ) : null}
+            {aside ? <div className="mt-8 [&>*]:!justify-center">{aside}</div> : null}
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
   return (
     <section className={cn("relative isolate overflow-hidden pb-4 pt-28 sm:pt-32", className)}>
       <div aria-hidden className="absolute inset-0 -z-10">
@@ -156,5 +203,44 @@ export function PageHero({
         </div>
       </Container>
     </section>
+  );
+}
+
+/** Darkens a page backdrop for legibility and fades its foot into the page. */
+function BackdropScrim() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      <div className="absolute inset-0 bg-ink/55" />
+      {/* Fade the last third into the page so the media has no hard edge. */}
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-ink" />
+      <div className="grain absolute inset-0 opacity-30" />
+    </div>
+  );
+}
+
+/**
+ * A page backdrop as a band behind the top of a custom layout (the sign-in
+ * page keeps its form beside the pitch), fading out under the content.
+ */
+export function BackdropBand({ backdrop }: { backdrop: PageBackdrop }) {
+  return (
+    <div className="absolute inset-x-0 top-0 -z-10 h-[85svh]">
+      {"video" in backdrop ? (
+        <LoopVideo
+          src={backdrop.video.src}
+          poster={backdrop.video.poster ?? ""}
+          label={backdrop.video.label}
+          controls={false}
+          overlay={<BackdropScrim />}
+        />
+      ) : (
+        <>
+          <Image src={backdrop.image} alt={backdrop.alt} fill priority sizes="100vw" className="object-cover" />
+          <BackdropScrim />
+        </>
+      )}
+      {/* The copy here is left-aligned, so darken that side as well. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/35 to-transparent" />
+    </div>
   );
 }

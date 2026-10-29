@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { LegalPage } from "@/components/site/legal-page";
 import { PRICING } from "@/lib/domain/pricing";
 import { money } from "@/lib/domain/format";
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <LegalPage
+      backdrop={PAGE_BACKDROPS.terms}
       eyebrow="Legal"
       title="Terms of Service"
       lede="The agreement between you and NXL covering bookings, rentals, deposits, cancellations and conduct."

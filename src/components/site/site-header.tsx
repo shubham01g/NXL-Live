@@ -20,23 +20,25 @@ import { QuickReserve } from "./quick-reserve";
  * Primary navigation.
  *
  * Labels are deliberately shortened from the prototype ("Loyalty Program" →
- * "Loyalty") so all eight links fit on one row alongside the account controls.
+ * "Loyalty") so all nine links fit on one row alongside the account controls.
  *
- * The full row needs `xl`: eight links plus the bell, the account entry and
+ * The full row needs `xl`: nine links plus the bell, the account entry and
  * Reserve overflow at 1024px. Below `xl` the drawer takes over, so there is
  * never a width with no navigation — which was the actual bug in the
  * prototype, where the nav vanished under 1280px with nothing in its place.
  *
- * "Home" is not a link — the wordmark is.
+ * Order is the client's (2026-10-28): the house first, then what we rent,
+ * then how to reach us.
  */
 const NAV = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/who-we-are", label: "Who We Are" },
   { href: "/cars", label: "Exotic Cars" },
   { href: "/homes", label: "Luxury Homes" },
   { href: "/subscriptions", label: "Subscription" },
   { href: "/loyalty", label: "Loyalty" },
   { href: "/partners", label: "Partners" },
-  { href: "/about", label: "About" },
-  { href: "/who-we-are", label: "Who We Are" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -101,8 +103,9 @@ export function SiteHeader({ listings }: { listings: Listing[] }) {
     return () => window.removeEventListener("pointerdown", onDown);
   }, [bellOpen]);
 
+  // Home is exact-match only, or every page would light it up.
   const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <header

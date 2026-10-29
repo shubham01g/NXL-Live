@@ -25,9 +25,13 @@ const fromNow = (days: number) => Date.now() + days * DAY;
 const fleetGallery = (slug: string, count: number) =>
   Array.from({ length: count }, (_, i) => `/fleet/${slug}/${String(i + 1).padStart(2, "0")}.webp`);
 
-/** `/estates/<slug>/01.webp` … `04.webp` — exterior first, then interiors. */
-const estateGallery = (slug: string) =>
-  Array.from({ length: 4 }, (_, i) => `/estates/${slug}/${String(i + 1).padStart(2, "0")}.webp`);
+/**
+ * `/estates/<slug>/NN.webp`, exterior first, then interiors. The stock set
+ * shared some interiors between estates; each estate now lists only the
+ * shots that belong to it alone, so no photo appears on two homes.
+ */
+const estateGallery = (slug: string, shots: number[]) =>
+  shots.map((n) => `/estates/${slug}/${String(n).padStart(2, "0")}.webp`);
 
 export const CARS: CarListing[] = [
   {
@@ -209,7 +213,7 @@ function importedCars(): CarListing[] {
       hour: 175,
       day: 1000,
       deposit: 2000,
-      photos: 8,
+      photos: 7,
       specs: { horsepower: 641, topSpeed: 190, zeroToSixty: 3.5, seats: 5, transmission: "8-speed automatic", drivetrain: "All-wheel drive" },
     },
     {
@@ -225,7 +229,7 @@ function importedCars(): CarListing[] {
       hour: 200,
       day: 1000,
       deposit: 2000,
-      photos: 7,
+      photos: 6,
       specs: { horsepower: 612, topSpeed: 203, zeroToSixty: 3.2, seats: 2, transmission: "7-speed dual-clutch", drivetrain: "Rear-wheel drive" },
     },
     {
@@ -469,7 +473,7 @@ export const HOMES: HomeListing[] = [
     rates: { day: 4500, week: 27000, month: 95000 },
     deposit: 1500,
     photo: "/estates/villa-serena-oceanfront-estate/cover.webp",
-    gallery: estateGallery("villa-serena-oceanfront-estate"),
+    gallery: estateGallery("villa-serena-oceanfront-estate", [1, 2, 3]),
     video: reelFor("villa-serena-oceanfront-estate"),
     featured: true,
     bookedRanges: [],
@@ -501,7 +505,7 @@ export const HOMES: HomeListing[] = [
     rates: { day: 3200, week: 19500, month: 68000 },
     deposit: 1500,
     photo: "/estates/the-vantage-ocean-drive-penthouse/cover.webp",
-    gallery: estateGallery("the-vantage-ocean-drive-penthouse"),
+    gallery: estateGallery("the-vantage-ocean-drive-penthouse", [1, 2]),
     video: reelFor("the-vantage-ocean-drive-penthouse"),
     featured: true,
     bookedRanges: [],
@@ -532,7 +536,7 @@ export const HOMES: HomeListing[] = [
     rates: { day: 2800, week: 16800, month: 59000 },
     deposit: 1500,
     photo: "/estates/mirage-house-waterfront-retreat/cover.webp",
-    gallery: estateGallery("mirage-house-waterfront-retreat"),
+    gallery: estateGallery("mirage-house-waterfront-retreat", [1, 2]),
     video: reelFor("mirage-house-waterfront-retreat"),
     featured: false,
     bookedRanges: [{ start: fromNow(2), end: fromNow(9) }],
@@ -562,7 +566,7 @@ export const HOMES: HomeListing[] = [
     rates: { day: 3800, week: 22800, month: 79000 },
     deposit: 1500,
     photo: "/estates/still-water-bayfront-modern/cover.webp",
-    gallery: estateGallery("still-water-bayfront-modern"),
+    gallery: estateGallery("still-water-bayfront-modern", [1, 3]),
     video: reelFor("still-water-bayfront-modern"),
     featured: false,
     bookedRanges: [],

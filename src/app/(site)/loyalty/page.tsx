@@ -6,6 +6,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Container, Section, SectionHeading } from "@/components/ui/layout";
 import { Card, Eyebrow } from "@/components/ui/primitives";
 import { Accordion } from "@/components/ui/disclosure";
+import { PAGE_BACKDROPS } from "@/lib/data/films";
 import { PageHero } from "@/components/site/hero";
 import { LoyaltyStatus } from "@/components/site/loyalty-status";
 
@@ -74,6 +75,7 @@ export default function LoyaltyPage() {
   return (
     <>
       <PageHero
+        backdrop={PAGE_BACKDROPS.loyalty}
         eyebrow="Level Rewards"
         title={
           <>
