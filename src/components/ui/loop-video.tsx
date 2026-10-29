@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { videoSources } from "@/lib/data/av1";
 
 /**
  * Muted, looping background film.
@@ -12,6 +13,9 @@ import { cn } from "@/lib/utils/cn";
  * visitors who ask for reduced motion (they get the poster), and a pause
  * control is shown because the loops run longer than five seconds, unless the
  * caller opts out.
+ *
+ * `eager` is for the film at the top of a page: the browser starts buffering
+ * and playing it straight from the HTML instead of waiting for hydration.
  */
 export function LoopVideo({
   src,
@@ -22,6 +26,7 @@ export function LoopVideo({
   fit = "cover",
   overlay,
   controls = true,
+  eager = false,
 }: {
   src: string;
   poster: string;
@@ -34,6 +39,7 @@ export function LoopVideo({
   overlay?: ReactNode;
   /** Hides the pause control, for a pure backdrop loop such as the home hero. */
   controls?: boolean;
+  eager?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
@@ -69,15 +75,19 @@ export function LoopVideo({
     <>
       <video
         ref={ref}
-        src={reduced ? undefined : src}
         poster={poster}
         muted
         loop
         playsInline
-        preload={reduced ? "none" : "metadata"}
+        autoPlay={eager && !reduced}
+        preload={reduced ? "none" : eager ? "auto" : "metadata"}
         aria-label={label}
         className={cn("absolute inset-0 h-full w-full", fit === "contain" ? "object-contain" : "object-cover", className)}
-      />
+      >
+        {videoSources(src).map((s) => (
+          <source key={s.src} src={s.src} type={s.type} />
+        ))}
+      </video>
       {overlay}
       {reduced || !controls ? null : (
         <button

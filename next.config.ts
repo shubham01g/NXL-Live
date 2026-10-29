@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   // and every other corner is taken (logo, account, concierge). Errors still
   // raise the overlay; only the idle badge is hidden.
   devIndicators: false,
+  // Films and photos were served with max-age=0, so every page view
+  // re-checked them with the server. Keep them for an hour, then serve the
+  // cached copy at once while refreshing it in the background: repeat visits
+  // are instant, and a replaced file still shows up on the next visit.
+  async headers() {
+    const media = [{ key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=604800" }];
+    return ["media", "fleet", "estates", "brand"].map((dir) => ({ source: `/${dir}/:path*`, headers: media }));
+  },
   // The client's current site (nxlcertifiedexoticrentals.com) will point here
   // at launch. Its fleet and booking URLs are indexed, so each one lands on the
   // matching page rather than a 404.

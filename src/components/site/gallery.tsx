@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { Media } from "@/components/ui/media";
 import { StatusBadge } from "@/components/ui/primitives";
 import type { ListingStatus, MediaVideo } from "@/lib/domain/types";
+import { videoSources } from "@/lib/data/av1";
 
 /**
  * Listing gallery.
@@ -86,7 +87,6 @@ export function Gallery({
             ) : null}
             <video
               key={video.src}
-              src={video.src}
               poster={video.poster ?? undefined}
               controls
               playsInline
@@ -100,7 +100,11 @@ export function Gallery({
               }}
               onLoadedMetadata={(e) => measure(video.src, e.currentTarget)}
               className="h-full w-full object-contain"
-            />
+            >
+              {videoSources(video.src).map((s) => (
+                <source key={s.src} src={s.src} type={s.type} />
+              ))}
+            </video>
           </div>
         ) : (
           <Media

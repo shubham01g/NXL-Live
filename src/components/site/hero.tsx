@@ -40,6 +40,7 @@ export function Hero({
             poster={video.poster ?? ""}
             label={video.label}
             controls={false}
+            eager
             overlay={<HeroScrim film />}
           />
         </div>
@@ -146,6 +147,7 @@ export function PageHero({
               poster={backdrop.video.poster ?? ""}
               label={backdrop.video.label}
               controls={false}
+              eager
               overlay={<BackdropScrim />}
             />
           ) : (
@@ -231,6 +233,7 @@ export function BackdropBand({ backdrop }: { backdrop: PageBackdrop }) {
           poster={backdrop.video.poster ?? ""}
           label={backdrop.video.label}
           controls={false}
+          eager
           overlay={<BackdropScrim />}
         />
       ) : (
